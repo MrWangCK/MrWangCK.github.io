@@ -521,6 +521,187 @@ const algorithms = {
                 steps.push({ type: 'complete', array: [...a], line: 10, message: '排序完成!' });
                 return steps;
             }
+        },
+        {
+            id: 'shell',
+            name: '希尔排序',
+            nameEn: 'Shell Sort',
+            desc: '改进的插入排序，使用增量分组进行排序',
+            complexity: { best: 'O(n log n)', avg: 'O(n^1.3)', worst: 'O(n²)', space: 'O(1)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>算法原理</h3>
+                    <p>希尔排序是插入排序的改进版，通过引入"增量"概念，将数组分成若干子序列分别进行插入排序，随着增量逐渐减小，最后整体进行一次插入排序。</p>
+                </div>
+                <div class="theory-section">
+                    <h3>算法步骤</h3>
+                    <ul>
+                        <li>选择一个增量序列（如 n/2, n/4, ...）</li>
+                        <li>根据增量将数组分成若干子序列</li>
+                        <li>对每个子序列进行插入排序</li>
+                        <li>逐步减小增量，重复上述过程</li>
+                    </ul>
+                </div>
+            `,
+            pseudocode: [
+                '<span class="code-line" data-line="0"><span class="code-keyword">procedure</span> <span class="code-function">ShellSort</span>(arr)</span>',
+                '<span class="code-line" data-line="1">    n ← length(arr)</span>',
+                '<span class="code-line" data-line="2">    gap ← n / <span class="code-number">2</span></span>',
+                '<span class="code-line" data-line="3">    <span class="code-keyword">while</span> gap > <span class="code-number">0</span> <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="4">        <span class="code-keyword">for</span> i ← gap <span class="code-keyword">to</span> n-<span class="code-number">1</span> <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="5">            temp ← arr[i]</span>',
+                '<span class="code-line" data-line="6">            j ← i</span>',
+                '<span class="code-line" data-line="7">            <span class="code-keyword">while</span> j ≥ gap <span class="code-keyword">and</span> arr[j-gap] > temp <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="8">                arr[j] ← arr[j-gap]</span>',
+                '<span class="code-line" data-line="9">                j ← j - gap</span>',
+                '<span class="code-line" data-line="10">            <span class="code-keyword">end while</span></span>',
+                '<span class="code-line" data-line="11">            arr[j] ← temp</span>',
+                '<span class="code-line" data-line="12">        <span class="code-keyword">end for</span></span>',
+                '<span class="code-line" data-line="13">        gap ← gap / <span class="code-number">2</span></span>',
+                '<span class="code-line" data-line="14">    <span class="code-keyword">end while</span></span>',
+                '<span class="code-line" data-line="15"><span class="code-keyword">end procedure</span></span>'
+            ],
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">shell_sort</span>(arr):</span>',
+                '<span class="code-line">    n = <span class="code-function">len</span>(arr)</span>',
+                '<span class="code-line">    gap = n // <span class="code-number">2</span></span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> gap > <span class="code-number">0</span>:</span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(gap, n):</span>',
+                '<span class="code-line">            temp = arr[i]</span>',
+                '<span class="code-line">            j = i</span>',
+                '<span class="code-line">            <span class="code-keyword">while</span> j >= gap <span class="code-keyword">and</span> arr[j-gap] > temp:</span>',
+                '<span class="code-line">                arr[j] = arr[j-gap]</span>',
+                '<span class="code-line">                j -= gap</span>',
+                '<span class="code-line">            arr[j] = temp</span>',
+                '<span class="code-line">        gap //= <span class="code-number">2</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const a = [...arr];
+                const n = a.length;
+                let gap = Math.floor(n / 2);
+                steps.push({ type: 'code-line', array: [...a], line: 1, message: `n = ${n}` });
+                while (gap > 0) {
+                    steps.push({ type: 'code-line', array: [...a], line: 2, message: `gap = ${gap}` });
+                    steps.push({ type: 'loop-start', array: [...a], line: 3, message: `开始 gap=${gap} 的排序` });
+                    for (let i = gap; i < n; i++) {
+                        steps.push({ type: 'loop-start', indices: [i], array: [...a], line: 4, message: `i = ${i}` });
+                        const temp = a[i];
+                        steps.push({ type: 'code-line', indices: [i], array: [...a], line: 5, message: `temp = arr[${i}] = ${temp}` });
+                        let j = i;
+                        steps.push({ type: 'code-line', indices: [j], array: [...a], line: 6, message: `j = ${j}` });
+                        while (j >= gap && a[j - gap] > temp) {
+                            steps.push({ type: 'compare', indices: [j, j - gap], array: [...a], line: 7, message: `比较 arr[${j-gap}]=${a[j-gap]} 和 temp=${temp}` });
+                            a[j] = a[j - gap];
+                            steps.push({ type: 'shift', index: j, array: [...a], line: 8, message: `移动 arr[${j-gap}]=${a[j]} 到位置 ${j}` });
+                            j -= gap;
+                            if (j >= gap) steps.push({ type: 'code-line', indices: [j], array: [...a], line: 9, message: `j = ${j}` });
+                        }
+                        steps.push({ type: 'loop-end', array: [...a], line: 10, message: 'while结束' });
+                        a[j] = temp;
+                        steps.push({ type: 'insert', index: j, array: [...a], line: 11, message: `arr[${j}] = ${temp}` });
+                    }
+                    steps.push({ type: 'loop-end', array: [...a], line: 12, message: `gap=${gap} 排序完成` });
+                    gap = Math.floor(gap / 2);
+                    steps.push({ type: 'code-line', array: [...a], line: 13, message: `gap = ${gap}` });
+                }
+                steps.push({ type: 'loop-end', array: [...a], line: 14, message: '所有gap排序完成' });
+                steps.push({ type: 'complete', array: [...a], line: 15, message: '排序完成!' });
+                return steps;
+            }
+        },
+        {
+            id: 'counting',
+            name: '计数排序',
+            nameEn: 'Counting Sort',
+            desc: '非比较排序，通过统计元素出现次数进行排序',
+            complexity: { best: 'O(n+k)', avg: 'O(n+k)', worst: 'O(n+k)', space: 'O(k)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>算法原理</h3>
+                    <p>计数排序是一种非比较排序算法，通过统计每个元素值出现的次数，然后根据统计结果将元素放到正确的位置。</p>
+                </div>
+                <div class="theory-section">
+                    <h3>算法步骤</h3>
+                    <ul>
+                        <li>找出数组中的最大值和最小值</li>
+                        <li>创建计数数组，统计每个值出现的次数</li>
+                        <li>对计数数组进行累加</li>
+                        <li>根据计数数组将元素放到输出数组的正确位置</li>
+                    </ul>
+                </div>
+            `,
+            pseudocode: [
+                '<span class="code-line" data-line="0"><span class="code-keyword">procedure</span> <span class="code-function">CountingSort</span>(arr)</span>',
+                '<span class="code-line" data-line="1">    max ← max(arr)</span>',
+                '<span class="code-line" data-line="2">    min ← min(arr)</span>',
+                '<span class="code-line" data-line="3">    range ← max - min + <span class="code-number">1</span></span>',
+                '<span class="code-line" data-line="4">    count ← array[range] initialized to <span class="code-number">0</span></span>',
+                '<span class="code-line" data-line="5">    <span class="code-keyword">for each</span> element <span class="code-keyword">in</span> arr <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="6">        count[element-min] ← count[element-min] + <span class="code-number">1</span></span>',
+                '<span class="code-line" data-line="7">    <span class="code-keyword">end for</span></span>',
+                '<span class="code-line" data-line="8">    <span class="code-keyword">for</span> i ← <span class="code-number">1</span> <span class="code-keyword">to</span> range-<span class="code-number">1</span> <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="9">        count[i] ← count[i] + count[i-<span class="code-number">1</span>]</span>',
+                '<span class="code-line" data-line="10">    <span class="code-keyword">end for</span></span>',
+                '<span class="code-line" data-line="11">    output ← array of length n</span>',
+                '<span class="code-line" data-line="12">    <span class="code-keyword">for</span> i ← n-<span class="code-number">1</span> <span class="code-keyword">downto</span> <span class="code-number">0</span> <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="13">        output[count[arr[i]-min]-<span class="code-number">1</span>] ← arr[i]</span>',
+                '<span class="code-line" data-line="14">        count[arr[i]-min] ← count[arr[i]-min] - <span class="code-number">1</span></span>',
+                '<span class="code-line" data-line="15">    <span class="code-keyword">end for</span></span>',
+                '<span class="code-line" data-line="16">    <span class="code-keyword">return</span> output</span>'
+            ],
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">counting_sort</span>(arr):</span>',
+                '<span class="code-line">    max_val = <span class="code-function">max</span>(arr)</span>',
+                '<span class="code-line">    min_val = <span class="code-function">min</span>(arr)</span>',
+                '<span class="code-line">    range_ = max_val - min_val + <span class="code-number">1</span></span>',
+                '<span class="code-line">    count = [<span class="code-number">0</span>] * range_</span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> val <span class="code-keyword">in</span> arr:</span>',
+                '<span class="code-line">        count[val - min_val] += <span class="code-number">1</span></span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-number">1</span>, range_):</span>',
+                '<span class="code-line">        count[i] += count[i - <span class="code-number">1</span>]</span>',
+                '<span class="code-line">    output = [<span class="code-number">0</span>] * <span class="code-function">len</span>(arr)</span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> val <span class="code-keyword">in</span> <span class="code-function">reversed</span>(arr):</span>',
+                '<span class="code-line">        output[count[val - min_val] - <span class="code-number">1</span>] = val</span>',
+                '<span class="code-line">        count[val - min_val] -= <span class="code-number">1</span></span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> output</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const max = Math.max(...arr);
+                const min = Math.min(...arr);
+                const range = max - min + 1;
+                let count = new Array(range).fill(0);
+                const output = new Array(arr.length);
+                
+                steps.push({ type: 'code-line', array: [...arr], line: 1, message: `max = ${max}` });
+                steps.push({ type: 'code-line', array: [...arr], line: 2, message: `min = ${min}` });
+                steps.push({ type: 'code-line', array: [...arr], line: 3, message: `range = ${range}` });
+                steps.push({ type: 'code-line', array: [...arr], line: 4, message: `count数组初始化为0` });
+                
+                for (let i = 0; i < arr.length; i++) {
+                    count[arr[i] - min]++;
+                    steps.push({ type: 'count', indices: [i], array: [...arr], count: [...count], line: 5, message: `统计 arr[${i}]=${arr[i]}` });
+                    steps.push({ type: 'code-line', indices: [i], array: [...arr], count: [...count], line: 6, message: `count[${arr[i]-min}] = ${count[arr[i]-min]}` });
+                }
+                steps.push({ type: 'loop-end', array: [...arr], count: [...count], line: 7, message: '计数完成' });
+                
+                for (let i = 1; i < range; i++) {
+                    count[i] += count[i - 1];
+                    steps.push({ type: 'code-line', array: [...arr], count: [...count], line: 9, message: `累加 count[${i}] = ${count[i]}` });
+                }
+                steps.push({ type: 'loop-end', array: [...arr], count: [...count], line: 10, message: '累加完成' });
+                
+                for (let i = arr.length - 1; i >= 0; i--) {
+                    output[count[arr[i] - min] - 1] = arr[i];
+                    count[arr[i] - min]--;
+                    steps.push({ type: 'insert', indices: [i], array: [...arr], output: [...output], line: 12, message: `放置 ${arr[i]} 到位置 ${count[arr[i]-min]}` });
+                    steps.push({ type: 'code-line', indices: [i], array: [...arr], output: [...output], line: 13, message: `count[${arr[i]-min}] = ${count[arr[i]-min]}` });
+                }
+                
+                steps.push({ type: 'complete', array: [...output], line: 16, message: '排序完成!' });
+                return steps;
+            }
         }
     ],
     searching: [
@@ -802,6 +983,166 @@ const algorithms = {
                 steps.push({ type: 'complete', list: [...list].reverse(), line: 9, message: '返回新头节点' });
                 return steps;
             }
+        },
+        {
+            id: 'll-cycle',
+            name: '链表环检测',
+            nameEn: 'Cycle Detection',
+            desc: '使用快慢指针检测链表中是否存在环',
+            complexity: { best: 'O(n)', avg: 'O(n)', worst: 'O(n)', space: 'O(1)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>Floyd 龟兔赛跑算法</h3>
+                    <p>使用两个指针，慢指针每次移动一步，快指针每次移动两步。如果链表中存在环，快指针最终会追上慢指针。</p>
+                </div>
+                <div class="theory-section">
+                    <h3>算法步骤</h3>
+                    <ul>
+                        <li>创建两个指针：slow 和 fast，初始都指向头节点</li>
+                        <li>slow 每次移动一步，fast 每次移动两步</li>
+                        <li>如果链表有环，fast 最终会与 slow 相遇</li>
+                        <li>如果 fast 到达 null，说明没有环</li>
+                    </ul>
+                </div>
+            `,
+            pseudocode: [
+                '<span class="code-line" data-line="0"><span class="code-keyword">procedure</span> <span class="code-function">HasCycle</span>(head)</span>',
+                '<span class="code-line" data-line="1">    slow ← head</span>',
+                '<span class="code-line" data-line="2">    fast ← head</span>',
+                '<span class="code-line" data-line="3">    <span class="code-keyword">while</span> fast ≠ <span class="code-keyword">null</span> <span class="code-keyword">and</span> fast.next ≠ <span class="code-keyword">null</span> <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="4">        slow ← slow.next</span>',
+                '<span class="code-line" data-line="5">        fast ← fast.next.next</span>',
+                '<span class="code-line" data-line="6">        <span class="code-keyword">if</span> slow = fast <span class="code-keyword">then</span></span>',
+                '<span class="code-line" data-line="7">            <span class="code-keyword">return</span> <span class="code-keyword">true</span></span>',
+                '<span class="code-line" data-line="8">        <span class="code-keyword">end if</span></span>',
+                '<span class="code-line" data-line="9">    <span class="code-keyword">end while</span></span>',
+                '<span class="code-line" data-line="10">    <span class="code-keyword">return</span> <span class="code-keyword">false</span></span>',
+                '<span class="code-line" data-line="11"><span class="code-keyword">end procedure</span></span>'
+            ],
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">has_cycle</span>(head):</span>',
+                '<span class="code-line">    slow = fast = head</span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> fast <span class="code-keyword">and</span> fast.next:</span>',
+                '<span class="code-line">        slow = slow.next</span>',
+                '<span class="code-line">        fast = fast.next.next</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> slow == fast:</span>',
+                '<span class="code-line">            <span class="code-keyword">return</span> <span class="code-keyword">True</span></span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> <span class="code-keyword">False</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const list = [...arr];
+                steps.push({ type: 'code-line', list: [...list], line: 0, message: '开始环检测' });
+                steps.push({ type: 'code-line', list: [...list], slow: 0, fast: 0, line: 1, message: 'slow = head' });
+                steps.push({ type: 'code-line', list: [...list], slow: 0, fast: 0, line: 2, message: 'fast = head' });
+                
+                let slow = 0, fast = 0;
+                const maxSteps = list.length + 2;
+                
+                for (let i = 0; i < maxSteps; i++) {
+                    steps.push({ type: 'loop-start', list: [...list], slow: slow, fast: fast, line: 3, message: `while循环检查` });
+                    steps.push({ type: 'code-line', list: [...list], slow: slow, fast: fast, line: 4, message: `slow = slow.next` });
+                    slow = (slow + 1) % list.length;
+                    steps.push({ type: 'code-line', list: [...list], slow: slow, fast: fast, line: 5, message: `fast = fast.next.next` });
+                    fast = (fast + 2) % list.length;
+                    steps.push({ type: 'compare-pointers', list: [...list], slow: slow, fast: fast, line: 6, message: `检查 slow == fast` });
+                    
+                    if (slow === fast && i > 0) {
+                        steps.push({ type: 'found', list: [...list], slow: slow, fast: fast, line: 7, message: `发现环！slow和fast在位置 ${slow} 相遇` });
+                        break;
+                    }
+                    steps.push({ type: 'code-line', list: [...list], slow: slow, fast: fast, line: 8, message: '继续检测' });
+                }
+                
+                if (slow !== fast || (slow === fast && list.length < 3)) {
+                    steps.push({ type: 'not_found', list: [...list], slow: slow, fast: fast, line: 9, message: '未发现环' });
+                }
+                steps.push({ type: 'complete', list: [...list], line: 10, message: '检测完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'll-merge',
+            name: '链表合并',
+            nameEn: 'Merge Two Lists',
+            desc: '合并两个有序链表',
+            complexity: { best: 'O(n+m)', avg: 'O(n+m)', worst: 'O(n+m)', space: 'O(1)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>算法原理</h3>
+                    <p>合并两个有序链表时，比较两个链表当前节点的值，将较小的节点接到结果链表上，直到某个链表为空，然后将另一个链表接到结果尾部。</p>
+                </div>
+            `,
+            pseudocode: [
+                '<span class="code-line" data-line="0"><span class="code-keyword">procedure</span> <span class="code-function">MergeLists</span>(l1, l2)</span>',
+                '<span class="code-line" data-line="1">    dummy ← Node(<span class="code-number">0</span>)</span>',
+                '<span class="code-line" data-line="2">    current ← dummy</span>',
+                '<span class="code-line" data-line="3">    <span class="code-keyword">while</span> l1 ≠ <span class="code-keyword">null</span> <span class="code-keyword">and</span> l2 ≠ <span class="code-keyword">null</span> <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="4">        <span class="code-keyword">if</span> l1.val ≤ l2.val <span class="code-keyword">then</span></span>',
+                '<span class="code-line" data-line="5">            current.next ← l1</span>',
+                '<span class="code-line" data-line="6">            l1 ← l1.next</span>',
+                '<span class="code-line" data-line="7">        <span class="code-keyword">else</span></span>',
+                '<span class="code-line" data-line="8">            current.next ← l2</span>',
+                '<span class="code-line" data-line="9">            l2 ← l2.next</span>',
+                '<span class="code-line" data-line="10">        <span class="code-keyword">end if</span></span>',
+                '<span class="code-line" data-line="11">        current ← current.next</span>',
+                '<span class="code-line" data-line="12">    <span class="code-keyword">end while</span></span>',
+                '<span class="code-line" data-line="13">    current.next ← l1 <span class="code-keyword">if</span> l1 ≠ <span class="code-keyword">null</span> <span class="code-keyword">else</span> l2</span>',
+                '<span class="code-line" data-line="14">    <span class="code-keyword">return</span> dummy.next</span>'
+            ],
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">merge_two_lists</span>(l1, l2):</span>',
+                '<span class="code-line">    dummy = Node(<span class="code-number">0</span>)</span>',
+                '<span class="code-line">    current = dummy</span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> l1 <span class="code-keyword">and</span> l2:</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> l1.val <= l2.val:</span>',
+                '<span class="code-line">            current.next = l1</span>',
+                '<span class="code-line">            l1 = l1.next</span>',
+                '<span class="code-line">        <span class="code-keyword">else</span>:</span>',
+                '<span class="code-line">            current.next = l2</span>',
+                '<span class="code-line">            l2 = l2.next</span>',
+                '<span class="code-line">        current = current.next</span>',
+                '<span class="code-line">    current.next = l1 <span class="code-keyword">or</span> l2</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> dummy.next</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const list1 = [...arr.slice(0, Math.ceil(arr.length/2))].sort((a,b)=>a-b);
+                const list2 = [...arr.slice(Math.ceil(arr.length/2))].sort((a,b)=>a-b);
+                const merged = [];
+                
+                steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [], line: 0, message: `合并两个有序链表` });
+                steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [], line: 1, message: `创建虚拟头节点` });
+                steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [], line: 2, message: `current = dummy` });
+                
+                let i = 0, j = 0;
+                while (i < list1.length && j < list2.length) {
+                    steps.push({ type: 'loop-start', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 3, message: `比较 list1[${i}]=${list1[i]} 和 list2[${j}]=${list2[j]}` });
+                    if (list1[i] <= list2[j]) {
+                        merged.push(list1[i]);
+                        steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 4, message: `${list1[i]} <= ${list2[j]}，选择 list1` });
+                        i++;
+                    } else {
+                        merged.push(list2[j]);
+                        steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 7, message: `${list1[i]} > ${list2[j]}，选择 list2` });
+                        j++;
+                    }
+                }
+                
+                while (i < list1.length) {
+                    merged.push(list1[i]);
+                    steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 12, message: `添加剩余 list1: ${list1[i]}` });
+                    i++;
+                }
+                while (j < list2.length) {
+                    merged.push(list2[j]);
+                    steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 12, message: `添加剩余 list2: ${list2[j]}` });
+                    j++;
+                }
+                
+                steps.push({ type: 'complete', list1: [], list2: [], merged: [...merged], line: 14, message: `合并完成: ${merged.join(' -> ')}` });
+                return steps;
+            }
         }
     ],
     tree: [
@@ -966,6 +1307,100 @@ const algorithms = {
                 steps.push({ type: 'start', tree: JSON.parse(JSON.stringify(tree)), line: 1, message: '开始前序遍历: 根 → 左 → 右' });
                 preorder(tree);
                 steps.push({ type: 'complete', tree: JSON.parse(JSON.stringify(tree)), order: order, line: 6, message: `遍历顺序: ${order.join(' → ')}` });
+                return steps;
+            }
+        },
+        {
+            id: 'tree-levelorder',
+            name: '层序遍历',
+            nameEn: 'Level Order Traversal',
+            desc: '按层级顺序遍历二叉树（广度优先）',
+            complexity: { best: 'O(n)', avg: 'O(n)', worst: 'O(n)', space: 'O(w)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>算法原理</h3>
+                    <p>层序遍历使用队列，按从上到下、从左到右的顺序访问二叉树的节点，每一层的节点在下一层之前被访问。</p>
+                </div>
+                <div class="theory-section">
+                    <h3>算法步骤</h3>
+                    <ul>
+                        <li>将根节点入队</li>
+                        <li>出队一个节点，访问它</li>
+                        <li>将它的左、右子节点入队</li>
+                        <li>重复直到队列为空</li>
+                    </ul>
+                </div>
+            `,
+            pseudocode: [
+                '<span class="code-line" data-line="0"><span class="code-keyword">procedure</span> <span class="code-function">LevelOrder</span>(root)</span>',
+                '<span class="code-line" data-line="1">    <span class="code-keyword">if</span> root = <span class="code-keyword">null</span> <span class="code-keyword">then</span></span>',
+                '<span class="code-line" data-line="2">        <span class="code-keyword">return</span></span>',
+                '<span class="code-line" data-line="3">    <span class="code-keyword">end if</span></span>',
+                '<span class="code-line" data-line="4">    queue ← [root]</span>',
+                '<span class="code-line" data-line="5">    <span class="code-keyword">while</span> queue not empty <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="6">        node ← queue.dequeue()</span>',
+                '<span class="code-line" data-line="7">        visit(node)</span>',
+                '<span class="code-line" data-line="8">        <span class="code-keyword">if</span> node.left ≠ <span class="code-keyword">null</span> <span class="code-keyword">then</span></span>',
+                '<span class="code-line" data-line="9">            queue.enqueue(node.left)</span>',
+                '<span class="code-line" data-line="10">        <span class="code-keyword">end if</span></span>',
+                '<span class="code-line" data-line="11">        <span class="code-keyword">if</span> node.right ≠ <span class="code-keyword">null</span> <span class="code-keyword">then</span></span>',
+                '<span class="code-line" data-line="12">            queue.enqueue(node.right)</span>',
+                '<span class="code-line" data-line="13">        <span class="code-keyword">end if</span></span>',
+                '<span class="code-line" data-line="14">    <span class="code-keyword">end while</span></span>',
+                '<span class="code-line" data-line="15"><span class="code-keyword">end procedure</span></span>'
+            ],
+            python: [
+                '<span class="code-line"><span class="code-keyword">from</span> collections <span class="code-keyword">import</span> deque</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">level_order</span>(root):</span>',
+                '<span class="code-line">    <span class="code-keyword">if not</span> root:</span>',
+                '<span class="code-line">        <span class="code-keyword">return</span></span>',
+                '<span class="code-line">    queue = deque([root])</span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> queue:</span>',
+                '<span class="code-line">        node = queue.popleft()</span>',
+                '<span class="code-line">        <span class="code-function">print</span>(node.val)</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> node.left:</span>',
+                '<span class="code-line">            queue.append(node.left)</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> node.right:</span>',
+                '<span class="code-line">            queue.append(node.right)</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const sortedArr = [...arr].sort((a, b) => a - b);
+                
+                function buildTree(values, start, end) {
+                    if (start > end) return null;
+                    const mid = Math.floor((start + end) / 2);
+                    const node = { val: values[mid], left: null, right: null };
+                    node.left = buildTree(values, start, mid - 1);
+                    node.right = buildTree(values, mid + 1, end);
+                    return node;
+                }
+                
+                const tree = buildTree(sortedArr, 0, sortedArr.length - 1);
+                const queue = [tree];
+                const order = [];
+                
+                steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 0, message: '层序遍历开始' });
+                steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 1, message: '检查根节点' });
+                
+                while (queue.length > 0) {
+                    const node = queue.shift();
+                    order.push(node.val);
+                    steps.push({ type: 'visit', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], current: node.val, order: [...order], line: 5, message: `访问节点 ${node.val}` });
+                    steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], current: node.val, order: [...order], line: 6, message: `出队 ${node.val}` });
+                    
+                    if (node.left) {
+                        queue.push(node.left);
+                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], current: node.val, order: [...order], line: 8, message: `左子节点 ${node.left.val} 入队` });
+                    }
+                    if (node.right) {
+                        queue.push(node.right);
+                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], current: node.val, order: [...order], line: 11, message: `右子节点 ${node.right.val} 入队` });
+                    }
+                }
+                
+                steps.push({ type: 'complete', tree: JSON.parse(JSON.stringify(tree)), order: [...order], line: 14, message: `层序遍历: ${order.join(' -> ')}` });
                 return steps;
             }
         }
@@ -1133,6 +1568,222 @@ const algorithms = {
                 steps.push({ type: 'complete', graph, visited: [...visited], stack: [], line: 8, message: `DFS完成，顺序: ${[...visited]}` });
                 return steps;
             }
+        },
+        {
+            id: 'dijkstra',
+            name: 'Dijkstra 最短路径',
+            nameEn: "Dijkstra's Algorithm",
+            desc: '计算单源最短路径',
+            complexity: { best: 'O((V+E) log V)', avg: 'O((V+E) log V)', worst: 'O((V+E) log V)', space: 'O(V)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>算法原理</h3>
+                    <p>Dijkstra算法使用贪心策略，从起点开始，逐步扩展已知最短路径的顶点集合。每次选择当前距离最小的未访问顶点。</p>
+                </div>
+                <div class="theory-section">
+                    <h3>算法步骤</h3>
+                    <ul>
+                        <li>初始化距离数组，起点距离为0，其他为无穷大</li>
+                        <li>使用优先队列，弹出当前距离最小的顶点</li>
+                        <li>更新该顶点的邻居距离</li>
+                        <li>重复直到所有顶点都被访问</li>
+                    </ul>
+                </div>
+            `,
+            pseudocode: [
+                '<span class="code-line" data-line="0"><span class="code-keyword">procedure</span> <span class="code-function">Dijkstra</span>(graph, start)</span>',
+                '<span class="code-line" data-line="1">    dist ← array initialized to ∞</span>',
+                '<span class="code-line" data-line="2">    dist[start] ← <span class="code-number">0</span></span>',
+                '<span class="code-line" data-line="3">    visited ← empty set</span>',
+                '<span class="code-line" data-line="4">    <span class="code-keyword">while</span> visited.size < V <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="5">        u ← vertex with min dist not in visited</span>',
+                '<span class="code-line" data-line="6">        visited.add(u)</span>',
+                '<span class="code-line" data-line="7">        <span class="code-keyword">for each</span> neighbor v <span class="code-keyword">of</span> u <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="8">            alt ← dist[u] + weight(u,v)</span>',
+                '<span class="code-line" data-line="9">            <span class="code-keyword">if</span> alt < dist[v] <span class="code-keyword">then</span></span>',
+                '<span class="code-line" data-line="10">                dist[v] ← alt</span>',
+                '<span class="code-line" data-line="11">            <span class="code-keyword">end if</span></span>',
+                '<span class="code-line" data-line="12">        <span class="code-keyword">end for</span></span>',
+                '<span class="code-line" data-line="13">    <span class="code-keyword">end while</span></span>',
+                '<span class="code-line" data-line="14">    <span class="code-keyword">return</span> dist</span>'
+            ],
+            python: [
+                '<span class="code-line"><span class="code-keyword">import</span> heapq</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">dijkstra</span>(graph, start):</span>',
+                '<span class="code-line">    dist = {v: <span class="code-function">float</span>(<span class="code-string">\'inf\'</span>) <span class="code-keyword">for</span> v <span class="code-keyword">in</span> graph}</span>',
+                '<span class="code-line">    dist[start] = <span class="code-number">0</span></span>',
+                '<span class="code-line">    pq = [(<span class="code-number">0</span>, start)]</span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> pq:</span>',
+                '<span class="code-line">        d, u = heapq.heappop(pq)</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> d > dist[u]:</span>',
+                '<span class="code-line">            <span class="code-keyword">continue</span></span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> v, w <span class="code-keyword">in</span> graph[u]:</span>',
+                '<span class="code-line">            alt = dist[u] + w</span>',
+                '<span class="code-line">            <span class="code-keyword">if</span> alt < dist[v]:</span>',
+                '<span class="code-line">                dist[v] = alt</span>',
+                '<span class="code-line">                heapq.heappush(pq, (alt, v))</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> dist</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const graph = {
+                    0: [[1, 4], [2, 2]],
+                    1: [[3, 6], [4, 3]],
+                    2: [[1, 1], [3, 3], [4, 5]],
+                    3: [[4, 2]],
+                    4: []
+                };
+                const vertices = Object.keys(graph).map(Number);
+                const dist = {};
+                const visited = new Set();
+                vertices.forEach(v => dist[v] = Infinity);
+                dist[0] = 0;
+                
+                steps.push({ type: 'start', graph, dist: {...dist}, visited: [], line: 0, message: 'Dijkstra算法开始' });
+                steps.push({ type: 'code-line', graph, dist: {...dist}, visited: [], line: 1, message: '初始化距离数组' });
+                steps.push({ type: 'code-line', graph, dist: {...dist}, visited: [], line: 2, message: `dist[0] = 0` });
+                steps.push({ type: 'code-line', graph, dist: {...dist}, visited: [], line: 3, message: 'visited = ∅' });
+                
+                while (visited.size < vertices.length) {
+                    let u = -1, minDist = Infinity;
+                    for (const v of vertices) {
+                        if (!visited.has(v) && dist[v] < minDist) {
+                            minDist = dist[v];
+                            u = v;
+                        }
+                    }
+                    
+                    if (u === -1) break;
+                    
+                    visited.add(u);
+                    steps.push({ type: 'visit', graph, dist: {...dist}, visited: [...visited], current: u, line: 5, message: `选择顶点 ${u}，距离 = ${dist[u]}` });
+                    steps.push({ type: 'code-line', graph, dist: {...dist}, visited: [...visited], current: u, line: 6, message: `visited 添加 ${u}` });
+                    
+                    for (const [v, w] of graph[u]) {
+                        const alt = dist[u] + w;
+                        steps.push({ type: 'code-line', graph, dist: {...dist}, visited: [...visited], current: u, neighbor: v, line: 7, message: `检查边 ${u}→${v}，权重=${w}` });
+                        steps.push({ type: 'code-line', graph, dist: {...dist}, visited: [...visited], current: u, neighbor: v, line: 8, message: `alt = ${dist[u]} + ${w} = ${alt}` });
+                        
+                        if (alt < dist[v]) {
+                            dist[v] = alt;
+                            steps.push({ type: 'update', graph, dist: {...dist}, visited: [...visited], current: u, neighbor: v, line: 10, message: `更新 dist[${v}] = ${alt}` });
+                        }
+                    }
+                }
+                
+                const result = Object.entries(dist).map(([k, v]) => `${k}:${v}`).join(', ');
+                steps.push({ type: 'complete', graph, dist: {...dist}, visited: [...visited], line: 14, message: `最短路径: ${result}` });
+                return steps;
+            }
+        },
+        {
+            id: 'topo-sort',
+            name: '拓扑排序',
+            nameEn: 'Topological Sort',
+            desc: '对有向无环图进行排序',
+            complexity: { best: 'O(V+E)', avg: 'O(V+E)', worst: 'O(V+E)', space: 'O(V)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>算法原理</h3>
+                    <p>拓扑排序用于对有向无环图(DAG)进行排序，使得所有有向边都从排在前面的元素指向后面的元素。</p>
+                </div>
+                <div class="theory-section">
+                    <h3>算法步骤 (Kahn算法)</h3>
+                    <ul>
+                        <li>计算所有顶点的入度</li>
+                        <li>将入度为0的顶点入队</li>
+                        <li>出队一个顶点，添加到结果</li>
+                        <li>更新邻居的入度，将入度变为0的顶点入队</li>
+                    </ul>
+                </div>
+            `,
+            pseudocode: [
+                '<span class="code-line" data-line="0"><span class="code-keyword">procedure</span> <span class="code-function">TopoSort</span>(graph)</span>',
+                '<span class="code-line" data-line="1">    indegree ← array of <span class="code-number">0</span></span>',
+                '<span class="code-line" data-line="2">    <span class="code-keyword">for each</span> vertex u <span class="code-keyword">in</span> graph <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="3">        <span class="code-keyword">for each</span> neighbor v <span class="code-keyword">of</span> u <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="4">            indegree[v] ← indegree[v] + <span class="code-number">1</span></span>',
+                '<span class="code-line" data-line="5">        <span class="code-keyword">end for</span></span>',
+                '<span class="code-line" data-line="6">    queue ← vertices with indegree <span class="code-number">0</span></span>',
+                '<span class="code-line" data-line="7">    result ← empty list</span>',
+                '<span class="code-line" data-line="8">    <span class="code-keyword">while</span> queue not empty <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="9">        u ← queue.dequeue()</span>',
+                '<span class="code-line" data-line="10">        result.append(u)</span>',
+                '<span class="code-line" data-line="11">        <span class="code-keyword">for each</span> neighbor v <span class="code-keyword">of</span> u <span class="code-keyword">do</span></span>',
+                '<span class="code-line" data-line="12">            indegree[v] ← indegree[v] - <span class="code-number">1</span></span>',
+                '<span class="code-line" data-line="13">            <span class="code-keyword">if</span> indegree[v] = <span class="code-number">0</span> <span class="code-keyword">then</span></span>',
+                '<span class="code-line" data-line="14">                queue.enqueue(v)</span>',
+                '<span class="code-line" data-line="15">            <span class="code-keyword">end if</span></span>',
+                '<span class="code-line" data-line="16">        <span class="code-keyword">end for</span></span>',
+                '<span class="code-line" data-line="17">    <span class="code-keyword">end while</span></span>',
+                '<span class="code-line" data-line="18">    <span class="code-keyword">return</span> result</span>'
+            ],
+            python: [
+                '<span class="code-line"><span class="code-keyword">from</span> collections <span class="code-keyword">import</span> deque</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">topo_sort</span>(graph):</span>',
+                '<span class="code-line">    indegree = {v: <span class="code-number">0</span> <span class="code-keyword">for</span> v <span class="code-keyword">in</span> graph}</span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> u <span class="code-keyword">in</span> graph:</span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> v <span class="code-keyword">in</span> graph[u]:</span>',
+                '<span class="code-line">            indegree[v] += <span class="code-number">1</span></span>',
+                '<span class="code-line">    queue = deque([v <span class="code-keyword">for</span> v <span class="code-keyword">in</span> indegree <span class="code-keyword">if</span> indegree[v] == <span class="code-number">0</span>])</span>',
+                '<span class="code-line">    result = []</span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> queue:</span>',
+                '<span class="code-line">        u = queue.popleft()</span>',
+                '<span class="code-line">        result.append(u)</span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> v <span class="code-keyword">in</span> graph[u]:</span>',
+                '<span class="code-line">            indegree[v] -= <span class="code-number">1</span></span>',
+                '<span class="code-line">            <span class="code-keyword">if</span> indegree[v] == <span class="code-number">0</span>:</span>',
+                '<span class="code-line">                queue.append(v)</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> result</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const graph = {
+                    0: [2, 3],
+                    1: [3, 4],
+                    2: [3],
+                    3: [4],
+                    4: []
+                };
+                const vertices = Object.keys(graph).map(Number);
+                const indegree = {};
+                vertices.forEach(v => indegree[v] = 0);
+                
+                for (const u of vertices) {
+                    for (const v of graph[u]) {
+                        indegree[v]++;
+                    }
+                }
+                
+                steps.push({ type: 'code-line', graph, indegree: {...indegree}, line: 0, message: '拓扑排序开始' });
+                steps.push({ type: 'code-line', graph, indegree: {...indegree}, line: 1, message: '计算入度' });
+                
+                const queue = vertices.filter(v => indegree[v] === 0);
+                steps.push({ type: 'code-line', graph, indegree: {...indegree}, queue: [...queue], line: 6, message: `入度为0的顶点: ${queue.join(', ')}` });
+                
+                const result = [];
+                while (queue.length > 0) {
+                    const u = queue.shift();
+                    result.push(u);
+                    steps.push({ type: 'visit', graph, indegree: {...indegree}, queue: [...queue], result: [...result], current: u, line: 8, message: `出队: ${u}` });
+                    steps.push({ type: 'code-line', graph, indegree: {...indegree}, queue: [...queue], result: [...result], current: u, line: 10, message: `添加到结果` });
+                    
+                    for (const v of graph[u]) {
+                        indegree[v]--;
+                        steps.push({ type: 'code-line', graph, indegree: {...indegree}, queue: [...queue], result: [...result], current: u, neighbor: v, line: 11, message: `indegree[${v}] = ${indegree[v]}` });
+                        
+                        if (indegree[v] === 0) {
+                            queue.push(v);
+                            steps.push({ type: 'enqueue', graph, indegree: {...indegree}, queue: [...queue], result: [...result], current: u, neighbor: v, line: 14, message: `${v} 入度为0，入队` });
+                        }
+                    }
+                }
+                
+                steps.push({ type: 'complete', graph, indegree: {...indegree}, queue: [], result: [...result], line: 18, message: `拓扑排序: ${result.join(' → ')}` });
+                return steps;
+            }
         }
     ]
 };
@@ -1152,24 +1803,11 @@ let state = {
 // ===== 初始化 =====
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
-    initCategoryTabs();
-    initContentTabs();
+    initCategoryList();
+    initCodePanelTabs();
     initVizControls();
-    initPseudocodePanel();
     renderAlgorithmList('sorting');
 });
-
-// ===== 伪代码面板折叠 =====
-function initPseudocodePanel() {
-    const panel = document.getElementById('pseudocodePanel');
-    const toggle = document.getElementById('pseudocodeToggle');
-    if (!panel || !toggle) return;
-    
-    toggle.addEventListener('click', () => {
-        panel.classList.toggle('collapsed');
-        toggle.textContent = panel.classList.contains('collapsed') ? '+' : '−';
-    });
-}
 
 // ===== 主题切换 =====
 function initTheme() {
@@ -1190,13 +1828,13 @@ function updateThemeIcon(theme) {
     document.querySelector('.theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
 }
 
-// ===== 分类Tab =====
-function initCategoryTabs() {
-    document.querySelectorAll('.category-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-            const category = tab.dataset.category;
+// ===== 分类列表 =====
+function initCategoryList() {
+    document.querySelectorAll('.category-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            const category = item.dataset.category;
             state.currentCategory = category;
             state.currentAlgorithm = null;
             renderAlgorithmList(category);
@@ -1205,14 +1843,14 @@ function initCategoryTabs() {
     });
 }
 
-// ===== 内容Tab =====
-function initContentTabs() {
-    document.querySelectorAll('.content-tab').forEach(tab => {
+// ===== 代码面板切换 =====
+function initCodePanelTabs() {
+    document.querySelectorAll('.code-tab').forEach(tab => {
         tab.addEventListener('click', () => {
-            document.querySelectorAll('.content-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
             tab.classList.add('active');
-            document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+            document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
         });
     });
 }
@@ -1221,9 +1859,18 @@ function initContentTabs() {
 function renderAlgorithmList(category) {
     const list = document.getElementById('algorithmList');
     const algos = algorithms[category] || [];
+    
+    const icons = {
+        sorting: '📊',
+        searching: '🔍',
+        'linked-list': '🔗',
+        tree: '🌳',
+        graph: '🔀'
+    };
+    
     list.innerHTML = algos.map(algo => 
         '<div class="algorithm-item ' + (state.currentAlgorithm && state.currentAlgorithm.id === algo.id ? 'active' : '') + '" data-id="' + algo.id + '">' +
-            '<span class="algorithm-item-icon">📊</span>' +
+            '<span class="algorithm-item-icon">' + (icons[category] || '📊') + '</span>' +
             '<div class="algorithm-item-info">' +
                 '<div class="algorithm-item-name">' + algo.name + '</div>' +
                 '<div class="algorithm-item-complexity">' + algo.complexity.avg + '</div>' +
@@ -1252,16 +1899,11 @@ function selectAlgorithm(algo) {
         item.classList.toggle('active', item.dataset.id === algo.id);
     });
     
-    document.getElementById('currentAlgoName').textContent = algo.name + ' (' + algo.nameEn + ')';
-    document.getElementById('currentAlgoDesc').textContent = algo.desc;
+    document.getElementById('currentAlgoName').textContent = algo.name;
     
     document.getElementById('complexityBadges').innerHTML = 
-        '<div class="complexity-badge best"><span class="label">最佳</span>' + algo.complexity.best + '</div>' +
-        '<div class="complexity-badge avg"><span class="label">平均</span>' + algo.complexity.avg + '</div>' +
-        '<div class="complexity-badge worst"><span class="label">最差</span>' + algo.complexity.worst + '</div>' +
-        '<div class="complexity-badge space"><span class="label">空间</span>' + algo.complexity.space + '</div>';
-    
-    document.getElementById('theoryContent').innerHTML = algo.theory;
+        '<div class="complexity-badge avg">' + algo.complexity.avg + '</div>' +
+        '<div class="complexity-badge space">' + algo.complexity.space + '</div>';
     
     // 渲染伪代码（支持数组格式）
     let pseudoHtml = '';
@@ -1281,7 +1923,6 @@ function selectAlgorithm(algo) {
     }
     document.getElementById('pythonCode').innerHTML = '<code>' + pythonHtml + '</code>';
     
-    document.querySelector('.content-tab[data-tab="theory"]').click();
     updateStepInfo();
     renderVisualization();
 }
@@ -1339,6 +1980,7 @@ function initVizControls() {
     document.getElementById('btnRandom').addEventListener('click', randomize);
     document.getElementById('btnApply').addEventListener('click', applyCustomInput);
     document.getElementById('speedSlider').addEventListener('input', updateSpeed);
+    document.getElementById('btnClearProcess').addEventListener('click', clearProcessList);
     
     document.addEventListener('keydown', (e) => {
         if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
@@ -1461,12 +2103,13 @@ function updateStepInfo() {
         info.innerHTML = '步骤: <span>' + (state.currentStep + 1) + '</span> / ' + state.steps.length;
         progress.style.width = ((state.currentStep + 1) / state.steps.length * 100) + '%';
         const step = state.steps[state.currentStep];
-        document.querySelector('.step-text').textContent = step.message || '执行中...';
+        document.getElementById('stepText').textContent = step.message || '执行中...';
     } else {
         info.innerHTML = '步骤: <span>0</span> / 0';
         progress.style.width = '0%';
-        document.querySelector('.step-text').textContent = '--';
+        document.getElementById('stepText').textContent = '--';
     }
+    updateProcessListActive();
 }
 
 function generateSteps() {
@@ -1475,7 +2118,119 @@ function generateSteps() {
     if (algo.generateSteps) {
         state.steps = algo.generateSteps(state.array);
         state.currentStep = 0;
+        initProcessList();
     }
+}
+
+// ===== 过程记录 =====
+function initProcessList() {
+    const processList = document.getElementById('processList');
+    processList.innerHTML = '';
+    
+    if (state.steps.length === 0) {
+        processList.innerHTML = '<div class="process-empty">选择一个算法查看执行过程</div>';
+        return;
+    }
+    
+    state.steps.forEach((step, index) => {
+        const item = document.createElement('div');
+        item.className = 'process-item';
+        item.dataset.step = index;
+        
+        const typeClass = getStepTypeClass(step.type);
+        const typeLabel = getStepTypeLabel(step.type);
+        
+        item.innerHTML = `
+            <span class="process-step-num">${index + 1}</span>
+            <span class="process-step-content">
+                ${escapeHtml(step.message || '...')}
+                <span class="process-step-type ${typeClass}">${typeLabel}</span>
+            </span>
+        `;
+        
+        item.addEventListener('click', () => {
+            state.currentStep = index;
+            renderVisualization();
+            updateStepInfo();
+            highlightPseudocode();
+        });
+        
+        processList.appendChild(item);
+    });
+    
+    updateProcessListActive();
+}
+
+function updateProcessListActive() {
+    const items = document.querySelectorAll('.process-item');
+    items.forEach((item, index) => {
+        item.classList.remove('active', 'current');
+        if (index === state.currentStep) {
+            item.classList.add('current');
+            item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else if (index < state.currentStep) {
+            item.classList.add('active');
+        }
+    });
+}
+
+function getStepTypeClass(type) {
+    const typeMap = {
+        'compare': 'type-compare',
+        'swap': 'type-swap',
+        'swap-start': 'type-swap',
+        'visit': 'type-visit',
+        'enqueue': 'type-visit',
+        'dequeue': 'type-visit',
+        'push': 'type-visit',
+        'pop': 'type-visit',
+        'loop-start': 'type-loop',
+        'loop-end': 'type-loop',
+        'complete': 'type-complete'
+    };
+    return typeMap[type] || 'type-default';
+}
+
+function getStepTypeLabel(type) {
+    const labelMap = {
+        'init': '初始化',
+        'start': '开始',
+        'compare': '比较',
+        'swap': '交换',
+        'swap-start': '准备交换',
+        'visit': '访问',
+        'enqueue': '入队',
+        'dequeue': '出队',
+        'push': '入栈',
+        'pop': '出栈',
+        'loop-start': '循环',
+        'loop-end': '循环结束',
+        'insert': '插入',
+        'shift': '移位',
+        'sorted': '已排序',
+        'found': '找到',
+        'check': '检查',
+        'complete': '完成',
+        'update': '更新',
+        'code-line': '执行'
+    };
+    return labelMap[type] || '步骤';
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function clearProcessList() {
+    state.steps = [];
+    state.currentStep = 0;
+    const processList = document.getElementById('processList');
+    processList.innerHTML = '<div class="process-empty">选择一个算法查看执行过程</div>';
+    renderVisualization();
+    updateStepInfo();
+    highlightPseudocode();
 }
 
 // ===== 渲染可视化 =====
@@ -1746,21 +2501,14 @@ function renderGraphVisualization(step) {
 }
 
 function showPlaceholder() {
-    document.getElementById('currentAlgoName').textContent = '选择一个算法开始学习';
-    document.getElementById('currentAlgoDesc').textContent = '从左侧列表选择一个算法，查看详细讲解和动画演示';
+    document.getElementById('currentAlgoName').textContent = '选择算法';
     document.getElementById('complexityBadges').innerHTML = '';
-    document.getElementById('theoryContent').innerHTML = '<div class="placeholder-message"><div class="placeholder-icon">📚</div><p>请选择一个算法查看详细原理讲解</p></div>';
     document.getElementById('pseudocodeBlock').innerHTML = '<code>请选择一个算法</code>';
     document.getElementById('pythonCode').innerHTML = '<code>请选择一个算法</code>';
-    // 只替换 vizCanvas 中的占位符消息，保留伪代码面板
-    const vizCanvas = document.getElementById('vizCanvas');
-    const placeholder = vizCanvas.querySelector('.placeholder-message');
-    if (placeholder) {
-        placeholder.innerHTML = '<div class="placeholder-icon">🎬</div><p>选择一个算法开始可视化演示</p>';
-    }
+    document.getElementById('vizCanvas').innerHTML = '<div class="placeholder-message"><div class="placeholder-icon">🎬</div><p>选择一个算法开始可视化演示</p></div>';
     document.getElementById('stepInfo').innerHTML = '步骤: <span>0</span> / 0';
     document.getElementById('progressFill').style.width = '0%';
-    document.querySelector('.step-text').textContent = '--';
+    document.getElementById('stepText').textContent = '--';
 }
 
 function copyCode(elementId) {

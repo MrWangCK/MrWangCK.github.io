@@ -16,7 +16,7 @@
             <div class="logo">
                 <div class="logo-icon">📊</div>
                 <div class="logo-text">
-                    <h1>算法可视化教学</h1>
+                    <h1>算法可视化</h1>
                     <span>Algorithm Visualizer</span>
                 </div>
             </div>
@@ -28,175 +28,162 @@
         </div>
     </header>
 
-    <!-- 分类导航 -->
-    <nav class="category-nav">
-        <div class="category-tabs">
-            <button class="category-tab active" data-category="sorting">
-                <span>📊</span> 排序算法
-            </button>
-            <button class="category-tab" data-category="searching">
-                <span>🔍</span> 搜索算法
-            </button>
-            <button class="category-tab" data-category="linked-list">
-                <span>🔗</span> 链表
-            </button>
-            <button class="category-tab" data-category="tree">
-                <span>🌳</span> 树结构
-            </button>
-            <button class="category-tab" data-category="graph">
-                <span>🔀</span> 图算法
-            </button>
-        </div>
-    </nav>
-
     <!-- 主页内容 -->
     <main class="main">
-        <!-- 左侧边栏：算法列表 -->
+        <!-- 左侧边栏：分类和算法列表 -->
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <h3>算法列表</h3>
+            <!-- 分类选择 -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">分类</div>
+                <div class="category-list" id="categoryList">
+                    <button class="category-item active" data-category="sorting">
+                        <span class="category-icon">📊</span>
+                        <span class="category-name">排序算法</span>
+                    </button>
+                    <button class="category-item" data-category="searching">
+                        <span class="category-icon">🔍</span>
+                        <span class="category-name">搜索算法</span>
+                    </button>
+                    <button class="category-item" data-category="linked-list">
+                        <span class="category-icon">🔗</span>
+                        <span class="category-name">链表</span>
+                    </button>
+                    <button class="category-item" data-category="tree">
+                        <span class="category-icon">🌳</span>
+                        <span class="category-name">树结构</span>
+                    </button>
+                    <button class="category-item" data-category="graph">
+                        <span class="category-icon">🔀</span>
+                        <span class="category-name">图算法</span>
+                    </button>
+                </div>
             </div>
-            <div class="algorithm-list" id="algorithmList">
-                <!-- 由JS动态生成 -->
+            
+            <!-- 算法列表 -->
+            <div class="sidebar-section">
+                <div class="sidebar-section-title">算法</div>
+                <div class="algorithm-list" id="algorithmList">
+                    <!-- 由JS动态生成 -->
+                </div>
+            </div>
+            
+            <!-- 当前算法信息 -->
+            <div class="algo-info" id="algoInfo">
+                <div class="algo-name" id="currentAlgoName">选择算法</div>
+                <div class="algo-complexity" id="complexityBadges"></div>
             </div>
         </aside>
 
-        <!-- 中间内容区 -->
-        <div class="content">
-            <!-- 算法信息卡片 -->
-            <div class="algorithm-header" id="algorithmHeader">
-                <div class="algorithm-title">
-                    <h2 id="currentAlgoName">选择一个算法开始学习</h2>
-                    <p id="currentAlgoDesc">从左侧列表选择一个算法，查看详细讲解和动画演示</p>
+        <!-- 中间可视化区域 -->
+        <div class="visualization-area">
+            <!-- 可视化控制栏 -->
+            <div class="viz-controls">
+                <div class="viz-controls-left">
+                    <button class="viz-btn" id="btnStart" title="开始/暂停">
+                        <span>▶</span> 开始
+                    </button>
+                    <button class="viz-btn" id="btnStep" title="单步执行">
+                        <span>⏭</span> 单步
+                    </button>
+                    <button class="viz-btn" id="btnReset" title="重置">
+                        <span>↺</span> 重置
+                    </button>
                 </div>
-                <div class="complexity-badges" id="complexityBadges">
-                    <!-- 复杂度标签由JS动态生成 -->
-                </div>
-            </div>
-
-            <!-- Tab导航 -->
-            <div class="content-tabs">
-                <button class="content-tab active" data-tab="theory">
-                    <span class="tab-icon">📖</span> 算法原理
-                </button>
-                <button class="content-tab" data-tab="python">
-                    <span class="tab-icon">🐍</span> Python实现
-                </button>
-                <button class="content-tab" data-tab="visualization">
-                    <span class="tab-icon">🎬</span> 可视化演示
-                </button>
-            </div>
-
-            <!-- Tab内容区 -->
-            <div class="tab-content active" id="tab-theory">
-                <div class="theory-content" id="theoryContent">
-                    <div class="placeholder-message">
-                        <div class="placeholder-icon">📚</div>
-                        <p>请选择一个算法查看详细原理讲解</p>
+                <div class="viz-controls-center">
+                    <span class="step-info" id="stepInfo">步骤: 0 / 0</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
                     </div>
+                </div>
+                <div class="viz-controls-right">
+                    <label class="speed-label">速度:</label>
+                    <input type="range" class="speed-slider" id="speedSlider" min="0.25" max="4" step="0.25" value="1">
+                    <span class="speed-value" id="speedValue">1x</span>
+                    <button class="viz-btn small" id="btnRandom" title="随机数据">
+                        🎲
+                    </button>
                 </div>
             </div>
 
-
-
-            <div class="tab-content" id="tab-python">
-                <div class="code-container">
-                    <div class="code-panel python">
-                        <div class="code-header">
-                            <span class="code-lang">🐍 Python</span>
-                            <button class="copy-btn" onclick="copyCode('pythonCode')">复制代码</button>
-                        </div>
-                        <pre class="code-block" id="pythonCode"><code>请选择一个算法</code></pre>
-                    </div>
+            <!-- 可视化画布 -->
+            <div class="viz-canvas" id="vizCanvas">
+                <div class="placeholder-message">
+                    <div class="placeholder-icon">🎬</div>
+                    <p>选择一个算法开始可视化演示</p>
                 </div>
             </div>
 
-            <div class="tab-content" id="tab-visualization">
-                <!-- 可视化控制栏 -->
-                <div class="viz-controls">
-                    <div class="viz-controls-left">
-                        <button class="viz-btn" id="btnStart" title="开始/暂停">
-                            <span>▶</span> 开始
-                        </button>
-                        <button class="viz-btn" id="btnStep" title="单步执行">
-                            <span>⏭</span> 单步
-                        </button>
-                        <button class="viz-btn" id="btnReset" title="重置">
-                            <span>↺</span> 重置
-                        </button>
-                    </div>
-                    <div class="viz-controls-center">
-                        <span class="step-info" id="stepInfo">步骤: 0 / 0</span>
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-                        </div>
-                    </div>
-                    <div class="viz-controls-right">
-                        <label class="speed-label">速度:</label>
-                        <input type="range" class="speed-slider" id="speedSlider" min="0.25" max="4" step="0.25" value="1">
-                        <span class="speed-value" id="speedValue">1x</span>
-                        <button class="viz-btn small" id="btnRandom" title="随机数据">
-                            🎲
-                        </button>
-                    </div>
-                </div>
+            <!-- 步骤说明 -->
+            <div class="step-description" id="stepDescription">
+                <span class="step-label">当前操作:</span>
+                <span class="step-text" id="stepText">--</span>
+            </div>
 
-                <!-- 可视化画布 -->
-                <div class="viz-canvas" id="vizCanvas">
-                    <!-- 伪代码面板 - 右下角悬浮 -->
-                    <div class="pseudocode-panel" id="pseudocodePanel">
-                        <div class="pseudocode-header">
-                            <span>📝 伪代码</span>
-                            <button class="pseudocode-toggle" id="pseudocodeToggle">−</button>
-                        </div>
-                        <pre class="pseudocode-block" id="pseudocodeBlock"><code>请选择一个算法</code></pre>
-                    </div>
-                    <div class="placeholder-message">
-                        <div class="placeholder-icon">🎬</div>
-                        <p>选择一个算法开始可视化演示</p>
-                    </div>
+            <!-- 过程记录面板 -->
+            <div class="process-panel" id="processPanel">
+                <div class="process-header">
+                    <span class="process-title">📋 执行过程</span>
+                    <button class="process-clear" id="btnClearProcess" title="清空记录">🗑</button>
                 </div>
+                <div class="process-list" id="processList">
+                    <div class="process-empty">选择一个算法查看执行过程</div>
+                </div>
+            </div>
 
-                <!-- 步骤说明 -->
-                <div class="step-description" id="stepDescription">
-                    <span class="step-label">当前操作:</span>
-                    <span class="step-text">--</span>
+            <!-- 图例 -->
+            <div class="viz-legend" id="vizLegend">
+                <div class="legend-item">
+                    <span class="legend-color comparing"></span>
+                    <span>比较中</span>
                 </div>
+                <div class="legend-item">
+                    <span class="legend-color swapping"></span>
+                    <span>交换中</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color sorted"></span>
+                    <span>已排序</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color pivot"></span>
+                    <span>枢轴</span>
+                </div>
+            </div>
 
-                <!-- 图例 -->
-                <div class="viz-legend" id="vizLegend">
-                    <div class="legend-item">
-                        <span class="legend-color comparing"></span>
-                        <span>比较中</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color swapping"></span>
-                        <span>交换中</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color sorted"></span>
-                        <span>已排序</span>
-                    </div>
-                    <div class="legend-item">
-                        <span class="legend-color pivot"></span>
-                        <span>枢轴</span>
-                    </div>
-                </div>
-
-                <!-- 自定义输入 -->
-                <div class="custom-input">
-                    <label>自定义数据:</label>
-                    <input type="text" id="customInput" placeholder="例如: 64, 34, 25, 12, 22">
-                    <button class="apply-btn" id="btnApply">应用</button>
-                </div>
+            <!-- 自定义输入 -->
+            <div class="custom-input">
+                <label>自定义数据:</label>
+                <input type="text" id="customInput" placeholder="例如: 64, 34, 25, 12, 22">
+                <button class="apply-btn" id="btnApply">应用</button>
             </div>
         </div>
-    </main>
 
-    <!-- 页脚 -->
-    <footer class="footer">
-        <p>算法可视化教学平台 | 使用纯前端技术构建 | 可部署至 GitHub Pages</p>
-    </footer>
+        <!-- 右侧代码面板 -->
+        <aside class="code-sidebar">
+            <!-- 伪代码面板 -->
+            <div class="code-panel active" id="panel-pseudocode">
+                <div class="code-panel-header">
+                    <span>📝 伪代码</span>
+                </div>
+                <pre class="code-block" id="pseudocodeBlock"><code>请选择一个算法</code></pre>
+            </div>
+            
+            <!-- Python代码面板 -->
+            <div class="code-panel" id="panel-python">
+                <div class="code-panel-header">
+                    <span>🐍 Python</span>
+                    <button class="copy-btn" onclick="copyCode('pythonCode')">复制</button>
+                </div>
+                <pre class="code-block" id="pythonCode"><code>请选择一个算法</code></pre>
+            </div>
+            
+            <!-- 面板切换 -->
+            <div class="code-panel-tabs">
+                <button class="code-tab active" data-panel="pseudocode">伪代码</button>
+                <button class="code-tab" data-panel="python">Python</button>
+            </div>
+        </aside>
+    </main>
 
     <script src="main.js"></script>
 </body>
