@@ -1,6 +1,7 @@
 // ===== 算法数据定义 =====
 
 const algorithms = {
+    // ===== 排序 =====
     sorting: [
         {
             id: 'bubble',
@@ -702,11 +703,815 @@ const algorithms = {
                 steps.push({ type: 'complete', array: [...output], line: 16, message: '排序完成!' });
                 return steps;
             }
+        },
+        {
+            id: 'radix-sort',
+            name: '基数排序',
+            nameEn: 'Radix Sort',
+            desc: '按位数逐个排序，从低位到高位或高位到低位',
+            complexity: { best: 'O(d(n+r))', avg: 'O(d(n+r))', worst: 'O(d(n+r))', space: 'O(n+r)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>算法原理</h3>
+                    <p>基数排序是一种非比较排序算法，通过按位数分配和收集来完成排序。通常从最低位开始，按每位数字将元素分配到0-9的桶中，然后按顺序收集，再进行下一位。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">from</span> math <span class="code-keyword">import</span> pow</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">radix_sort</span>(arr):</span>',
+                '<span class="code-line">    max_val = <span class="code-function">max</span>(arr)</span>',
+                '<span class="code-line">    d = <span class="code-function">len</span>(<span class="code-function">str</span>(max_val))</span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(d):</span>',
+                '<span class="code-line">        buckets = [[] <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-number">10</span>)]</span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> num <span class="code-keyword">in</span> arr:</span>',
+                '<span class="code-line">            digit = (num // <span class="code-function">int</span>(pow(<span class="code-number">10</span>, i))) % <span class="code-number">10</span></span>',
+                '<span class="code-line">            buckets[digit].append(num)</span>',
+                '<span class="code-line">        arr = [num <span class="code-keyword">for</span> bucket <span class="code-keyword">in</span> buckets <span class="code-keyword">for</span> num <span class="code-keyword">in</span> bucket]</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> arr</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const a = [...arr];
+                const maxDigits = Math.max(...a.map(x => String(x).length));
+                steps.push({ type: 'init', array: [...a], line: 0, message: `最大位数 d=${maxDigits}` });
+                
+                for (let d = 0; d < maxDigits; d++) {
+                    steps.push({ type: 'loop-start', array: [...a], line: 1, message: `第 ${d+1} 位 (10^${d})` });
+                    const buckets = Array.from({length: 10}, () => []);
+                    
+                    for (let i = 0; i < a.length; i++) {
+                        const digit = Math.floor(a[i] / Math.pow(10, d)) % 10;
+                        steps.push({ type: 'visit', indices: [i], array: [...a], line: 2, message: `${a[i]} 的第 ${d+1} 位 = ${digit}` });
+                        buckets[digit].push(a[i]);
+                        steps.push({ type: 'code-line', array: [...a], line: 3, message: `放入桶 ${digit}` });
+                    }
+                    
+                    steps.push({ type: 'code-line', array: [...a], line: 4, message: '收集所有桶' });
+                    a.splice(0, a.length, ...buckets.flat());
+                    steps.push({ type: 'code-line', array: [...a], line: 5, message: `当前: [${a.join(', ')}]` });
+                }
+                
+                steps.push({ type: 'complete', array: [...a], line: 6, message: '基数排序完成!' });
+                return steps;
+            }
+        },
+        {
+            id: 'binary-insert',
+            name: '折半插入排序',
+            nameEn: 'Binary Insertion Sort',
+            desc: '在插入时使用二分查找确定位置',
+            complexity: { best: 'O(n log n)', avg: 'O(n²)', worst: 'O(n²)', space: 'O(1)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>算法原理</h3>
+                    <p>折半插入排序是对直接插入排序的改进，在查找插入位置时使用二分查找，减少比较次数。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">binary_insertion</span>(arr):</span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-number">1</span>, <span class="code-function">len</span>(arr)):</span>',
+                '<span class="code-line">        key = arr[i]</span>',
+                '<span class="code-line">        lo, hi = <span class="code-number">0</span>, i - <span class="code-number">1</span></span>',
+                '<span class="code-line">        <span class="code-keyword">while</span> lo <= hi:</span>',
+                '<span class="code-line">            mid = (lo + hi) // <span class="code-number">2</span></span>',
+                '<span class="code-line">            <span class="code-keyword">if</span> arr[mid] > key:</span>',
+                '<span class="code-line">                hi = mid - <span class="code-number">1</span></span>',
+                '<span class="code-line">            <span class="code-keyword">else</span>:</span>',
+                '<span class="code-line">                lo = mid + <span class="code-number">1</span></span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> j <span class="code-keyword">in</span> <span class="code-function">range</span>(i, lo, -<span class="code-number">1</span>):</span>',
+                '<span class="code-line">            arr[j] = arr[j - <span class="code-number">1</span>]</span>',
+                '<span class="code-line">        arr[lo] = key</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const a = [...arr];
+                steps.push({ type: 'init', array: [...a], line: 0, message: '开始折半插入排序' });
+                
+                for (let i = 1; i < Math.min(a.length, 6); i++) {
+                    const key = a[i];
+                    steps.push({ type: 'loop-start', indices: [i], array: [...a], line: 1, message: `插入 arr[${i}]=${key}` });
+                    steps.push({ type: 'code-line', indices: [i], array: [...a], line: 2, message: `key = ${key}` });
+                    
+                    let lo = 0, hi = i - 1;
+                    steps.push({ type: 'code-line', array: [...a], line: 3, message: `lo=${lo}, hi=${hi}` });
+                    
+                    while (lo <= hi) {
+                        const mid = Math.floor((lo + hi) / 2);
+                        steps.push({ type: 'compare', indices: [mid, i], array: [...a], line: 4, message: `mid=${mid}, arr[${mid}]=${a[mid]} vs key=${key}` });
+                        if (a[mid] > key) {
+                            hi = mid - 1;
+                        } else {
+                            lo = mid + 1;
+                        }
+                        steps.push({ type: 'code-line', array: [...a], line: 5, message: `lo=${lo}, hi=${hi}` });
+                    }
+                    
+                    steps.push({ type: 'code-line', array: [...a], line: 6, message: `插入位置 lo=${lo}` });
+                }
+                
+                steps.push({ type: 'complete', array: [...a], line: 7, message: '折半插入排序完成' });
+                return steps;
+            }
         }
     ],
+
+
+    // ===== 线性表 =====
+    linear: [
+        {
+            id: 'array-list',
+            name: '顺序表',
+            nameEn: 'Array List',
+            desc: '使用数组实现的顺序存储结构，支持插入、删除、查找操作',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>存储方式</h3>
+                    <p>顺序表使用一段连续的存储单元依次存储数据元素，类似于数组。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">SeqList</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.data = []</span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">insert</span>(self, i, e):</span>',
+                '<span class="code-line">        self.data.insert(i, e)</span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">delete</span>(self, i):</span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> self.data.pop(i)</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '初始化顺序表' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 0, message: `位置 ${i}: ${val}` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 0, message: '顺序表构建完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'single-linked',
+            name: '单链表-带头结点',
+            nameEn: 'Singly Linked List',
+            desc: '每个节点包含数据和指向下一个节点的指针',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>链表结构</h3>
+                    <p>单链表由节点组成，每个节点包含数据域和指针域，指针指向下一个节点。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">Node</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, data):</span>',
+                '<span class="code-line">        self.data = data</span>',
+                '<span class="code-line">        self.next = <span class="code-keyword">None</span></span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">LinkList</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.head = Node(<span class="code-number">0</span>)  <span class="code-comment"># 头结点</span></span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">traverse</span>(self):</span>',
+                '<span class="code-line">        p = self.head.next</span>',
+                '<span class="code-line">        <span class="code-keyword">while</span> p:</span>',
+                '<span class="code-line">            <span class="code-function">print</span>(p.data)</span>',
+                '<span class="code-line">            p = p.next</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '创建头结点' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `访问节点 ${i}: ${val}` });
+                    if (i < arr.length - 1) {
+                        steps.push({ type: 'code-line', array: [...arr], line: 2, message: `next 指针移动` });
+                    }
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: '链表遍历完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'single-linked-no-head',
+            name: '单链表-不带头结点',
+            nameEn: 'Singly Linked List (No Head)',
+            desc: '第一个节点即为数据节点，无虚拟头结点',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>不带头结点的链表</h3>
+                    <p>第一个节点就是数据节点，需要特殊处理插入和删除操作。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">LinkListNoHead</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.head = <span class="code-keyword">None</span></span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">insert_head</span>(self, e):</span>',
+                '<span class="code-line">        p = Node(e)</span>',
+                '<span class="code-line">        p.next = self.head</span>',
+                '<span class="code-line">        self.head = p</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: 'head = None' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `创建节点 ${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `next 指向 head` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `head 移动到新节点` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: '头插法完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'double-linked',
+            name: '双链表-带头结点',
+            nameEn: 'Doubly Linked List',
+            desc: '每个节点包含指向前后两个节点的指针',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>双链表结构</h3>
+                    <p>双链表每个节点有前驱和后继两个指针，可以双向遍历。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DNode</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, data):</span>',
+                '<span class="code-line">        self.data = data</span>',
+                '<span class="code-line">        self.prior = <span class="code-keyword">None</span></span>',
+                '<span class="code-line">        self.next = <span class="code-keyword">None</span></span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">DLinkList</span>:</span>',
+                '<span class="code-line">    head = DNode(<span class="code-number">0</span>)  <span class="code-comment"># 头结点</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '创建双链表头结点' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `节点 ${val}: prior + data + next` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 2, message: '双链表构建完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'circular-single',
+            name: '循环单链表',
+            nameEn: 'Circular Singly Linked List',
+            desc: '尾节点指向头节点，形成环',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>循环链表</h3>
+                    <p>循环链表的尾节点指向头节点，形成一个环，可以从任意节点遍历所有节点。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">CircularLinkList</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.tail = <span class="code-keyword">None</span></span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">append</span>(self, e):</span>',
+                '<span class="code-line">        p = Node(e)</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> <span class="code-keyword">not</span> self.tail:</span>',
+                '<span class="code-line">            p.next = p</span>',
+                '<span class="code-line">            self.tail = p</span>',
+                '<span class="code-line">        <span class="code-keyword">else</span>:</span>',
+                '<span class="code-line">            p.next = self.tail.next</span>',
+                '<span class="code-line">            self.tail.next = p</span>',
+                '<span class="code-line">            self.tail = p</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: 'tail = None' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `创建节点 ${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `next 指向 tail.next` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `tail.next 指向 p` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 4, message: `tail = p` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 5, message: '循环链表构建完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'circular-double',
+            name: '循环双链表',
+            nameEn: 'Circular Doubly Linked List',
+            desc: '头结点前后指针形成环',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>循环双链表</h3>
+                    <p>循环双链表的头结点前驱指向尾结点，尾结点后继指向头结点，形成双向环。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">CircularDLinkList</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.head = DNode(<span class="code-number">0</span>)</span>',
+                '<span class="code-line">        self.head.next = self.head</span>',
+                '<span class="code-line">        self.head.prior = self.head</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '创建头结点' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `节点 ${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `prior 指向 head` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `next 指向 head` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '循环双链表完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'static-list',
+            name: '静态链表',
+            nameEn: 'Static Linked List',
+            desc: '用数组模拟链表，通过游标连接各节点',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>静态链表</h3>
+                    <p>静态链表使用数组存储数据，通过游标（cur）代替指针连接各节点。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line">MAXSIZE = <span class="code-number">100</span></span>',
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">StaticLinkList</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.space = [{cur: i+<span class="code-number">1</span>} <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(MAXSIZE)]</span>',
+                '<span class="code-line">        self.space[MAXSIZE-<span class="code-number">1</span>][<span class="code-string">"cur"</span>] = <span class="code-number">0</span></span>',
+                '<span class="code-line">        self.head = <span class="code-number">0</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '初始化静态链表数组' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `节点 ${i}: data=${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `cur 指向下一个空闲位置` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: '静态链表构建完成' });
+                return steps;
+            }
+        }
+    ],
+
+
+    // ===== 栈和队列 =====
+    'stack-queue': [
+        {
+            id: 'stack-array',
+            name: '栈-顺序表',
+            nameEn: 'Stack (Array)',
+            desc: '使用数组实现的栈，遵循LIFO原则',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>栈的特点</h3>
+                    <p>栈是一种后进先出(LIFO)的数据结构，只允许在栈顶进行插入和删除操作。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">SqStack</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.data = []</span>',
+                '<span class="code-line">        self.top = -<span class="code-number">1</span></span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">push</span>(self, e):</span>',
+                '<span class="code-line">        self.data.append(e)</span>',
+                '<span class="code-line">        self.top += <span class="code-number">1</span></span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">pop</span>(self):</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> self.top >= <span class="code-number">0</span>:</span>',
+                '<span class="code-line">            self.top -= <span class="code-number">1</span></span>',
+                '<span class="code-line">            <span class="code-keyword">return</span> self.data.pop()</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '初始化空栈, top=-1' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'code-line', array: [...arr], line: 1, message: `push(${val}) 入栈` });
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 2, message: `top++` });
+                });
+                steps.push({ type: 'loop-start', array: [...arr], line: 3, message: '开始出栈' });
+                arr.slice().reverse().forEach((val, i) => {
+                    steps.push({ type: 'code-line', array: [...arr], line: 4, message: `top--` });
+                    steps.push({ type: 'visit', indices: [arr.length - 1 - i], array: [...arr], line: 5, message: `pop() = ${val}` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 6, message: '栈操作完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'stack-linked-head',
+            name: '栈-链表-带头结点',
+            nameEn: 'Stack (Linked List)',
+            desc: '使用链表实现的栈，头插头删',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(1)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>链栈</h3>
+                    <p>链栈使用链表实现，入栈和出栈都在栈顶进行，时间复杂度为O(1)。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">LinkStack</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.head = Node(<span class="code-number">0</span>)</span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">push</span>(self, e):</span>',
+                '<span class="code-line">        s = Node(e)</span>',
+                '<span class="code-line">        s.next = self.head.next</span>',
+                '<span class="code-line">        self.head.next = s</span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">pop</span>(self):</span>',
+                '<span class="code-line">        p = self.head.next</span>',
+                '<span class="code-line">        self.head.next = p.next</span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> p.data</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '创建栈顶头结点' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `push(${val})` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `s.next = head.next` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `head.next = s` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '链栈构建完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'queue-array',
+            name: '队列-顺序表',
+            nameEn: 'Queue (Array)',
+            desc: '使用数组实现的队列，遵循FIFO原则',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>队列特点</h3>
+                    <p>队列是一种先进先出(FIFO)的数据结构，只允许在队尾插入，队头删除。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">SqQueue</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.data = []</span>',
+                '<span class="code-line">        self.front = <span class="code-number">0</span></span>',
+                '<span class="code-line">        self.rear = <span class="code-number">0</span></span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">enqueue</span>(self, e):</span>',
+                '<span class="code-line">        self.data.append(e)</span>',
+                '<span class="code-line">        self.rear += <span class="code-number">1</span></span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">dequeue</span>(self):</span>',
+                '<span class="code-line">        self.front += <span class="code-number">1</span></span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> self.data[self.front-<span class="code-number">1</span>]</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: 'front=rear=0' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'code-line', array: [...arr], line: 1, message: `入队 ${val}` });
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 2, message: `rear++` });
+                });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `front++` });
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 4, message: `出队 ${val}` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 5, message: '队列操作完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'queue-circular',
+            name: '队列-循环队列',
+            nameEn: 'Circular Queue',
+            desc: '使用循环数组避免假溢出问题',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(1)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>循环队列</h3>
+                    <p>循环队列通过取模运算实现逻辑上的环形结构，充分利用存储空间。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line">MAXSIZE = <span class="code-number">100</span></span>',
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">CirQueue</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.data = [None]*MAXSIZE</span>',
+                '<span class="code-line">        self.front = <span class="code-number">0</span></span>',
+                '<span class="code-line">        self.rear = <span class="code-number">0</span></span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">enqueue</span>(self, e):</span>',
+                '<span class="code-line">        self.rear = (self.rear+<span class="code-number">1</span>) % MAXSIZE</span>',
+                '<span class="code-line">        self.data[self.rear] = e</span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">dequeue</span>(self):</span>',
+                '<span class="code-line">        self.front = (self.front+<span class="code-number">1</span>) % MAXSIZE</span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> self.data[self.front]</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '初始化循环队列' });
+                arr.forEach((val, i) => {
+                    const pos = i % 8;
+                    steps.push({ type: 'code-line', array: [...arr], line: 1, message: `rear = (rear+1) % ${8}` });
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 2, message: `位置 ${pos}: ${val}` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: '循环队列完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'bracket-match',
+            name: '括号匹配',
+            nameEn: 'Bracket Matching',
+            desc: '使用栈检查表达式中括号是否匹配',
+            complexity: { best: 'O(n)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>括号匹配原理</h3>
+                    <p>遇到左括号入栈，遇到右括号时检查是否与栈顶左括号匹配。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">bracket_match</span>(expr):</span>',
+                '<span class="code-line">    stack = []</span>',
+                '<span class="code-line">    pairs = {<span class="code-string">")"</span>: <span class="code-string">"("</span>, <span class="code-string">"]"</span>: <span class="code-string">"["</span>, <span class="code-string">"}"</span>: <span class="code-string">"{"</span>}</span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> ch <span class="code-keyword">in</span> expr:</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> ch <span class="code-keyword">in</span> <span class="code-string">"([{"</span>:</span>',
+                '<span class="code-line">            stack.append(ch)</span>',
+                '<span class="code-line">        <span class="code-keyword">elif</span> ch <span class="code-keyword">in</span> <span class="code-string">")]}"</span>:</span>',
+                '<span class="code-line">            <span class="code-keyword">if</span> <span class="code-keyword">not</span> stack <span class="code-keyword">or</span> stack[-<span class="code-number">1</span>] != pairs[ch]:</span>',
+                '<span class="code-line">                <span class="code-keyword">return</span> <span class="code-keyword">False</span></span>',
+                '<span class="code-line">            stack.pop()</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> <span class="code-keyword">not</span> stack</span>'
+            ],
+            generateSteps: (arr) => {
+                const brackets = ['(', ')', '[', ']', '{', '}'];
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '初始化空栈' });
+                brackets.forEach((b, i) => {
+                    if ('([{'.includes(b)) {
+                        steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `遇到 ${b}, 入栈` });
+                        steps.push({ type: 'code-line', array: [...arr], line: 2, message: `stack.append('${b}')` });
+                    } else {
+                        steps.push({ type: 'compare', indices: [i], array: [...arr], line: 3, message: `遇到 ${b}, 检查栈顶` });
+                        steps.push({ type: 'code-line', array: [...arr], line: 4, message: `匹配, pop()` });
+                    }
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 5, message: '匹配成功!' });
+                return steps;
+            }
+        },
+        {
+            id: 'expr-eval',
+            name: '表达式计算',
+            nameEn: 'Expression Evaluation',
+            desc: '使用栈进行中缀表达式求值',
+            complexity: { best: 'O(n)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>表达式求值</h3>
+                    <p>使用两个栈分别存储操作数和操作符，按照运算符优先级进行计算。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">eval_expr</span>(expr):</span>',
+                '<span class="code-line">    num_stack = []</span>',
+                '<span class="code-line">    op_stack = [<span class="code-string">"#"</span>]</span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> ch <span class="code-keyword">in</span> expr:</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> ch.isdigit():</span>',
+                '<span class="code-line">            num_stack.append(int(ch))</span>',
+                '<span class="code-line">        <span class="code-keyword">elif</span> ch <span class="code-keyword">in</span> <span class="code-string">"+-*/"</span>:</span>',
+                '<span class="code-line">            <span class="code-keyword">while</span> priority(op_stack[-<span class="code-number">1</span>]) >= priority(ch):</span>',
+                '<span class="code-line">                num2 = num_stack.pop()</span>',
+                '<span class="code-line">                num1 = num_stack.pop()</span>',
+                '<span class="code-line">                num_stack.append(calc(num1, op_stack.pop(), num2))</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '初始化操作数栈和操作符栈' });
+                arr.forEach((val, i) => {
+                    if (i % 2 === 0) {
+                        steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `数字 ${val} 入操作数栈` });
+                    } else {
+                        steps.push({ type: 'compare', indices: [i], array: [...arr], line: 2, message: `运算符 ${val} 处理` });
+                        steps.push({ type: 'code-line', array: [...arr], line: 3, message: `比较优先级` });
+                    }
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '表达式求值完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'deque',
+            name: '双端队列',
+            nameEn: 'Deque',
+            desc: '可以在两端进行插入和删除的队列',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(1)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>双端队列</h3>
+                    <p>双端队列是一种特殊的队列，允许在两端进行插入和删除操作。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">from</span> collections <span class="code-keyword">import</span> deque</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line">dq = deque()</span>',
+                '<span class="code-line">dq.appendleft(<span class="code-number">1</span>)  <span class="code-comment"># 左端插入</span></span>',
+                '<span class="code-line">dq.append(<span class="code-number">2</span>)     <span class="code-comment"># 右端插入</span></span>',
+                '<span class="code-line">dq.popleft()   <span class="code-comment"># 左端删除</span></span>',
+                '<span class="code-line">dq.pop()       <span class="code-comment"># 右端删除</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '创建空双端队列' });
+                arr.forEach((val, i) => {
+                    if (i % 2 === 0) {
+                        steps.push({ type: 'code-line', array: [...arr], line: 1, message: `appendleft(${val})` });
+                    } else {
+                        steps.push({ type: 'code-line', array: [...arr], line: 2, message: `append(${val})` });
+                    }
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 3, message: `队列: ${val}` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '双端队列完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'stack-linked-no-head',
+            name: '栈-链表-不带头结点',
+            nameEn: 'Stack (Linked List No Head)',
+            desc: '不带头结点的链栈实现',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(1)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>不带头结点的链栈</h3>
+                    <p>第一个数据节点即为栈顶，入栈和出栈操作直接操作栈顶指针。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">StackNoHead</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.top = <span class="code-keyword">None</span></span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">push</span>(self, e):</span>',
+                '<span class="code-line">        s = Node(e)</span>',
+                '<span class="code-line">        s.next = self.top</span>',
+                '<span class="code-line">        self.top = s</span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">pop</span>(self):</span>',
+                '<span class="code-line">        p = self.top</span>',
+                '<span class="code-line">        self.top = p.next</span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> p.data</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: 'top = None' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'code-line', array: [...arr], line: 1, message: `创建节点 ${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `s.next = top` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `top = s` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '链栈构建完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'queue-linked-head',
+            name: '队列-链表-带头结点',
+            nameEn: 'Queue (Linked List Head)',
+            desc: '带头结点的链式队列',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(1)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>链式队列</h3>
+                    <p>链式队列使用链表实现，通过头指针和尾指针维护队列。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">LinkQueue</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.front = self.rear = Node(<span class="code-number">0</span>)</span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">enqueue</span>(self, e):</span>',
+                '<span class="code-line">        s = Node(e)</span>',
+                '<span class="code-line">        self.rear.next = s</span>',
+                '<span class="code-line">        self.rear = s</span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">dequeue</span>(self):</span>',
+                '<span class="code-line">        p = self.front.next</span>',
+                '<span class="code-line">        self.front.next = p.next</span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> p.data</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '创建头结点, front=rear' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'code-line', array: [...arr], line: 1, message: `创建节点 ${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `rear.next = s` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `rear = s` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '链式队列完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'queue-linked-no-head',
+            name: '队列-链表-不带头结点',
+            nameEn: 'Queue (Linked List No Head)',
+            desc: '不带头结点的链式队列',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(1)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>不带头结点的链式队列</h3>
+                    <p>第一个节点即为数据节点，需要特殊处理空队列的情况。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">QueueNoHead</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.front = self.rear = <span class="code-keyword">None</span></span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">enqueue</span>(self, e):</span>',
+                '<span class="code-line">        s = Node(e)</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> <span class="code-keyword">not</span> self.rear:</span>',
+                '<span class="code-line">            self.front = self.rear = s</span>',
+                '<span class="code-line">        <span class="code-keyword">else</span>:</span>',
+                '<span class="code-line">            self.rear.next = s</span>',
+                '<span class="code-line">            self.rear = s</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: 'front = rear = None' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'code-line', array: [...arr], line: 1, message: `创建节点 ${val}` });
+                    if (i === 0) {
+                        steps.push({ type: 'code-line', array: [...arr], line: 2, message: `front = rear = s (首个节点)` });
+                    } else {
+                        steps.push({ type: 'code-line', array: [...arr], line: 3, message: `rear.next = s, rear = s` });
+                    }
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '不带头结点队列完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'queue-level-order',
+            name: '队列-层次遍历',
+            nameEn: 'Level Order Traversal',
+            desc: '使用队列进行树的层次遍历',
+            complexity: { best: 'O(n)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>层次遍历</h3>
+                    <p>利用队列先进先出的特性，按层次顺序遍历树的节点。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">from</span> collections <span class="code-keyword">import</span> deque</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">level_order</span>(root):</span>',
+                '<span class="code-line">    <span class="code-keyword">if</span> <span class="code-keyword">not</span> root: <span class="code-keyword">return</span> []</span>',
+                '<span class="code-line">    queue = deque([root])</span>',
+                '<span class="code-line">    result = []</span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> queue:</span>',
+                '<span class="code-line">        node = queue.popleft()</span>',
+                '<span class="code-line">        result.append(node.val)</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> node.left: queue.append(node.left)</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> node.right: queue.append(node.right)</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> result</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '创建队列, 根节点入队' });
+                arr.forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `出队 ${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `访问节点` });
+                    if (i < arr.length - 1) {
+                        steps.push({ type: 'code-line', array: [...arr], line: 3, message: `左右子节点入队` });
+                    }
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '层次遍历完成' });
+                return steps;
+            }
+        }
+    ],
+
+    // ===== 查找 =====
     searching: [
         {
-            id: 'linear',
+            id: 'linear-search',
             name: '线性搜索',
             nameEn: 'Linear Search',
             desc: '从头到尾遍历数组查找目标元素',
@@ -762,6 +1567,85 @@ const algorithms = {
                 }
                 steps.push({ type: 'loop-end', array: a, line: 6, message: '遍历完成' });
                 steps.push({ type: 'not_found', array: a, target: t, line: 7, message: '未找到目标' });
+                return steps;
+            }
+        },
+        {
+            id: 'seq-search-unordered',
+            name: '顺序查找-无序表',
+            nameEn: 'Sequential Search (Unordered)',
+            desc: '在无序表中顺序查找目标元素',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)', space: 'O(1)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>顺序查找(无序)</h3>
+                    <p>最简单的查找方法，从表的一端开始顺序扫描，直到找到目标或扫描完所有元素。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">seq_search_unordered</span>(arr, target):</span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(<span class="code-function">len</span>(arr)):</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> arr[i] == target:</span>',
+                '<span class="code-line">            <span class="code-keyword">return</span> i</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> -<span class="code-number">1</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const target = arr[Math.floor(arr.length / 2)];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `查找目标: ${target}` });
+                
+                for (let i = 0; i < Math.min(arr.length, 6); i++) {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `比较 arr[${i}]=${arr[i]} 与 ${target}` });
+                    if (arr[i] === target) {
+                        steps.push({ type: 'complete', array: [...arr], line: 2, message: `找到! 位置 ${i}` });
+                        return steps;
+                    }
+                }
+                
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: '未找到' });
+                return steps;
+            }
+        },
+        {
+            id: 'seq-search-ordered',
+            name: '顺序查找-有序表',
+            nameEn: 'Sequential Search (Ordered)',
+            desc: '在有序表中顺序查找，可提前终止',
+            complexity: { best: 'O(1)', avg: 'O(n/2)', worst: 'O(n)', space: 'O(1)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>顺序查找(有序)</h3>
+                    <p>在有序表中顺序查找，当遇到大于目标的元素时可以提前终止。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">seq_search_ordered</span>(arr, target):</span>',
+                '<span class="code-line">    i = <span class="code-number">0</span></span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> i < <span class="code-function">len</span>(arr) <span class="code-keyword">and</span> arr[i] <= target:</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> arr[i] == target:</span>',
+                '<span class="code-line">            <span class="code-keyword">return</span> i</span>',
+                '<span class="code-line">        i += <span class="code-number">1</span></span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> -<span class="code-number">1</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const sortedArr = [...arr].sort((a, b) => a - b);
+                const target = sortedArr[Math.floor(sortedArr.length / 2)];
+                steps.push({ type: 'init', array: sortedArr, line: 0, message: `有序表查找, 目标: ${target}` });
+                
+                for (let i = 0; i < sortedArr.length; i++) {
+                    steps.push({ type: 'visit', indices: [i], array: sortedArr, line: 1, message: `比较 arr[${i}]=${sortedArr[i]}` });
+                    if (sortedArr[i] === target) {
+                        steps.push({ type: 'complete', array: sortedArr, line: 2, message: `找到! 位置 ${i}` });
+                        return steps;
+                    }
+                    if (sortedArr[i] > target) {
+                        steps.push({ type: 'code-line', array: sortedArr, line: 3, message: `arr[${i}] > 目标, 提前终止` });
+                        break;
+                    }
+                }
+                
+                steps.push({ type: 'complete', array: sortedArr, line: 4, message: '未找到' });
                 return steps;
             }
         },
@@ -1143,9 +2027,316 @@ const algorithms = {
                 steps.push({ type: 'complete', list1: [], list2: [], merged: [...merged], line: 14, message: `合并完成: ${merged.join(' -> ')}` });
                 return steps;
             }
+        },
+        {
+            id: 'b-tree',
+            name: 'B树',
+            nameEn: 'B-Tree',
+            desc: '一种自平衡的多路搜索树，适用于磁盘读写',
+            complexity: { best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>B树特点</h3>
+                    <p>B树是一种平衡的多叉树，每个节点可以有多个子节点和关键字，适合大规模数据的索引。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">BTreeNode</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, leaf=<span class="code-keyword">False</span>):</span>',
+                '<span class="code-line">        self.keys = []</span>',
+                '<span class="code-line">        self.children = []</span>',
+                '<span class="code-line">        self.leaf = leaf</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">insert_non_full</span>(self, k):</span>',
+                '<span class="code-line">        i = <span class="code-function">len</span>(self.keys) - <span class="code-number">1</span></span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> self.leaf:</span>',
+                '<span class="code-line">            self.keys.append(<span class="code-number">0</span>)</span>',
+                '<span class="code-line">            <span class="code-keyword">while</span> i >= <span class="code-number">0</span> <span class="code-keyword">and</span> self.keys[i] > k:</span>',
+                '<span class="code-line">                self.keys[i+<span class="code-number">1</span>] = self.keys[i]</span>',
+                '<span class="code-line">                i -= <span class="code-number">1</span></span>',
+                '<span class="code-line">            self.keys[i+<span class="code-number">1</span>] = k</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '创建B树节点(度m=3)' });
+                arr.slice(0, 6).forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `插入 key=${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `找到合适位置` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `移动keys` });
+                    steps.push({ type: 'insert', indices: [i], array: [...arr], line: 4, message: `插入成功` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 5, message: 'B树插入完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'bplus-tree',
+            name: 'B+树',
+            nameEn: 'B+ Tree',
+            desc: 'B树的变体，所有数据在叶子节点',
+            complexity: { best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>B+树特点</h3>
+                    <p>B+树的所有数据都存储在叶子节点，非叶子节点只存储索引信息，适合范围查询。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">BPlusTreeNode</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
+                '<span class="code-line">        self.keys = []</span>',
+                '<span class="code-line">        self.children = []</span>',
+                '<span class="code-line">        self.next = <span class="code-keyword">None</span>  <span class="code-comment"># 叶子节点链表</span></span>',
+                '<span class="code-line">        self.is_leaf = <span class="code-keyword">True</span></span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-comment"># 搜索：从根开始，一直下降到叶子节点</span></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">search</span>(root, key):</span>',
+                '<span class="code-line">    node = root</span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> <span class="code-keyword">not</span> node.is_leaf:</span>',
+                '<span class="code-line">        i = <span class="code-number">0</span></span>',
+                '<span class="code-line">        <span class="code-keyword">while</span> i < <span class="code-function">len</span>(node.keys) <span class="code-keyword">and</span> key > node.keys[i]:</span>',
+                '<span class="code-line">            i += <span class="code-number">1</span></span>',
+                '<span class="code-line">        node = node.children[i]</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> node</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '构建B+树' });
+                arr.slice(0, 6).forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `插入 ${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `查找叶子节点` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `更新索引` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: 'B+树构建完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'red-black',
+            name: '红黑树',
+            nameEn: 'Red-Black Tree',
+            desc: '自平衡的二叉搜索树，节点有红黑颜色',
+            complexity: { best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>红黑树性质</h3>
+                    <ul>
+                        <li>每个节点非红即黑</li>
+                        <li>根节点是黑色</li>
+                        <li>叶子节点(NIL)是黑色</li>
+                        <li>红节点的子节点都是黑色</li>
+                        <li>任意节点到叶子节点的路径黑高相同</li>
+                    </ul>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">RBNode</span>:</span>',
+                '<span class="code-line">    RED = <span class="code-keyword">True</span></span>',
+                '<span class="code-line">    BLACK = <span class="code-keyword">False</span></span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, val):</span>',
+                '<span class="code-line">        self.val = val</span>',
+                '<span class="code-line">        self.color = RBNode.RED</span>',
+                '<span class="code-line">        self.left = self.right = self.parent = <span class="code-keyword">None</span></span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">left_rotate</span>(T, x):</span>',
+                '<span class="code-line">    y = x.right</span>',
+                '<span class="code-line">    x.right = y.left</span>',
+                '<span class="code-line">    <span class="code-keyword">if</span> y.left != T.nil:</span>',
+                '<span class="code-line">        y.left.parent = x</span>',
+                '<span class="code-line">    y.parent = x.parent</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '创建红黑树空状态' });
+                arr.slice(0, 5).forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `插入 ${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `BST插入` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `检查并修复红黑性质` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 4, message: `可能需要旋转/变色` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 5, message: '红黑树平衡完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'hash-chain',
+            name: '哈希表-拉链法',
+            nameEn: 'Hash Table (Chaining)',
+            desc: '使用链表解决哈希冲突',
+            complexity: { best: 'O(1)', avg: 'O(α)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>拉链法</h3>
+                    <p>当发生哈希冲突时，将冲突的元素用链表连接在同一个桶中。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">HashChain</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, size=<span class="code-number">10</span>):</span>',
+                '<span class="code-line">        self.size = size</span>',
+                '<span class="code-line">        self.buckets = [[] <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> <span class="code-function">range</span>(size)]</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">hash</span>(self, key):</span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> key % self.size</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">insert</span>(self, key):</span>',
+                '<span class="code-line">        idx = <span class="code-function">self.hash</span>(key)</span>',
+                '<span class="code-line">        self.buckets[idx].append(key)</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">search</span>(self, key):</span>',
+                '<span class="code-line">        idx = <span class="code-function">self.hash</span>(key)</span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> key <span class="code-keyword">in</span> self.buckets[idx]</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const tableSize = 5;
+                const buckets = Array(tableSize).fill(null).map(() => []);
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `创建哈希表, 大小=${tableSize}` });
+                
+                arr.slice(0, 6).forEach((val, i) => {
+                    const idx = val % tableSize;
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `hash(${val}) = ${val} % ${tableSize} = ${idx}` });
+                    buckets[idx].push(val);
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `放入桶[${idx}]: [${buckets[idx].join(', ')}]` });
+                });
+                
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: '拉链哈希表构建完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'hash-open',
+            name: '哈希表-开放定址法',
+            nameEn: 'Hash Table (Open Addressing)',
+            desc: '线性探测/二次探测解决冲突',
+            complexity: { best: 'O(1)', avg: 'O(1/(1-α))', worst: 'O(n)', space: 'O(1/(1-α))' },
+            theory: `
+                <div class="theory-section">
+                    <h3>开放定址法</h3>
+                    <p>当发生冲突时，使用探测函数找到下一个空位置。常见方法：线性探测、二次探测、双散列。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">HashOpen</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, size=<span class="code-number">10</span>):</span>',
+                '<span class="code-line">        self.size = size</span>',
+                '<span class="code-line">        self.table = [None] * size</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">hash</span>(self, key, i=<span class="code-number">0</span>):</span>',
+                '<span class="code-line">        <span class="code-comment"># 线性探测: h(key) = (hash(key) + i) % m</span></span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> (key + i) % self.size</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">insert</span>(self, key):</span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(self.size):</span>',
+                '<span class="code-line">            idx = <span class="code-function">self.hash</span>(key, i)</span>',
+                '<span class="code-line">            <span class="code-keyword">if</span> self.table[idx] <span class="code-keyword">is</span> None:</span>',
+                '<span class="code-line">                self.table[idx] = key</span>',
+                '<span class="code-line">                <span class="code-keyword">return</span> idx</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const tableSize = 7;
+                const table = Array(tableSize).fill(null);
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `创建哈希表, 大小=${tableSize}` });
+                
+                arr.slice(0, 6).forEach((val, i) => {
+                    let probe = 0;
+                    let idx = val % tableSize;
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `探测 ${probe}: hash(${val}) = ${idx}` });
+                    
+                    while (table[idx] !== null && probe < tableSize) {
+                        probe++;
+                        idx = (val + probe) % tableSize;
+                        steps.push({ type: 'compare', indices: [i], array: [...arr], line: 2, message: `冲突! 探测 ${probe}: ${idx}` });
+                    }
+                    
+                    if (table[idx] === null) {
+                        table[idx] = val;
+                        steps.push({ type: 'insert', indices: [i], array: [...arr], line: 3, message: `放入 table[${idx}] = ${val}` });
+                    }
+                });
+                
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: `开放定址哈希表完成` });
+                return steps;
+            }
         }
     ],
     tree: [
+        {
+            id: 'binary-chain',
+            name: '二叉树-链式存储',
+            nameEn: 'Binary Tree (Linked)',
+            desc: '用链表节点存储二叉树，每个节点含数据域和左右指针',
+            complexity: { best: 'O(n)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>二叉树链式存储</h3>
+                    <p>每个节点包含数据域和两个指向左右子树的指针。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">TreeNode</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, val):</span>',
+                '<span class="code-line">        self.val = val</span>',
+                '<span class="code-line">        self.lchild = <span class="code-keyword">None</span></span>',
+                '<span class="code-line">        self.rchild = <span class="code-keyword">None</span></span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-comment"># 先序遍历</span></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">pre_order</span>(root):</span>',
+                '<span class="code-line">    <span class="code-keyword">if</span> root:</span>',
+                '<span class="code-line">        <span class="code-function">visit</span>(root.val)</span>',
+                '<span class="code-line">        pre_order(root.lchild)</span>',
+                '<span class="code-line">        pre_order(root.rchild)</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '构建二叉树' });
+                arr.slice(0, 7).forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `创建节点 ${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `lchild = ${i*2+1 < arr.length ? arr[i*2+1] : 'null'}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `rchild = ${i*2+2 < arr.length ? arr[i*2+2] : 'null'}` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '二叉树构建完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'binary-seq',
+            name: '二叉树-顺序存储',
+            nameEn: 'Binary Tree (Sequential)',
+            desc: '用数组存储完全二叉树，节点i的左右子在2i和2i+1',
+            complexity: { best: 'O(n)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>二叉树顺序存储</h3>
+                    <p>用数组存储完全二叉树，通过下标计算父子关系。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-comment"># 完全二叉树的顺序存储</span></span>',
+                '<span class="code-line"><span class="code-comment"># 父节点: i // 2</span></span>',
+                '<span class="code-line"><span class="code-comment"># 左子: 2*i, 右子: 2*i+1</span></span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">parent</span>(i): <span class="code-keyword">return</span> i // <span class="code-number">2</span></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">left_child</span>(i): <span class="code-keyword">return</span> <span class="code-number">2</span>*i</span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">right_child</span>(i): <span class="code-keyword">return</span> <span class="code-number">2</span>*i+<span class="code-number">1</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const n = 8;
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '顺序存储二叉树' });
+                for (let i = 1; i < Math.min(n, arr.length + 1); i++) {
+                    const parent = Math.floor(i / 2);
+                    const left = 2 * i;
+                    const right = 2 * i + 1;
+                    steps.push({ type: 'visit', indices: [i-1], array: [...arr], line: 1, message: `i=${i}: val=${arr[i-1] || 'null'}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `parent=${parent !== 0 ? parent : 'root'}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `left=${left <= arr.length ? left : 'null'}, right=${right <= arr.length ? right : 'null'}` });
+                }
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '顺序存储完成' });
+                return steps;
+            }
+        },
         {
             id: 'bst-insert',
             name: 'BST插入',
@@ -1234,7 +2425,7 @@ const algorithms = {
             id: 'tree-traverse',
             name: '二叉树遍历',
             nameEn: 'Tree Traversal',
-            desc: '前序、中序、后序遍历二叉树',
+            desc: '前序、中序、后序、层次遍历二叉树',
             complexity: { best: 'O(n)', avg: 'O(n)', worst: 'O(n)', space: 'O(h)' },
             theory: `
                 <div class="theory-section">
@@ -1250,119 +2441,59 @@ const algorithms = {
                     <p><strong>左 → 右 → 根</strong>：先遍历左子树，再遍历右子树，最后访问根节点。</p>
                 </div>
             `,
-            pseudocode: [
-                '<span class="code-line" data-line="0"><span class="code-comment"># 前序遍历</span></span>',
-                '<span class="code-line" data-line="1"><span class="code-keyword">procedure</span> <span class="code-function">Preorder</span>(node)</span>',
-                '<span class="code-line" data-line="2">    <span class="code-keyword">if</span> node ≠ <span class="code-keyword">null</span> <span class="code-keyword">then</span></span>',
-                '<span class="code-line" data-line="3">        visit(node)</span>',
-                '<span class="code-line" data-line="4">        Preorder(node.left)</span>',
-                '<span class="code-line" data-line="5">        Preorder(node.right)</span>',
-                '<span class="code-line" data-line="6">    <span class="code-keyword">end if</span></span>',
-                '<span class="code-line" data-line="7"></span>',
-                '<span class="code-line" data-line="8"><span class="code-comment"># 中序遍历</span></span>',
-                '<span class="code-line" data-line="9"><span class="code-keyword">procedure</span> <span class="code-function">Inorder</span>(node)</span>',
-                '<span class="code-line" data-line="10">    <span class="code-keyword">if</span> node ≠ <span class="code-keyword">null</span> <span class="code-keyword">then</span></span>',
-                '<span class="code-line" data-line="11">        Inorder(node.left)</span>',
-                '<span class="code-line" data-line="12">        visit(node)</span>',
-                '<span class="code-line" data-line="13">        Inorder(node.right)</span>',
-                '<span class="code-line" data-line="14">    <span class="code-keyword">end if</span></span>'
-            ],
-            python: [
-                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">preorder</span>(node):</span>',
-                '<span class="code-line">    <span class="code-keyword">if</span> node:</span>',
-                '<span class="code-line">        <span class="code-function">print</span>(node.val)</span>',
-                '<span class="code-line">        preorder(node.left)</span>',
-                '<span class="code-line">        preorder(node.right)</span>',
-                '<span class="code-line"></span>',
-                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">inorder</span>(node):</span>',
-                '<span class="code-line">    <span class="code-keyword">if</span> node:</span>',
-                '<span class="code-line">        inorder(node.left)</span>',
-                '<span class="code-line">        <span class="code-function">print</span>(node.val)</span>',
-                '<span class="code-line">        inorder(node.right)</span>'
-            ],
-            generateSteps: (arr) => {
-                const steps = [];
-                const sortedArr = [...arr].sort((a, b) => a - b);
-                function buildTree(values) {
-                    if (values.length === 0) return null;
-                    const mid = Math.floor(values.length / 2);
-                    const node = { val: values[mid], left: null, right: null };
-                    node.left = buildTree(values.slice(0, mid));
-                    node.right = buildTree(values.slice(mid + 1));
-                    return node;
+            python: `
+<span class="code-line"><span class="code-comment"># 根据选择的变体显示对应代码</span></span>`,
+            variants: [
+                {
+                    id: 'preorder',
+                    name: '前序',
+                    python: [
+                        '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">preorder</span>(node):</span>',
+                        '<span class="code-line">    <span class="code-keyword">if</span> node:</span>',
+                        '<span class="code-line">        <span class="code-function">print</span>(node.val)  <span class="code-comment"># 访问根</span></span>',
+                        '<span class="code-line">        preorder(node.left)  <span class="code-comment"># 遍历左</span></span>',
+                        '<span class="code-line">        preorder(node.right) <span class="code-comment"># 遍历右</span></span>'
+                    ]
+                },
+                {
+                    id: 'inorder',
+                    name: '中序',
+                    python: [
+                        '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">inorder</span>(node):</span>',
+                        '<span class="code-line">    <span class="code-keyword">if</span> node:</span>',
+                        '<span class="code-line">        inorder(node.left)   <span class="code-comment"># 遍历左</span></span>',
+                        '<span class="code-line">        <span class="code-function">print</span>(node.val)  <span class="code-comment"># 访问根</span></span>',
+                        '<span class="code-line">        inorder(node.right)  <span class="code-comment"># 遍历右</span></span>'
+                    ]
+                },
+                {
+                    id: 'postorder',
+                    name: '后序',
+                    python: [
+                        '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">postorder</span>(node):</span>',
+                        '<span class="code-line">    <span class="code-keyword">if</span> node:</span>',
+                        '<span class="code-line">        postorder(node.left)  <span class="code-comment"># 遍历左</span></span>',
+                        '<span class="code-line">        postorder(node.right) <span class="code-comment"># 遍历右</span></span>',
+                        '<span class="code-line">        <span class="code-function">print</span>(node.val)  <span class="code-comment"># 访问根</span></span>'
+                    ]
+                },
+                {
+                    id: 'levelorder',
+                    name: '层次',
+                    python: [
+                        '<span class="code-line"><span class="code-keyword">from</span> collections <span class="code-keyword">import</span> deque</span>',
+                        '<span class="code-line"></span>',
+                        '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">level_order</span>(root):</span>',
+                        '<span class="code-line">    queue = deque([root])</span>',
+                        '<span class="code-line">    <span class="code-keyword">while</span> queue:</span>',
+                        '<span class="code-line">        node = queue.popleft()</span>',
+                        '<span class="code-line">        <span class="code-function">print</span>(node.val)</span>',
+                        '<span class="code-line">        <span class="code-keyword">if</span> node.left:</span>',
+                        '<span class="code-line">            queue.append(node.left)</span>',
+                        '<span class="code-line">        <span class="code-keyword">if</span> node.right:</span>',
+                        '<span class="code-line">            queue.append(node.right)</span>'
+                    ]
                 }
-                const tree = buildTree(sortedArr);
-                const order = [];
-                function preorder(node) {
-                    if (!node) return;
-                    steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 2, message: `检查节点 ${node.val}` });
-                    order.push(node.val);
-                    steps.push({ type: 'visit', tree: JSON.parse(JSON.stringify(tree)), current: node.val, order: [...order], line: 3, message: `前序访问: ${node.val} (根→左→右)` });
-                    steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 4, message: `遍历左子树: ${node.left ? node.left.val : 'null'}` });
-                    preorder(node.left);
-                    steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 5, message: `遍历右子树: ${node.right ? node.right.val : 'null'}` });
-                    preorder(node.right);
-                    steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 6, message: `${node.val} 遍历完成` });
-                }
-                steps.push({ type: 'start', tree: JSON.parse(JSON.stringify(tree)), line: 1, message: '开始前序遍历: 根 → 左 → 右' });
-                preorder(tree);
-                steps.push({ type: 'complete', tree: JSON.parse(JSON.stringify(tree)), order: order, line: 6, message: `遍历顺序: ${order.join(' → ')}` });
-                return steps;
-            }
-        },
-        {
-            id: 'tree-levelorder',
-            name: '层序遍历',
-            nameEn: 'Level Order Traversal',
-            desc: '按层级顺序遍历二叉树（广度优先）',
-            complexity: { best: 'O(n)', avg: 'O(n)', worst: 'O(n)', space: 'O(w)' },
-            theory: `
-                <div class="theory-section">
-                    <h3>算法原理</h3>
-                    <p>层序遍历使用队列，按从上到下、从左到右的顺序访问二叉树的节点，每一层的节点在下一层之前被访问。</p>
-                </div>
-                <div class="theory-section">
-                    <h3>算法步骤</h3>
-                    <ul>
-                        <li>将根节点入队</li>
-                        <li>出队一个节点，访问它</li>
-                        <li>将它的左、右子节点入队</li>
-                        <li>重复直到队列为空</li>
-                    </ul>
-                </div>
-            `,
-            pseudocode: [
-                '<span class="code-line" data-line="0"><span class="code-keyword">procedure</span> <span class="code-function">LevelOrder</span>(root)</span>',
-                '<span class="code-line" data-line="1">    <span class="code-keyword">if</span> root = <span class="code-keyword">null</span> <span class="code-keyword">then</span></span>',
-                '<span class="code-line" data-line="2">        <span class="code-keyword">return</span></span>',
-                '<span class="code-line" data-line="3">    <span class="code-keyword">end if</span></span>',
-                '<span class="code-line" data-line="4">    queue ← [root]</span>',
-                '<span class="code-line" data-line="5">    <span class="code-keyword">while</span> queue not empty <span class="code-keyword">do</span></span>',
-                '<span class="code-line" data-line="6">        node ← queue.dequeue()</span>',
-                '<span class="code-line" data-line="7">        visit(node)</span>',
-                '<span class="code-line" data-line="8">        <span class="code-keyword">if</span> node.left ≠ <span class="code-keyword">null</span> <span class="code-keyword">then</span></span>',
-                '<span class="code-line" data-line="9">            queue.enqueue(node.left)</span>',
-                '<span class="code-line" data-line="10">        <span class="code-keyword">end if</span></span>',
-                '<span class="code-line" data-line="11">        <span class="code-keyword">if</span> node.right ≠ <span class="code-keyword">null</span> <span class="code-keyword">then</span></span>',
-                '<span class="code-line" data-line="12">            queue.enqueue(node.right)</span>',
-                '<span class="code-line" data-line="13">        <span class="code-keyword">end if</span></span>',
-                '<span class="code-line" data-line="14">    <span class="code-keyword">end while</span></span>',
-                '<span class="code-line" data-line="15"><span class="code-keyword">end procedure</span></span>'
-            ],
-            python: [
-                '<span class="code-line"><span class="code-keyword">from</span> collections <span class="code-keyword">import</span> deque</span>',
-                '<span class="code-line"></span>',
-                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">level_order</span>(root):</span>',
-                '<span class="code-line">    <span class="code-keyword">if not</span> root:</span>',
-                '<span class="code-line">        <span class="code-keyword">return</span></span>',
-                '<span class="code-line">    queue = deque([root])</span>',
-                '<span class="code-line">    <span class="code-keyword">while</span> queue:</span>',
-                '<span class="code-line">        node = queue.popleft()</span>',
-                '<span class="code-line">        <span class="code-function">print</span>(node.val)</span>',
-                '<span class="code-line">        <span class="code-keyword">if</span> node.left:</span>',
-                '<span class="code-line">            queue.append(node.left)</span>',
-                '<span class="code-line">        <span class="code-keyword">if</span> node.right:</span>',
-                '<span class="code-line">            queue.append(node.right)</span>'
             ],
             generateSteps: (arr) => {
                 const steps = [];
@@ -1378,33 +2509,668 @@ const algorithms = {
                 }
                 
                 const tree = buildTree(sortedArr, 0, sortedArr.length - 1);
-                const queue = [tree];
-                const order = [];
+                const variant = state.currentVariant || 'preorder';
                 
-                steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 0, message: '层序遍历开始' });
-                steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 1, message: '检查根节点' });
-                
-                while (queue.length > 0) {
-                    const node = queue.shift();
-                    order.push(node.val);
-                    steps.push({ type: 'visit', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], current: node.val, order: [...order], line: 5, message: `访问节点 ${node.val}` });
-                    steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], current: node.val, order: [...order], line: 6, message: `出队 ${node.val}` });
-                    
-                    if (node.left) {
-                        queue.push(node.left);
-                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], current: node.val, order: [...order], line: 8, message: `左子节点 ${node.left.val} 入队` });
+                if (variant === 'preorder') {
+                    // 前序遍历: 根 -> 左 -> 右
+                    // 代码行号: 1=def, 2=if, 3=print, 4=left, 5=right
+                    const order = [];
+                    function preorder(node) {
+                        if (!node) return;
+                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 2, message: `检查节点 ${node.val}` });
+                        order.push(node.val);
+                        steps.push({ type: 'visit', tree: JSON.parse(JSON.stringify(tree)), current: node.val, order: [...order], line: 3, message: `前序访问: ${node.val} (根→左→右)` });
+                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 4, message: `遍历左子树: ${node.left ? node.left.val : 'null'}` });
+                        preorder(node.left);
+                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 5, message: `遍历右子树: ${node.right ? node.right.val : 'null'}` });
+                        preorder(node.right);
                     }
-                    if (node.right) {
-                        queue.push(node.right);
-                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], current: node.val, order: [...order], line: 11, message: `右子节点 ${node.right.val} 入队` });
+                    steps.push({ type: 'start', tree: JSON.parse(JSON.stringify(tree)), line: 1, message: '前序遍历: 根 → 左 → 右' });
+                    preorder(tree);
+                    steps.push({ type: 'complete', tree: JSON.parse(JSON.stringify(tree)), order: order, line: 5, message: `遍历顺序: ${order.join(' → ')}` });
+                } else if (variant === 'inorder') {
+                    // 中序遍历: 左 -> 根 -> 右
+                    // 代码行号: 1=def, 2=if, 3=left, 4=print, 5=right
+                    const order = [];
+                    function inorder(node) {
+                        if (!node) return;
+                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 2, message: `检查节点 ${node.val}` });
+                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 3, message: `遍历左子树: ${node.left ? node.left.val : 'null'}` });
+                        inorder(node.left);
+                        order.push(node.val);
+                        steps.push({ type: 'visit', tree: JSON.parse(JSON.stringify(tree)), current: node.val, order: [...order], line: 4, message: `中序访问: ${node.val} (左→根→右)` });
+                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 5, message: `遍历右子树: ${node.right ? node.right.val : 'null'}` });
+                        inorder(node.right);
                     }
+                    steps.push({ type: 'start', tree: JSON.parse(JSON.stringify(tree)), line: 1, message: '中序遍历: 左 → 根 → 右' });
+                    inorder(tree);
+                    steps.push({ type: 'complete', tree: JSON.parse(JSON.stringify(tree)), order: order, line: 5, message: `遍历顺序: ${order.join(' → ')}` });
+                } else if (variant === 'postorder') {
+                    // 后序遍历: 左 -> 右 -> 根
+                    // 代码行号: 1=def, 2=if, 3=left, 4=right, 5=print
+                    const order = [];
+                    function postorder(node) {
+                        if (!node) return;
+                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 2, message: `检查节点 ${node.val}` });
+                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 3, message: `遍历左子树: ${node.left ? node.left.val : 'null'}` });
+                        postorder(node.left);
+                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 4, message: `遍历右子树: ${node.right ? node.right.val : 'null'}` });
+                        postorder(node.right);
+                        order.push(node.val);
+                        steps.push({ type: 'visit', tree: JSON.parse(JSON.stringify(tree)), current: node.val, order: [...order], line: 5, message: `后序访问: ${node.val} (左→右→根)` });
+                    }
+                    steps.push({ type: 'start', tree: JSON.parse(JSON.stringify(tree)), line: 1, message: '后序遍历: 左 → 右 → 根' });
+                    postorder(tree);
+                    steps.push({ type: 'complete', tree: JSON.parse(JSON.stringify(tree)), order: order, line: 5, message: `遍历顺序: ${order.join(' → ')}` });
+                } else if (variant === 'levelorder') {
+                    // 层次遍历
+                    // 代码行号: 1=import, 3=def, 4=queue, 5=while, 6=popleft, 7=print, 8=if left, 9=append left, 10=if right, 11=append right
+                    const queue = [tree];
+                    const order = [];
+                    steps.push({ type: 'start', tree: JSON.parse(JSON.stringify(tree)), line: 3, message: '层次遍历: 按层从左到右' });
+                    steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], line: 4, message: '初始化队列' });
+                    while (queue.length > 0) {
+                        const node = queue.shift();
+                        order.push(node.val);
+                        steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], line: 6, message: `出队: ${node.val}` });
+                        steps.push({ type: 'visit', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], current: node.val, order: [...order], line: 7, message: `访问节点 ${node.val}` });
+                        if (node.left) {
+                            queue.push(node.left);
+                            steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], line: 9, message: `左子 ${node.left.val} 入队` });
+                        }
+                        if (node.right) {
+                            queue.push(node.right);
+                            steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), queue: [...queue], line: 11, message: `右子 ${node.right.val} 入队` });
+                        }
+                    }
+                    steps.push({ type: 'complete', tree: JSON.parse(JSON.stringify(tree)), order: [...order], line: 11, message: `层序遍历: ${order.join(' → ')}` });
                 }
                 
-                steps.push({ type: 'complete', tree: JSON.parse(JSON.stringify(tree)), order: [...order], line: 14, message: `层序遍历: ${order.join(' -> ')}` });
+                return steps;
+            }
+        },
+        {
+            id: 'complete-binary',
+            name: '完全二叉树-链式存储',
+            nameEn: 'Complete Binary Tree',
+            desc: '完全二叉树的链式存储结构',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>完全二叉树</h3>
+                    <p>完全二叉树除了最后一层外，每一层都是满的，且最后一层的节点都集中在左边。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">TreeNode</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, val):</span>',
+                '<span class="code-line">        self.val = val</span>',
+                '<span class="code-line">        self.left = <span class="code-keyword">None</span></span>',
+                '<span class="code-line">        self.right = <span class="code-keyword">None</span></span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-comment"># 完全二叉树的数组表示</span></span>',
+                '<span class="code-line"><span class="code-comment"># 父节点: (i-1)//2</span></span>',
+                '<span class="code-line"><span class="code-comment"># 左子: 2i+1, 右子: 2i+2</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '构建完全二叉树' });
+                arr.slice(0, 7).forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `节点 ${val}` });
+                    if (i > 0) {
+                        const parent = Math.floor((i - 1) / 2);
+                        steps.push({ type: 'code-line', array: [...arr], line: 2, message: `父节点: index ${parent} = ${arr[parent]}` });
+                    }
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: '完全二叉树构建完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'huffman',
+            name: '哈夫曼树-顺序存储',
+            nameEn: 'Huffman Tree',
+            desc: '最优二叉树，用于数据压缩',
+            complexity: { best: 'O(n log n)', avg: 'O(n log n)', worst: 'O(n log n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>哈夫曼树</h3>
+                    <p>哈夫曼树是带权路径长度最短的二叉树，常用于哈夫曼编码。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">import</span> heapq</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">huffman</span>(weights):</span>',
+                '<span class="code-line">    heap = [[w, i] <span class="code-keyword">for</span> i, w <span class="code-keyword">in</span> <span class="code-function">enumerate</span>(weights)]</span>',
+                '<span class="code-line">    heapq.heapify(heap)</span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> <span class="code-function">len</span>(heap) > <span class="code-number">1</span>:</span>',
+                '<span class="code-line">        left = heapq.heappop(heap)</span>',
+                '<span class="code-line">        right = heapq.heappop(heap)</span>',
+                '<span class="code-line">        parent = [left[<span class="code-number">0</span>]+right[<span class="code-number">0</span>], -<span class="code-number">1</span>]</span>',
+                '<span class="code-line">        heapq.heappush(heap, parent)</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> heap[<span class="code-number">0</span>][<span class="code-number">0</span>]</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const weights = arr.slice(0, 5);
+                steps.push({ type: 'init', array: [...weights], line: 0, message: `权重: [${weights.join(', ')}]` });
+                
+                for (let i = 0; i < weights.length - 1; i++) {
+                    weights.sort((a, b) => a - b);
+                    const left = weights.shift();
+                    const right = weights.shift();
+                    const parent = left + right;
+                    steps.push({ type: 'compare', array: [...weights], line: 1, message: `选择最小: ${left} 和 ${right}` });
+                    weights.unshift(parent);
+                    steps.push({ type: 'code-line', array: [...weights], line: 2, message: `合并: ${left}+${right}=${parent}` });
+                }
+                
+                steps.push({ type: 'complete', array: [...weights], line: 3, message: `WPL = ${weights[0]}` });
+                return steps;
+            }
+        },
+        {
+            id: 'threaded',
+            name: '线索二叉树',
+            nameEn: 'Threaded Binary Tree',
+            desc: '利用空指针存储遍历线索',
+            complexity: { best: 'O(n)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>线索二叉树</h3>
+                    <p>将二叉树中的空指针改为指向节点前驱或后继的线索，方便快速遍历。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ThreadNode</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, val):</span>',
+                '<span class="code-line">        self.val = val</span>',
+                '<span class="code-line">        self.ltag = <span class="code-number">0</span>  <span class="code-comment"># 0:孩子, 1:线索</span></span>',
+                '<span class="code-line">        self.rtag = <span class="code-number">0</span></span>',
+                '<span class="code-line">        self.left = self.right = <span class="code-keyword">None</span></span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-comment"># 中序线索化</span></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">inorder_thread</span>(root):</span>',
+                '<span class="code-line">    pre = <span class="code-keyword">None</span></span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">thread</span>(node):</span>',
+                '<span class="code-line">        <span class="code-keyword">nonlocal</span> pre</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> node:</span>',
+                '<span class="code-line">            <span class="code-function">thread</span>(node.left)</span>',
+                '<span class="code-line">            <span class="code-keyword">if</span> <span class="code-keyword">not</span> node.left:</span>',
+                '<span class="code-line">                node.left = pre; node.ltag = <span class="code-number">1</span></span>',
+                '<span class="code-line">            <span class="code-keyword">if</span> pre <span class="code-keyword">and</span> <span class="code-keyword">not</span> pre.right:</span>',
+                '<span class="code-line">                pre.right = node; pre.rtag = <span class="code-number">1</span></span>',
+                '<span class="code-line">            pre = node</span>',
+                '<span class="code-line">            <span class="code-function">thread</span>(node.right)</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '中序线索化二叉树' });
+                arr.slice(0, 5).forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `处理节点 ${val}` });
+                    if (i > 0) {
+                        steps.push({ type: 'code-line', array: [...arr], line: 2, message: `建立前驱线索` });
+                    }
+                    if (i < arr.length - 1) {
+                        steps.push({ type: 'code-line', array: [...arr], line: 3, message: `建立后继线索` });
+                    }
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '线索二叉树构建完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'avl',
+            name: 'AVL平衡二叉树',
+            nameEn: 'AVL Tree',
+            desc: '自平衡的二叉搜索树，任意节点左右子树高度差不超过1',
+            complexity: { best: 'O(log n)', avg: 'O(log n)', worst: 'O(log n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>AVL树</h3>
+                    <p>AVL树是最早提出的自平衡二叉搜索树，通过旋转操作保持平衡。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">AVLNode</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, val):</span>',
+                '<span class="code-line">        self.val = val</span>',
+                '<span class="code-line">        self.bf = <span class="code-number">0</span>  <span class="code-comment"># 平衡因子</span></span>',
+                '<span class="code-line">        self.left = self.right = <span class="code-keyword">None</span></span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-comment"># LL旋转</span></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">ll_rotate</span>(y):</span>',
+                '<span class="code-line">    x = y.left</span>',
+                '<span class="code-line">    y.left = x.right</span>',
+                '<span class="code-line">    x.right = y</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> x</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-comment"># RR旋转</span></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">rr_rotate</span>(y):</span>',
+                '<span class="code-line">    x = y.right</span>',
+                '<span class="code-line">    y.right = x.left</span>',
+                '<span class="code-line">    x.left = y</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> x</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '构建AVL树' });
+                arr.slice(0, 5).forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `插入 ${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `BST插入` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `计算平衡因子` });
+                    if (i > 2) {
+                        steps.push({ type: 'code-line', array: [...arr], line: 4, message: `检查是否失衡, 可能需要旋转` });
+                    }
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 5, message: 'AVL树平衡完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'tree-parent',
+            name: '树存储结构-双亲表示法',
+            nameEn: 'Tree - Parent Representation',
+            desc: '用数组存储每个节点的父节点索引',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>双亲表示法</h3>
+                    <p>每个节点存储其父节点的索引，适合查找父节点操作。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">PTNode</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, data, parent=-<span class="code-number">1</span>):</span>',
+                '<span class="code-line">        self.data = data</span>',
+                '<span class="code-line">        self.parent = parent</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ParentTree</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, nodes):</span>',
+                '<span class="code-line">        self.nodes = nodes</span>',
+                '<span class="code-line">    </span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">find_parent</span>(self, i):</span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> self.nodes[i].parent</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '双亲表示法数组' });
+                arr.slice(0, 6).forEach((val, i) => {
+                    const parent = i === 0 ? -1 : Math.floor((i - 1) / 3);
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `index ${i}: data=${val}, parent=${parent}` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 2, message: '双亲表示法完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'tree-child',
+            name: '树存储结构-孩子表示法',
+            nameEn: 'Tree - Child Representation',
+            desc: '每个节点存储所有孩子节点的索引',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>孩子表示法</h3>
+                    <p>每个节点用链表存储所有孩子节点的索引，适合查找孩子节点。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">CTNode</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, child, next=<span class="code-keyword">None</span>):</span>',
+                '<span class="code-line">        self.child = child</span>',
+                '<span class="code-line">        self.next = next</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ChildTree</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, n):</span>',
+                '<span class="code-line">        self.firstchild = [None]*n</span>',
+                '<span class="code-line">        self.data = [<span class="code-keyword">None</span>]*n</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '孩子表示法' });
+                arr.slice(0, 5).forEach((val, i) => {
+                    const children = [];
+                    for (let j = i * 3 + 1; j <= Math.min(i * 3 + 3, arr.length - 1); j++) {
+                        children.push(j);
+                    }
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `${val}: 孩子 ${children.length > 0 ? children.join(',') : '无'}` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 2, message: '孩子表示法完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'tree-child-sibling',
+            name: '树存储结构-孩子兄弟表示法',
+            nameEn: 'Tree - Child-Sibling Representation',
+            desc: '每个节点存储第一个孩子和下一个兄弟',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>孩子兄弟表示法</h3>
+                    <p>任何树都可以用二叉树表示，每个节点存储第一个孩子和下一个兄弟。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">CSNode</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, val):</span>',
+                '<span class="code-line">        self.val = val</span>',
+                '<span class="code-line">        self.firstchild = <span class="code-keyword">None</span>  <span class="code-comment"># 第一个孩子</span></span>',
+                '<span class="code-line">        self.nextsibling = <span class="code-keyword">None</span>  <span class="code-comment"># 下一个兄弟</span></span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-comment"># 树转二叉树</span></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">tree_to二叉树</span>(root):</span>',
+                '<span class="code-line">    <span class="code-keyword">if</span> root:</span>',
+                '<span class="code-line">        root.firstchild = root.child</span>',
+                '<span class="code-line">        root.nextsibling = root.next</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '孩子兄弟表示法' });
+                arr.slice(0, 5).forEach((val, i) => {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `节点 ${val}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `firstchild = 第一个孩子` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `nextsibling = 下一个兄弟` });
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '孩子兄弟表示法完成' });
                 return steps;
             }
         }
     ],
+
+
+    // ===== 数组 =====
+    array: [
+        {
+            id: 'matrix-basic',
+            name: '数组-存储结构',
+            nameEn: '2D Array Storage',
+            desc: '二维数组的行优先和列优先存储',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(1)', space: 'O(1)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>存储方式</h3>
+                    <p>二维数组可以按行优先(C语言)或列优先(Fortran)存储为一维数组。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-comment"># 行优先存储: A[i][j] 的地址</span></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">row_addr</span>(i, j, m, n, base):</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> base + (i*n + j) * ElemSize</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-comment"># 列优先存储: A[i][j] 的地址</span></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">col_addr</span>(i, j, m, n, base):</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> base + (j*m + i) * ElemSize</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const m = 3, n = 3;
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `二维数组 ${m}×${n}` });
+                for (let i = 0; i < m; i++) {
+                    steps.push({ type: 'loop-start', indices: [i], array: [...arr], line: 1, message: `行 ${i}` });
+                    for (let j = 0; j < n; j++) {
+                        const idx = i * n + j;
+                        steps.push({ type: 'visit', indices: [idx], array: [...arr], line: 2, message: `A[${i}][${j}] → 一维[${idx}]` });
+                    }
+                }
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: '行优先存储完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'symmetric-matrix',
+            name: '压缩存储-对称矩阵',
+            nameEn: 'Symmetric Matrix',
+            desc: '只存储下三角区域，节省一半空间',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(1)', space: 'O(n²/2)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>对称矩阵压缩</h3>
+                    <p>对称矩阵 A[i][j] = A[j][i]，只需存储下三角部分(含对角线)。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-comment"># 对称矩阵压缩存储</span></span>',
+                '<span class="code-line"><span class="code-comment"># A[i][j] 对应 B[k], k = i*(i+1)/2 + j</span></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">sym_get</span>(B, i, j):</span>',
+                '<span class="code-line">    <span class="code-keyword">if</span> i >= j:</span>',
+                '<span class="code-line">        k = i*(i+<span class="code-number">1</span>)//<span class="code-number">2</span> + j</span>',
+                '<span class="code-line">    <span class="code-keyword">else</span>:</span>',
+                '<span class="code-line">        k = j*(j+<span class="code-number">1</span>)//<span class="code-number">2</span> + i</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> B[k]</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const n = 4;
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `${n}×${n} 对称矩阵` });
+                let k = 0;
+                for (let i = 0; i < n; i++) {
+                    steps.push({ type: 'loop-start', indices: [i], array: [...arr], line: 1, message: `行 ${i}` });
+                    for (let j = 0; j <= i; j++) {
+                        steps.push({ type: 'visit', indices: [k], array: [...arr], line: 2, message: `B[${k}] = A[${i}][${j}]` });
+                        k++;
+                    }
+                }
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: `压缩存储完成, 共 ${k} 个元素` });
+                return steps;
+            }
+        },
+        {
+            id: 'triangular-matrix',
+            name: '压缩存储-三角矩阵',
+            nameEn: 'Triangular Matrix',
+            desc: '下三角或上三角矩阵的压缩存储',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(1)', space: 'O(n²/2)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>三角矩阵</h3>
+                    <p>下三角矩阵或上三角矩阵，一半是常数c，一半是数据。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-comment"># 下三角矩阵压缩存储</span></span>',
+                '<span class="code-line"><span class="code-comment"># 元素个数: n*(n+1)/2 + 1</span></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">tri_get</span>(B, i, j, c):</span>',
+                '<span class="code-line">    <span class="code-keyword">if</span> i >= j:</span>',
+                '<span class="code-line">        k = i*(i+<span class="code-number">1</span>)//<span class="code-number">2</span> + j</span>',
+                '<span class="code-line">    <span class="code-keyword">else</span>:</span>',
+                '<span class="code-line">        k = n*(n+<span class="code-number">1</span>)//<span class="code-number">2</span></span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> B[k] <span class="code-comment"># c存在最后</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const n = 4;
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `${n}×${n} 下三角矩阵` });
+                let k = 0;
+                for (let i = 0; i < n; i++) {
+                    steps.push({ type: 'loop-start', indices: [i], array: [...arr], line: 1, message: `行 ${i}` });
+                    for (let j = 0; j <= i; j++) {
+                        steps.push({ type: 'visit', indices: [k], array: [...arr], line: 2, message: `B[${k}] = ${arr[k]}` });
+                        k++;
+                    }
+                }
+                steps.push({ type: 'code-line', array: [...arr], line: 3, message: `B[${k}] = 常数c (上三角)` });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '三角矩阵压缩完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'tridiagonal',
+            name: '压缩存储-三对角矩阵',
+            nameEn: 'Tridiagonal Matrix',
+            desc: '只有主对角线和相邻对角线上有元素',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(1)', space: 'O(3n-2)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>三对角矩阵</h3>
+                    <p>三对角矩阵只在主对角线及其上下相邻的对角线上有非零元素。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-comment"># 三对角矩阵压缩存储</span></span>',
+                '<span class="code-line"><span class="code-comment"># B[k] = A[i][j], k = 2*i + j - 1</span></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">tri_diag_get</span>(B, i, j):</span>',
+                '<span class="code-line">    <span class="code-keyword">if</span> <span class="code-function">abs</span>(i-j) > <span class="code-number">1</span>:</span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> <span class="code-number">0</span></span>',
+                '<span class="code-line">    k = <span class="code-number">2</span>*i + j - <span class="code-number">1</span></span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> B[k]</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const n = 4;
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `${n}×${n} 三对角矩阵` });
+                let k = 0;
+                for (let i = 0; i < n; i++) {
+                    steps.push({ type: 'loop-start', indices: [i], array: [...arr], line: 1, message: `行 ${i}` });
+                    for (let j = Math.max(0, i-1); j <= Math.min(n-1, i+1); j++) {
+                        steps.push({ type: 'visit', indices: [k], array: [...arr], line: 2, message: `B[${k}] = A[${i}][${j}]` });
+                        k++;
+                    }
+                }
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: `共 ${k} 个元素 (原${n*n})` });
+                return steps;
+            }
+        },
+        {
+            id: 'sparse-matrix',
+            name: '稀疏矩阵-十字链表',
+            nameEn: 'Sparse Matrix Cross List',
+            desc: '使用十字链表存储非零元素',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)', space: 'O(k)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>十字链表</h3>
+                    <p>每个非零元素节点同时链接到所在行和所在列的两个链表中。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">OLNode</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, i, j, e):</span>',
+                '<span class="code-line">        self.row = i</span>',
+                '<span class="code-line">        self.col = j</span>',
+                '<span class="code-line">        self.val = e</span>',
+                '<span class="code-line">        self.right = <span class="code-keyword">None</span>  <span class="code-comment"># 行指针</span></span>',
+                '<span class="code-line">        self.down = <span class="code-keyword">None</span>    <span class="code-comment"># 列指针</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '创建十字链表头指针向量' });
+                const nonzero = arr.filter(v => v !== 0).length;
+                arr.forEach((val, i) => {
+                    if (val !== 0) {
+                        steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `节点: (row,col,${val})` });
+                        steps.push({ type: 'code-line', array: [...arr], line: 2, message: `链接到行链表` });
+                        steps.push({ type: 'code-line', array: [...arr], line: 3, message: `链接到列链表` });
+                    }
+                });
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: `共 ${nonzero} 个非零元素` });
+                return steps;
+            }
+        }
+    ],
+
+    // ===== 串 =====
+    string: [
+        {
+            id: 'bf-match',
+            name: '朴素模式匹配',
+            nameEn: 'Brute Force',
+            desc: '暴力匹配，逐个字符比较',
+            complexity: { best: 'O(n)', avg: 'O(nm)', worst: 'O(nm)', space: 'O(1)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>朴素匹配</h3>
+                    <p>从主串的每个位置开始，尝试与模式串匹配，失败则回溯到下一个位置。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">bf_match</span>(S, P):</span>',
+                '<span class="code-line">    i, j = <span class="code-number">0</span>, <span class="code-number">0</span></span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> i < <span class="code-function">len</span>(S) <span class="code-keyword">and</span> j < <span class="code-function">len</span>(P):</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> S[i] == P[j]:</span>',
+                '<span class="code-line">            i += <span class="code-number">1</span></span>',
+                '<span class="code-line">            j += <span class="code-number">1</span></span>',
+                '<span class="code-line">        <span class="code-keyword">else</span>:</span>',
+                '<span class="code-line">            i = i - j + <span class="code-number">1</span></span>',
+                '<span class="code-line">            j = <span class="code-number">0</span></span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> i - j <span class="code-keyword">if</span> j == <span class="code-function">len</span>(P) <span class="code-keyword">else</span> -<span class="code-number">1</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const S = 'ababcabababc';
+                const P = 'abc';
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `S="${S}", P="${P}"` });
+                for (let i = 0; i < Math.min(S.length, 5); i++) {
+                    steps.push({ type: 'loop-start', array: [...arr], line: 1, message: `从位置 ${i} 开始匹配` });
+                    for (let j = 0; j < P.length; j++) {
+                        const match = S[i+j] === P[j];
+                        steps.push({ type: 'compare', indices: [i], array: [...arr], line: 2, message: `S[${i+j}]='${S[i+j]}' ${match ? '==' : '!='} P[${j}]='${P[j]}'` });
+                        if (!match) {
+                            steps.push({ type: 'code-line', array: [...arr], line: 3, message: `不匹配,i回退` });
+                            break;
+                        }
+                    }
+                }
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '朴素匹配完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'kmp',
+            name: 'KMP算法',
+            nameEn: 'KMP Algorithm',
+            desc: '利用已匹配信息，避免不必要的回溯',
+            complexity: { best: 'O(n)', avg: 'O(n+m)', worst: 'O(n+m)', space: 'O(m)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>KMP算法</h3>
+                    <p>当匹配失败时，利用已匹配的前缀信息，将模式串向右滑动到合适位置，而不是回溯主串。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">get_next</span>(P):</span>',
+                '<span class="code-line">    next = [<span class="code-number">0</span>] * <span class="code-function">len</span>(P)</span>',
+                '<span class="code-line">    i, j = <span class="code-number">0</span>, -<span class="code-number">1</span></span>',
+                '<span class="code-line">    next[<span class="code-number">0</span>] = -<span class="code-number">1</span></span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> i < <span class="code-function">len</span>(P)-<span class="code-number">1</span>:</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> j==-<span class="code-number">1</span> <span class="code-keyword">or</span> P[i]==P[j]:</span>',
+                '<span class="code-line">            i, j = i+<span class="code-number">1</span>, j+<span class="code-number">1</span></span>',
+                '<span class="code-line">            next[i] = j</span>',
+                '<span class="code-line">        <span class="code-keyword">else</span>:</span>',
+                '<span class="code-line">            j = next[j]</span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">kmp_match</span>(S, P):</span>',
+                '<span class="code-line">    next = <span class="code-function">get_next</span>(P)</span>',
+                '<span class="code-line">    i, j = <span class="code-number">0</span>, <span class="code-number">0</span></span>',
+                '<span class="code-line">    <span class="code-keyword">while</span> i < <span class="code-function">len</span>(S) <span class="code-keyword">and</span> j < <span class="code-function">len</span>(P):</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> j==-<span class="code-number">1</span> <span class="code-keyword">or</span> S[i]==P[j]:</span>',
+                '<span class="code-line">            i, j = i+<span class="code-number">1</span>, j+<span class="code-number">1</span></span>',
+                '<span class="code-line">        <span class="code-keyword">else</span>:</span>',
+                '<span class="code-line">            j = next[j]</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> i-j <span class="code-keyword">if</span> j==<span class="code-function">len</span>(P) <span class="code-keyword">else</span> -<span class="code-number">1</span></span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const P = 'ababa';
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `P="${P}", 计算next数组` });
+                
+                // 构建next数组
+                const next = [0];
+                steps.push({ type: 'code-line', array: [...arr], line: 1, message: 'next[0] = -1' });
+                for (let i = 1; i < P.length; i++) {
+                    steps.push({ type: 'loop-start', indices: [i], array: [...arr], line: 2, message: `计算next[${i}]` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `next[${i}] = ${next[i-1] + 1 || 0}` });
+                    next.push(next[i-1] + 1 || 0);
+                }
+                
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: `next = [${next.join(',')}]` });
+                return steps;
+            }
+        }
+    ],
+
     graph: [
         {
             id: 'bfs',
@@ -1784,6 +3550,334 @@ const algorithms = {
                 steps.push({ type: 'complete', graph, indegree: {...indegree}, queue: [], result: [...result], line: 18, message: `拓扑排序: ${result.join(' → ')}` });
                 return steps;
             }
+        },
+        {
+            id: 'adj-matrix',
+            name: '存储结构-邻接矩阵',
+            nameEn: 'Adjacency Matrix',
+            desc: '使用二维数组表示图的连接关系',
+            complexity: { best: 'O(1)', avg: 'O(1)', worst: 'O(1)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>邻接矩阵</h3>
+                    <p>用二维数组matrix[i][j]表示顶点i到j是否有边，适合稠密图。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">create_matrix</span>(n, edges):</span>',
+                '<span class="code-line">    matrix = [[<span class="code-number">0</span>]*n <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> <span class="code-function">range</span>(n)]</span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> i, j, w <span class="code-keyword">in</span> edges:</span>',
+                '<span class="code-line">        matrix[i][j] = w</span>',
+                '<span class="code-line">        matrix[j][i] = w  <span class="code-comment"># 无向图</span></span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> matrix</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const n = 4;
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `创建 ${n}×${n} 邻接矩阵` });
+                
+                for (let i = 0; i < n; i++) {
+                    steps.push({ type: 'loop-start', indices: [i], array: [...arr], line: 1, message: `行 ${i}` });
+                    for (let j = 0; j < n; j++) {
+                        const weight = (i === j) ? 0 : (arr[i] + arr[j]) % 10;
+                        steps.push({ type: 'visit', indices: [i, j], array: [...arr], line: 2, message: `matrix[${i}][${j}] = ${weight}` });
+                    }
+                }
+                
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: '邻接矩阵构建完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'adj-list',
+            name: '存储结构-邻接表',
+            nameEn: 'Adjacency List',
+            desc: '用链表数组表示图的连接关系',
+            complexity: { best: 'O(1)', avg: 'O(n)', worst: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>邻接表</h3>
+                    <p>对每个顶点建立一个单链表，存储其所有邻接点，适合稀疏图。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">EdgeNode</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, adjvex, weight=<span class="code-number">1</span>):</span>',
+                '<span class="code-line">        self.adjvex = adjvex</span>',
+                '<span class="code-line">        self.weight = weight</span>',
+                '<span class="code-line">        self.next = <span class="code-keyword">None</span></span>',
+                '<span class="code-line"></span>',
+                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">AdjList</span>:</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, n):</span>',
+                '<span class="code-line">        self.vertices = [None]*n</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const n = 5;
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `创建 ${n} 个顶点的邻接表` });
+                
+                for (let i = 0; i < n; i++) {
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `顶点 ${i}: 邻接点 ` + 
+                        (arr.slice(0, i).map((v, idx) => idx).join(', ') || '无') });
+                }
+                
+                steps.push({ type: 'complete', array: [...arr], line: 2, message: '邻接表构建完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'prim',
+            name: 'Prim(普里姆)算法',
+            nameEn: "Prim's Algorithm",
+            desc: '生成最小生成树的贪心算法',
+            complexity: { best: 'O(n²)', avg: 'O(n²)', worst: 'O(n²)', space: 'O(n)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>Prim算法</h3>
+                    <p>从任意顶点开始，每次选择连接已选集合和未选集合的最小边，直到所有顶点都被选中。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">prim</span>(graph, n):</span>',
+                '<span class="code-line">    INF = <span class="code-function">float</span>(<span class="code-string">"inf"</span>)</span>',
+                '<span class="code-line">    lowcost = [INF]*n</span>',
+                '<span class="code-line">    visited = [<span class="code-keyword">False</span>]*n</span>',
+                '<span class="code-line">    lowcost[<span class="code-number">0</span>] = <span class="code-number">0</span></span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> <span class="code-function">range</span>(n):</span>',
+                '<span class="code-line">        k = -<span class="code-number">1</span></span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(n):</span>',
+                '<span class="code-line">            <span class="code-keyword">if</span> <span class="code-keyword">not</span> visited[i] <span class="code-keyword">and</span> (k==-<span class="code-number">1</span> <span class="code-keyword">or</span> lowcost[i]<lowcost[k]):</span>',
+                '<span class="code-line">                k = i</span>',
+                '<span class="code-line">        visited[k] = <span class="code-keyword">True</span></span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> j <span class="code-keyword">in</span> <span class="code-function">range</span>(n):</span>',
+                '<span class="code-line">            <span class="code-keyword">if</span> <span class="code-keyword">not</span> visited[j] <span class="code-keyword">and</span> graph[k][j] < lowcost[j]:</span>',
+                '<span class="code-line">                lowcost[j] = graph[k][j]</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const n = 5;
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `Prim算法, n=${n}` });
+                
+                let visited = [true, false, false, false, false];
+                steps.push({ type: 'visit', indices: [0], array: [...arr], line: 1, message: `选择顶点 0` });
+                
+                for (let i = 1; i < n; i++) {
+                    steps.push({ type: 'loop-start', array: [...arr], line: 2, message: `第 ${i} 步` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `选择最小边` });
+                    visited[i] = true;
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 4, message: `加入顶点 ${i}` });
+                }
+                
+                steps.push({ type: 'complete', array: [...arr], line: 5, message: '最小生成树完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'kruskal',
+            name: 'Kruskal(克鲁斯卡尔)算法',
+            nameEn: "Kruskal's Algorithm",
+            desc: '按边权重排序，贪心选择最小边',
+            complexity: { best: 'O(E log E)', avg: 'O(E log E)', worst: 'O(E log E)', space: 'O(V)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>Kruskal算法</h3>
+                    <p>将所有边按权重排序，依次选择不会形成环的最小边，直到有V-1条边。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">kruskal</span>(edges, n):</span>',
+                '<span class="code-line">    edges.sort(key=<span class="code-keyword">lambda</span> x: x[<span class="code-number">2</span>])</span>',
+                '<span class="code-line">    parent = <span class="code-function">list</span>(<span class="code-function">range</span>(n))</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">find</span>(x):</span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> x <span class="code-keyword">if</span> parent[x]==x <span class="code-keyword">else</span> parent[x]=<span class="code-function">find</span>(parent[x])</span>',
+                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">union</span>(x, y):</span>',
+                '<span class="code-line">        fx, fy = <span class="code-function">find</span>(x), <span class="code-function">find</span>(y)</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> fx != fy:</span>',
+                '<span class="code-line">            parent[fx] = fy</span>',
+                '<span class="code-line">            <span class="code-keyword">return</span> <span class="code-keyword">True</span></span>',
+                '<span class="code-line">        <span class="code-keyword">return</span> <span class="code-keyword">False</span></span>',
+                '<span class="code-line">    mst = []</span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> u, v, w <span class="code-keyword">in</span> edges:</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> <span class="code-function">union</span>(u, v):</span>',
+                '<span class="code-line">            mst.append((u, v, w))</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> mst</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const edges = [[0,1,3],[0,2,5],[1,2,4],[1,3,6],[2,3,2],[2,4,4],[3,4,7]];
+                steps.push({ type: 'init', array: [...arr], line: 0, message: '边按权重排序' });
+                
+                edges.slice(0, 5).forEach((edge, i) => {
+                    steps.push({ type: 'visit', array: [...arr], line: 1, message: `边 ${edge[0]}-${edge[1]}, 权重=${edge[2]}` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `检查是否成环` });
+                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: i < 4 ? '加入MST' : '跳过(成环)' });
+                });
+                
+                steps.push({ type: 'complete', array: [...arr], line: 4, message: '最小生成树完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'dijkstra',
+            name: 'Dijkstra(迪杰斯特拉)算法',
+            nameEn: "Dijkstra's Algorithm",
+            desc: '单源最短路径，适用于非负权重图',
+            complexity: { best: 'O(V²)', avg: 'O(V²)', worst: 'O(V²)', space: 'O(V)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>Dijkstra算法</h3>
+                    <p>从源点开始，每次选择距离最短且未访问的顶点，更新其邻居的距离。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">dijkstra</span>(graph, src, n):</span>',
+                '<span class="code-line">    dist = [<span class="code-function">float</span>(<span class="code-string">"inf"</span>)]*n</span>',
+                '<span class="code-line">    visited = [<span class="code-keyword">False</span>]*n</span>',
+                '<span class="code-line">    dist[src] = <span class="code-number">0</span></span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> <span class="code-function">range</span>(n):</span>',
+                '<span class="code-line">        u = -<span class="code-number">1</span></span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(n):</span>',
+                '<span class="code-line">            <span class="code-keyword">if</span> <span class="code-keyword">not</span> visited[i] <span class="code-keyword">and</span> (u==-<span class="code-number">1</span> <span class="code-keyword">or</span> dist[i]<dist[u]):</span>',
+                '<span class="code-line">                u = i</span>',
+                '<span class="code-line">        visited[u] = <span class="code-keyword">True</span></span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> v <span class="code-keyword">in</span> <span class="code-function">range</span>(n):</span>',
+                '<span class="code-line">            <span class="code-keyword">if</span> <span class="code-keyword">not</span> visited[v] <span class="code-keyword">and</span> graph[u][v] < dist[u] + graph[u][v]:</span>',
+                '<span class="code-line">                dist[v] = dist[u] + graph[u][v]</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const n = 5;
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `从顶点 0 开始` });
+                
+                for (let i = 0; i < n; i++) {
+                    steps.push({ type: 'loop-start', array: [...arr], line: 1, message: `选择最短距离顶点` });
+                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 2, message: `更新邻居距离` });
+                }
+                
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: '最短路径完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'floyd',
+            name: 'Floyd(弗洛伊德)算法',
+            nameEn: 'Floyd-Warshall Algorithm',
+            desc: '多源最短路径，动态规划',
+            complexity: { best: 'O(V³)', avg: 'O(V³)', worst: 'O(V³)', space: 'O(V²)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>Floyd算法</h3>
+                    <p>通过动态规划，逐步尝试通过每个顶点作为中转来缩短路径。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">floyd</span>(graph, n):</span>',
+                '<span class="code-line">    dist = [row[:] <span class="code-keyword">for</span> row <span class="code-keyword">in</span> graph]</span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> k <span class="code-keyword">in</span> <span class="code-function">range</span>(n):</span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> i <span class="code-keyword">in</span> <span class="code-function">range</span>(n):</span>',
+                '<span class="code-line">            <span class="code-keyword">for</span> j <span class="code-keyword">in</span> <span class="code-function">range</span>(n):</span>',
+                '<span class="code-line">                <span class="code-keyword">if</span> dist[i][j] > dist[i][k] + dist[k][j]:</span>',
+                '<span class="code-line">                    dist[i][j] = dist[i][k] + dist[k][j]</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> dist</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const n = 4;
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `Floyd算法, ${n}×${n}` });
+                
+                for (let k = 0; k < n; k++) {
+                    steps.push({ type: 'loop-start', array: [...arr], line: 1, message: `中转点 k=${k}` });
+                    for (let i = 0; i < n; i++) {
+                        for (let j = 0; j < n; j++) {
+                            if (i !== j && i !== k && j !== k) {
+                                steps.push({ type: 'compare', indices: [i, j], array: [...arr], line: 2, message: `dist[${i}][${j}] 经过 k=${k}` });
+                            }
+                        }
+                    }
+                }
+                
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: 'Floyd完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'bellman-ford',
+            name: 'BellmanFord(贝尔曼福特)',
+            nameEn: 'Bellman-Ford Algorithm',
+            desc: '单源最短路径，可处理负权重',
+            complexity: { best: 'O(VE)', avg: 'O(VE)', worst: 'O(VE)', space: 'O(V)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>Bellman-Ford算法</h3>
+                    <p>对所有边进行V-1次松弛操作，可以检测负权环。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">bellman_ford</span>(edges, n, src):</span>',
+                '<span class="code-line">    dist = [<span class="code-function">float</span>(<span class="code-string">"inf"</span>)]*n</span>',
+                '<span class="code-line">    dist[src] = <span class="code-number">0</span></span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> _ <span class="code-keyword">in</span> <span class="code-function">range</span>(n-<span class="code-number">1</span>):</span>',
+                '<span class="code-line">        <span class="code-keyword">for</span> u, v, w <span class="code-keyword">in</span> edges:</span>',
+                '<span class="code-line">            <span class="code-keyword">if</span> dist[u] + w < dist[v]:</span>',
+                '<span class="code-line">                dist[v] = dist[u] + w</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> dist</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const n = 5;
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `Bellman-Ford, ${n} 个顶点` });
+                
+                for (let i = 1; i < n; i++) {
+                    steps.push({ type: 'loop-start', array: [...arr], line: 1, message: `第 ${i} 轮松弛` });
+                    for (let j = 0; j < Math.min(3, n); j++) {
+                        steps.push({ type: 'code-line', array: [...arr], line: 2, message: `检查边 (${j}, ${j+1})` });
+                    }
+                }
+                
+                steps.push({ type: 'complete', array: [...arr], line: 3, message: 'Bellman-Ford完成' });
+                return steps;
+            }
+        },
+        {
+            id: 'critical-path',
+            name: '关键路径',
+            nameEn: 'Critical Path Method',
+            desc: '求AOE网的关键路径和关键活动',
+            complexity: { best: 'O(V+E)', avg: 'O(V+E)', worst: 'O(V+E)', space: 'O(V)' },
+            theory: `
+                <div class="theory-section">
+                    <h3>关键路径</h3>
+                    <p>在AOE网中，从起点到终点的最长路径称为关键路径，其上的活动称为关键活动。</p>
+                </div>
+            `,
+            python: [
+                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">critical_path</span>(n, edges):</span>',
+                '<span class="code-line">    <span class="code-comment"># ve: 最早开始时间, vl: 最迟开始时间</span></span>',
+                '<span class="code-line">    ve = [<span class="code-number">0</span>]*n</span>',
+                '<span class="code-line">    vl = [<span class="code-function">float</span>(<span class="code-string">"inf"</span>)]*n</span>',
+                '<span class="code-line">    vl[n-<span class="code-number">1</span>] = ve[n-<span class="code-number">1</span>]</span>',
+                '<span class="code-line">    <span class="code-comment"># 拓扑排序求ve</span></span>',
+                '<span class="code-line">    <span class="code-comment"># 逆拓扑排序求vl</span></span>',
+                '<span class="code-line">    <span class="code-keyword">for</span> u, v, w <span class="code-keyword">in</span> edges:</span>',
+                '<span class="code-line">        <span class="code-keyword">if</span> ve[u] + w > ve[v]:</span>',
+                '<span class="code-line">            ve[v] = ve[u] + w</span>',
+                '<span class="code-line">    <span class="code-keyword">return</span> [(u,v) <span class="code-keyword">for</span> u,v,w <span class="code-keyword">in</span> edges <span class="code-keyword">if</span> ve[u]==vl[v]-w]</span>'
+            ],
+            generateSteps: (arr) => {
+                const steps = [];
+                const n = 6;
+                steps.push({ type: 'init', array: [...arr], line: 0, message: `AOE网, ${n} 个事件` });
+                
+                steps.push({ type: 'loop-start', array: [...arr], line: 1, message: '拓扑排序' });
+                steps.push({ type: 'code-line', array: [...arr], line: 2, message: '求各事件最早发生时间 ve' });
+                
+                steps.push({ type: 'loop-start', array: [...arr], line: 3, message: '逆拓扑排序' });
+                steps.push({ type: 'code-line', array: [...arr], line: 4, message: '求各事件最迟发生时间 vl' });
+                
+                steps.push({ type: 'code-line', array: [...arr], line: 5, message: '计算各活动最早/最迟开始时间' });
+                steps.push({ type: 'complete', array: [...arr], line: 6, message: '关键路径完成' });
+                return steps;
+            }
         }
     ]
 };
@@ -1803,8 +3897,7 @@ let state = {
 // ===== 初始化 =====
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
-    initCategoryList();
-    initCodePanelTabs();
+    initAlgoTabs();
     initVizControls();
     renderAlgorithmList('sorting');
 });
@@ -1812,7 +3905,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ===== 主题切换 =====
 function initTheme() {
     const toggle = document.getElementById('themeToggle');
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    const savedTheme = localStorage.getItem('theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
     updateThemeIcon(savedTheme);
     toggle.addEventListener('click', () => {
@@ -1828,29 +3921,18 @@ function updateThemeIcon(theme) {
     document.querySelector('.theme-icon').textContent = theme === 'dark' ? '☀️' : '🌙';
 }
 
-// ===== 分类列表 =====
-function initCategoryList() {
-    document.querySelectorAll('.category-item').forEach(item => {
-        item.addEventListener('click', () => {
-            document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
-            item.classList.add('active');
-            const category = item.dataset.category;
+// ===== 顶部算法标签切换 =====
+function initAlgoTabs() {
+    document.querySelectorAll('.algo-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('.algo-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const category = tab.dataset.category;
             state.currentCategory = category;
             state.currentAlgorithm = null;
+            document.getElementById('currentAlgoName').textContent = '选择算法';
             renderAlgorithmList(category);
             showPlaceholder();
-        });
-    });
-}
-
-// ===== 代码面板切换 =====
-function initCodePanelTabs() {
-    document.querySelectorAll('.code-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
         });
     });
 }
@@ -1863,9 +3945,12 @@ function renderAlgorithmList(category) {
     const icons = {
         sorting: '📊',
         searching: '🔍',
-        'linked-list': '🔗',
+        linear: '📋',
+        'stack-queue': '📚',
         tree: '🌳',
-        graph: '🔀'
+        graph: '🔀',
+        array: '🔢',
+        string: '✏️'
     };
     
     list.innerHTML = algos.map(algo => 
@@ -1889,6 +3974,7 @@ function renderAlgorithmList(category) {
 // ===== 选择算法 =====
 function selectAlgorithm(algo) {
     state.currentAlgorithm = algo;
+    state.currentVariant = algo.variants ? algo.variants[0].id : null;
     state.array = generateRandomArray(8);
     state.steps = [];
     state.currentStep = 0;
@@ -1901,30 +3987,82 @@ function selectAlgorithm(algo) {
     
     document.getElementById('currentAlgoName').textContent = algo.name;
     
-    document.getElementById('complexityBadges').innerHTML = 
-        '<div class="complexity-badge avg">' + algo.complexity.avg + '</div>' +
-        '<div class="complexity-badge space">' + algo.complexity.space + '</div>';
-    
-    // 渲染伪代码（支持数组格式）
-    let pseudoHtml = '';
-    if (Array.isArray(algo.pseudocode)) {
-        pseudoHtml = algo.pseudocode.join('\n');
-    } else {
-        pseudoHtml = algo.pseudocode;
-    }
-    document.getElementById('pseudocodeBlock').innerHTML = '<code>' + pseudoHtml + '</code>';
+    // 渲染变体切换Tab
+    renderVariantTabs(algo);
     
     // 渲染Python代码
-    let pythonHtml = '';
-    if (Array.isArray(algo.python)) {
-        pythonHtml = algo.python.join('\n');
-    } else {
-        pythonHtml = algo.python;
-    }
-    document.getElementById('pythonCode').innerHTML = '<code>' + pythonHtml + '</code>';
+    renderPythonCode();
+    
+    // 生成步骤并自动执行到最后
+    generateSteps();
+    state.currentStep = state.steps.length - 1;
     
     updateStepInfo();
     renderVisualization();
+    highlightPythonCode();
+    initProcessList();
+}
+
+// ===== 渲染变体切换Tab =====
+function renderVariantTabs(algo) {
+    const variantTabs = document.getElementById('variantTabs');
+    if (algo.variants && algo.variants.length > 1) {
+        variantTabs.style.display = 'flex';
+        variantTabs.innerHTML = algo.variants.map(v => 
+            `<button class="variant-tab ${v.id === state.currentVariant ? 'active' : ''}" data-variant="${v.id}">${v.name}</button>`
+        ).join('');
+        
+        variantTabs.querySelectorAll('.variant-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                state.currentVariant = tab.dataset.variant;
+                variantTabs.querySelectorAll('.variant-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                // 停止播放
+                state.isPlaying = false;
+                if (state.animationTimer) clearInterval(state.animationTimer);
+                const btn = document.getElementById('btnStart');
+                btn.innerHTML = '<span>▶</span> 开始';
+                btn.classList.remove('primary');
+                // 重置到开始
+                renderPythonCode();
+                generateSteps();
+                state.currentStep = 0;
+                updateStepInfo();
+                renderVisualization();
+                highlightPythonCode();
+            });
+        });
+    } else {
+        variantTabs.style.display = 'none';
+    }
+}
+
+// ===== 渲染Python代码 =====
+function renderPythonCode() {
+    const algo = state.currentAlgorithm;
+    const variantId = state.currentVariant;
+    
+    let pythonCode = algo.python;
+    
+    // 如果有变体且选择了变体，获取变体的代码
+    if (algo.variants && variantId) {
+        const variant = algo.variants.find(v => v.id === variantId);
+        if (variant) {
+            pythonCode = variant.python || algo.python;
+        }
+    }
+    
+    let pythonHtml = '';
+    if (Array.isArray(pythonCode)) {
+        // 为每个代码行添加包装器（包含指示针）
+        pythonHtml = pythonCode.map((line, idx) => {
+            const lineNum = idx + 1;
+            return `<div class="code-line-wrapper" data-line-num="${lineNum}"><span class="line-marker"></span>${line}</div>`;
+        }).join('\n');
+    } else {
+        pythonHtml = pythonCode;
+    }
+    document.querySelector('#codeContent .code-block').innerHTML = '<code>' + pythonHtml + '</code>';
 }
 
 // ===== 生成随机数组 =====
@@ -1932,14 +4070,14 @@ function generateRandomArray(size) {
     return Array.from({ length: size }, () => Math.floor(Math.random() * 80) + 20);
 }
 
-// ===== 伪代码高亮 =====
-function highlightPseudocode() {
-    const codeBlock = document.getElementById('pseudocodeBlock');
+// ===== Python代码高亮 =====
+function highlightPythonCode() {
+    const codeBlock = document.querySelector('#codeContent .code-block');
     if (!codeBlock || !state.currentAlgorithm) return;
     
     // 清除所有高亮
-    codeBlock.querySelectorAll('.code-line').forEach(line => {
-        line.classList.remove('highlight', 'highlight-compare', 'highlight-swap', 'highlight-loop');
+    codeBlock.querySelectorAll('.code-line-wrapper').forEach(wrapper => {
+        wrapper.classList.remove('current', 'highlight-compare', 'highlight-swap', 'highlight-loop');
     });
     
     // 获取当前步骤
@@ -1948,22 +4086,28 @@ function highlightPseudocode() {
     const step = state.steps[state.currentStep];
     if (step.line === undefined && step.line === null) return;
     
-    // 高亮对应行
+    // 高亮对应行（通过包装器）
     const targetLine = step.line;
-    codeBlock.querySelectorAll('.code-line').forEach(line => {
-        const lineNum = parseInt(line.getAttribute('data-line'));
+    codeBlock.querySelectorAll('.code-line-wrapper').forEach(wrapper => {
+        const lineNum = parseInt(wrapper.getAttribute('data-line-num'));
         if (lineNum === targetLine) {
-            line.classList.add('highlight');
+            wrapper.classList.add('current');
             // 根据步骤类型添加额外样式
             if (step.type === 'compare' || step.type === 'check') {
-                line.classList.add('highlight-compare');
+                wrapper.classList.add('highlight-compare');
             } else if (step.type === 'swap' || step.type === 'swap-start') {
-                line.classList.add('highlight-swap');
+                wrapper.classList.add('highlight-swap');
             } else if (step.type === 'loop-start' || step.type === 'loop-end') {
-                line.classList.add('highlight-loop');
+                wrapper.classList.add('highlight-loop');
             }
         }
     });
+    
+    // 滚动到当前行（如果需要）
+    const currentWrapper = codeBlock.querySelector('.code-line-wrapper.current');
+    if (currentWrapper) {
+        currentWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
     
     // 滚动到高亮行
     const highlightedLine = codeBlock.querySelector('.code-line.highlight');
@@ -1975,6 +4119,7 @@ function highlightPseudocode() {
 // ===== 可视化控制 =====
 function initVizControls() {
     document.getElementById('btnStart').addEventListener('click', togglePlay);
+    document.getElementById('btnStepBack').addEventListener('click', stepBackward);
     document.getElementById('btnStep').addEventListener('click', stepForward);
     document.getElementById('btnReset').addEventListener('click', resetAnimation);
     document.getElementById('btnRandom').addEventListener('click', randomize);
@@ -1993,6 +4138,14 @@ function initVizControls() {
 function togglePlay() {
     if (!state.currentAlgorithm) return;
     if (state.steps.length === 0) generateSteps();
+    
+    // 如果已经到最后一步，先重置到开始
+    if (state.currentStep >= state.steps.length - 1) {
+        state.currentStep = 0;
+        renderVisualization();
+        updateStepInfo();
+        highlightPythonCode();
+    }
     
     state.isPlaying = !state.isPlaying;
     const btn = document.getElementById('btnStart');
@@ -2016,7 +4169,7 @@ function playAnimation() {
             state.currentStep++;
             renderVisualization();
             updateStepInfo();
-            highlightPseudocode();
+            highlightPythonCode();
         } else {
             togglePlay();
         }
@@ -2026,12 +4179,18 @@ function playAnimation() {
 function stepForward() {
     if (!state.currentAlgorithm) return;
     if (state.steps.length === 0) generateSteps();
-    if (state.currentStep < state.steps.length - 1) {
-        state.currentStep++;
+    // 如果已经到最后一步，先重置到开始
+    if (state.currentStep >= state.steps.length - 1) {
+        state.currentStep = 0;
         renderVisualization();
         updateStepInfo();
-        highlightPseudocode();
+        highlightPythonCode();
+        return;
     }
+    state.currentStep++;
+    renderVisualization();
+    updateStepInfo();
+    highlightPythonCode();
 }
 
 function stepBackward() {
@@ -2040,7 +4199,7 @@ function stepBackward() {
         state.currentStep--;
         renderVisualization();
         updateStepInfo();
-        highlightPseudocode();
+        highlightPythonCode();
     }
 }
 
@@ -2053,7 +4212,7 @@ function resetAnimation() {
     btn.classList.remove('primary');
     renderVisualization();
     updateStepInfo();
-    highlightPseudocode();
+    highlightPythonCode();
 }
 
 function randomize() {
@@ -2066,9 +4225,11 @@ function randomize() {
     const btn = document.getElementById('btnStart');
     btn.innerHTML = '<span>▶</span> 开始';
     btn.classList.remove('primary');
+    generateSteps();
+    initProcessList();
     renderVisualization();
     updateStepInfo();
-    highlightPseudocode();
+    highlightPythonCode();
 }
 
 function applyCustomInput() {
@@ -2084,9 +4245,11 @@ function applyCustomInput() {
         const btn = document.getElementById('btnStart');
         btn.innerHTML = '<span>▶</span> 开始';
         btn.classList.remove('primary');
+        generateSteps();
+        initProcessList();
         renderVisualization();
         updateStepInfo();
-        highlightPseudocode();
+        highlightPythonCode();
     }
 }
 
@@ -2099,17 +4262,63 @@ function updateSpeed() {
 function updateStepInfo() {
     const info = document.getElementById('stepInfo');
     const progress = document.getElementById('progressFill');
+    const infoValue = document.getElementById('infoValue');
+    const infoI = document.getElementById('infoI');
+    const infoJ = document.getElementById('infoJ');
+    const infoCompare = document.getElementById('infoCompare');
+    const infoSwap = document.getElementById('infoSwap');
+    
     if (state.steps.length > 0) {
-        info.innerHTML = '步骤: <span>' + (state.currentStep + 1) + '</span> / ' + state.steps.length;
+        info.textContent = `${state.currentStep + 1} / ${state.steps.length}`;
         progress.style.width = ((state.currentStep + 1) / state.steps.length * 100) + '%';
         const step = state.steps[state.currentStep];
-        document.getElementById('stepText').textContent = step.message || '执行中...';
+        infoValue.textContent = getStepTypeName(step.type);
+        
+        // 从message中提取i, j等信息
+        const message = step.message || '';
+        infoCompare.textContent = step.type === 'compare' ? '是' : '-';
+        infoSwap.textContent = (step.type === 'swap' || step.type === 'swap-start') ? '是' : '-';
+        
+        // 尝试提取i和j的值
+        const iMatch = message.match(/i\s*=\s*(\d+)/);
+        const jMatch = message.match(/j\s*=\s*(\d+)/);
+        infoI.textContent = iMatch ? iMatch[1] : '-';
+        infoJ.textContent = jMatch ? jMatch[1] : '-';
     } else {
-        info.innerHTML = '步骤: <span>0</span> / 0';
+        info.textContent = '0 / 0';
         progress.style.width = '0%';
-        document.getElementById('stepText').textContent = '--';
+        infoValue.textContent = '--';
+        infoI.textContent = '-';
+        infoJ.textContent = '-';
+        infoCompare.textContent = '-';
+        infoSwap.textContent = '-';
     }
     updateProcessListActive();
+}
+
+function getStepTypeName(type) {
+    const names = {
+        'init': '初始化',
+        'start': '开始',
+        'compare': '比较',
+        'swap': '交换',
+        'swap-start': '准备交换',
+        'visit': '访问',
+        'enqueue': '入队',
+        'dequeue': '出队',
+        'push': '入栈',
+        'pop': '出栈',
+        'loop-start': '循环',
+        'loop-end': '循环结束',
+        'insert': '插入',
+        'shift': '移位',
+        'sorted': '已排序',
+        'found': '找到',
+        'check': '检查',
+        'complete': '完成',
+        'update': '更新'
+    };
+    return names[type] || '执行';
 }
 
 function generateSteps() {
@@ -2152,7 +4361,7 @@ function initProcessList() {
             state.currentStep = index;
             renderVisualization();
             updateStepInfo();
-            highlightPseudocode();
+            highlightPythonCode();
         });
         
         processList.appendChild(item);
@@ -2230,7 +4439,7 @@ function clearProcessList() {
     processList.innerHTML = '<div class="process-empty">选择一个算法查看执行过程</div>';
     renderVisualization();
     updateStepInfo();
-    highlightPseudocode();
+    highlightPythonCode();
 }
 
 // ===== 渲染可视化 =====
@@ -2362,74 +4571,104 @@ function renderTreeVisualization(step) {
         return;
     }
     
-    const positions = [];
-    const levelWidth = 80;
-    const levelHeight = 70;
+    // 使用节点位置映射，更可靠的方式
+    const nodeMap = new Map();  // key: val, value: {x, y, node, hasLeft, hasRight}
+    const levelHeight = 70;  // 层级间距
+    const baseY = 30;
+    const nodeWidth = 50;  // 节点卡片宽度
+    const nodeHeight = 36;  // 节点卡片高度
     
-    function placeNodes(node, level, left, right) {
+    // 第一遍：收集所有节点位置
+    function collectNodes(node, level, left, right) {
         if (!node) return;
         const x = (left + right) / 2;
-        const y = level * levelHeight + 30;
-        positions.push({ x, y, val: node.val, level });
-        if (node.left) placeNodes(node.left, level + 1, left, x);
-        if (node.right) placeNodes(node.right, level + 1, x, right);
-    }
-    
-    placeNodes(tree, 0, 0, 500);
-    
-    function drawEdges(node, left, right) {
-        if (!node) return;
-        const x = (left + right) / 2;
-        const y = positions.find(p => p.val === node.val).y;
+        const y = level * levelHeight + baseY;
         
+        const hasLeft = node.left !== null;
+        const hasRight = node.right !== null;
+        
+        nodeMap.set(node.val, { x, y, node, hasLeft, hasRight, level });
+        
+        collectNodes(node.left, level + 1, left, x);
+        collectNodes(node.right, level + 1, x, right);
+    }
+    
+    collectNodes(tree, 0, 0, 600);
+    
+    // 第二遍：绘制连接线
+    function drawEdges(node) {
+        if (!node) return;
+        
+        const parentInfo = nodeMap.get(node.val);
+        if (!parentInfo) return;
+        
+        // 绘制到子节点的连线
         if (node.left) {
-            const childPos = positions.find(p => p.val === node.left.val);
-            if (childPos) {
-                const edge = document.createElement('div');
-                edge.className = 'tree-edge';
-                const dx = childPos.x - x;
-                const dy = childPos.y - y;
-                const length = Math.sqrt(dx * dx + dy * dy);
-                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-                edge.style.width = length + 'px';
-                edge.style.left = (x + 22) + 'px';
-                edge.style.top = (y + 22) + 'px';
-                edge.style.transform = 'rotate(' + angle + 'deg)';
-                container.appendChild(edge);
+            const childInfo = nodeMap.get(node.left.val);
+            if (childInfo) {
+                drawEdge(parentInfo.x, parentInfo.y, childInfo.x, childInfo.y);
             }
-            drawEdges(node.left, left, x);
+            drawEdges(node.left);
         }
+        
         if (node.right) {
-            const childPos = positions.find(p => p.val === node.right.val);
-            if (childPos) {
-                const edge = document.createElement('div');
-                edge.className = 'tree-edge';
-                const dx = childPos.x - x;
-                const dy = childPos.y - y;
-                const length = Math.sqrt(dx * dx + dy * dy);
-                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-                edge.style.width = length + 'px';
-                edge.style.left = (x + 22) + 'px';
-                edge.style.top = (y + 22) + 'px';
-                edge.style.transform = 'rotate(' + angle + 'deg)';
-                container.appendChild(edge);
+            const childInfo = nodeMap.get(node.right.val);
+            if (childInfo) {
+                drawEdge(parentInfo.x, parentInfo.y, childInfo.x, childInfo.y);
             }
-            drawEdges(node.right, x, right);
+            drawEdges(node.right);
         }
     }
     
-    drawEdges(tree, 0, 500);
+    function drawEdge(x1, y1, x2, y2) {
+        const edge = document.createElement('div');
+        edge.className = 'tree-edge';
+        
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const length = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+        
+        // 调整起点为节点底部中心
+        const startX = x1 + nodeWidth / 2 - 1;
+        const startY = y1 + nodeHeight;
+        
+        edge.style.width = length + 'px';
+        edge.style.left = startX + 'px';
+        edge.style.top = startY + 'px';
+        edge.style.transform = 'rotate(' + angle + 'deg)';
+        edge.style.transformOrigin = '0 0';
+        
+        container.appendChild(edge);
+    }
     
-    positions.forEach(pos => {
-        const node = document.createElement('div');
-        node.className = 'tree-node';
-        if (step.type === 'visit' && step.current === pos.val) {
-            node.classList.add('current');
+    drawEdges(tree);
+    
+    // 第三遍：绘制节点
+    nodeMap.forEach((info, val) => {
+        const nodeEl = document.createElement('div');
+        nodeEl.className = 'tree-node';
+        
+        if (info.level === 0) {
+            nodeEl.classList.add('root');
         }
-        node.style.left = pos.x + 'px';
-        node.style.top = pos.y + 'px';
-        node.textContent = pos.val;
-        container.appendChild(node);
+        
+        // 判断是否为叶子节点
+        if (!info.hasLeft && !info.hasRight && info.level > 0) {
+            nodeEl.classList.add('leaf');
+        }
+        
+        // 高亮状态
+        if (step.type === 'visit' && step.current === val) {
+            nodeEl.classList.add('current');
+        } else if (step.visited && step.visited.includes(val)) {
+            nodeEl.classList.add('visited');
+        }
+        
+        nodeEl.style.left = info.x + 'px';
+        nodeEl.style.top = info.y + 'px';
+        nodeEl.textContent = val;
+        container.appendChild(nodeEl);
     });
     
     canvas.innerHTML = '';
