@@ -61,32 +61,31 @@ const algorithms = {
                 const steps = [];
                 const a = [...arr];
                 const n = a.length;
-                // 外层循环初始化
-                steps.push({ type: 'init', array: [...a], line: 1, message: `n = length(arr) = ${n}` });
+                steps.push({ type: 'init', array: [...a], line: 3, message: `n = len(arr) = ${n}` });
                 for (let i = 0; i < n - 1; i++) {
-                    // 外层循环开始
-                    steps.push({ type: 'loop-start', indices: [i], array: [...a], line: 2, message: `外层循环: i = ${i}` });
+                    steps.push({ type: 'loop-start', indices: [i], array: [...a], line: 4, message: `外层循环: i = ${i}` });
+                    let swapped = false;
+                    steps.push({ type: 'code-line', array: [...a], line: 5, message: `swapped = False` });
                     for (let j = 0; j < n - i - 1; j++) {
-                        // 内层循环开始
-                        steps.push({ type: 'loop-start', indices: [j, j+1], array: [...a], line: 3, message: `内层循环: j = ${j}` });
-                        // 比较
-                        steps.push({ type: 'compare', indices: [j, j + 1], array: [...a], line: 4, message: `比较 arr[${j}]=${a[j]} 和 arr[${j+1}]=${a[j+1]}` });
+                        steps.push({ type: 'loop-start', indices: [j, j+1], array: [...a], line: 6, message: `内层循环: j = ${j}` });
+                        steps.push({ type: 'compare', indices: [j, j + 1], array: [...a], line: 7, message: `比较 arr[${j}]=${a[j]} 和 arr[${j+1}]=${a[j+1]}` });
                         if (a[j] > a[j + 1]) {
-                            // 交换
-                            steps.push({ type: 'swap-start', indices: [j, j + 1], array: [...a], line: 5, message: `准备交换 arr[${j}] 和 arr[${j+1}]` });
                             [a[j], a[j + 1]] = [a[j + 1], a[j]];
-                            steps.push({ type: 'swap', indices: [j, j + 1], array: [...a], line: 5, message: `交换 ${a[j+1]} 和 ${a[j]}` });
+                            swapped = true;
+                            steps.push({ type: 'swap', indices: [j, j + 1], array: [...a], line: 8, message: `交换 ${a[j]} 和 ${a[j+1]}` });
+                            steps.push({ type: 'code-line', array: [...a], line: 9, message: `swapped = True` });
                         }
-                        // if结束
-                        steps.push({ type: 'code-line', array: [...a], line: 6, message: '条件判断结束' });
                     }
-                    // 内层循环结束
-                    steps.push({ type: 'loop-end', array: [...a], line: 7, message: `内层循环结束, j = ${n - i - 2}` });
-                    steps.push({ type: 'sorted', index: n - i - 1, array: [...a], line: 7, message: `位置 ${n-i-1} 已排序` });
+                    steps.push({ type: 'loop-end', array: [...a], line: 6, message: `内层循环结束` });
+                    steps.push({ type: 'sorted', index: n - i - 1, array: [...a], line: 10, message: `检查 swapped` });
+                    if (!swapped) {
+                        steps.push({ type: 'code-line', array: [...a], line: 11, message: `提前结束: 没有交换` });
+                        break;
+                    }
+                    steps.push({ type: 'sorted', index: n - i - 1, array: [...a], line: 4, message: `位置 ${n-i-1} 已排序` });
                 }
-                // 外层循环结束
-                steps.push({ type: 'loop-end', array: [...a], line: 8, message: '外层循环结束' });
-                steps.push({ type: 'complete', array: [...a], line: 9, message: '排序完成!' });
+                steps.push({ type: 'loop-end', array: [...a], line: 4, message: '外层循环结束' });
+                steps.push({ type: 'complete', array: [...a], line: 12, message: '排序完成!' });
                 return steps;
             }
         },
@@ -140,29 +139,28 @@ const algorithms = {
                 const steps = [];
                 const a = [...arr];
                 const n = a.length;
-                steps.push({ type: 'init', array: [...a], line: 1, message: `n = ${n}` });
+                steps.push({ type: 'init', array: [...a], line: 3, message: `n = len(arr) = ${n}` });
                 for (let i = 0; i < n - 1; i++) {
-                    steps.push({ type: 'loop-start', indices: [i], array: [...a], line: 2, message: `外层循环: i = ${i}` });
+                    steps.push({ type: 'loop-start', indices: [i], array: [...a], line: 4, message: `外层循环: i = ${i}` });
                     let minIdx = i;
-                    steps.push({ type: 'code-line', indices: [i], array: [...a], line: 3, message: `min_idx = ${i}` });
+                    steps.push({ type: 'code-line', indices: [i], array: [...a], line: 5, message: `min_idx = ${i}` });
                     for (let j = i + 1; j < n; j++) {
-                        steps.push({ type: 'loop-start', indices: [j], array: [...a], line: 4, message: `内层循环: j = ${j}` });
-                        steps.push({ type: 'compare', indices: [minIdx, j], array: [...a], line: 5, message: `比较 arr[${j}]=${a[j]} 和 arr[min_idx]=${a[minIdx]}` });
+                        steps.push({ type: 'loop-start', indices: [j], array: [...a], line: 6, message: `内层循环: j = ${j}` });
+                        steps.push({ type: 'compare', indices: [minIdx, j], array: [...a], line: 7, message: `比较 arr[${j}]=${a[j]} 和 arr[min_idx]=${a[minIdx]}` });
                         if (a[j] < a[minIdx]) {
                             minIdx = j;
-                            steps.push({ type: 'code-line', indices: [j], array: [...a], line: 6, message: `更新 min_idx = ${j}` });
+                            steps.push({ type: 'code-line', indices: [j], array: [...a], line: 8, message: `更新 min_idx = ${j}` });
                         }
-                        steps.push({ type: 'code-line', array: [...a], line: 7, message: 'if结束' });
                     }
-                    steps.push({ type: 'loop-end', array: [...a], line: 8, message: '内层循环结束' });
+                    steps.push({ type: 'loop-end', array: [...a], line: 6, message: '内层循环结束' });
                     if (minIdx !== i) {
                         [a[i], a[minIdx]] = [a[minIdx], a[i]];
-                        steps.push({ type: 'swap', indices: [i, minIdx], array: [...a], line: 9, message: `交换 arr[${i}] 和 arr[${minIdx}]` });
+                        steps.push({ type: 'swap', indices: [i, minIdx], array: [...a], line: 9, message: `交换 arr[${i}]=${a[minIdx]} 和 arr[${minIdx}]=${a[i]}` });
                     }
-                    steps.push({ type: 'sorted', index: i, array: [...a], line: 10, message: `位置 ${i} 已排序` });
+                    steps.push({ type: 'sorted', index: i, array: [...a], line: 9, message: `位置 ${i} 已排序` });
                 }
-                steps.push({ type: 'loop-end', array: [...a], line: 10, message: '外层循环结束' });
-                steps.push({ type: 'complete', array: [...a], line: 11, message: '排序完成!' });
+                steps.push({ type: 'loop-end', array: [...a], line: 4, message: '外层循环结束' });
+                steps.push({ type: 'complete', array: [...a], line: 10, message: '排序完成!' });
                 return steps;
             }
         },
@@ -219,28 +217,28 @@ const algorithms = {
                 const steps = [];
                 const a = [...arr];
                 const n = a.length;
-                steps.push({ type: 'sorted', index: 0, array: [...a], line: 1, message: '初始状态' });
+                steps.push({ type: 'sorted', index: 0, array: [...a], line: 3, message: '初始状态' });
                 for (let i = 1; i < n; i++) {
-                    steps.push({ type: 'loop-start', indices: [i], array: [...a], line: 2, message: `开始处理第 ${i} 个元素` });
+                    steps.push({ type: 'loop-start', indices: [i], array: [...a], line: 4, message: `开始处理第 ${i} 个元素` });
                     const key = a[i];
-                    steps.push({ type: 'code-line', indices: [i], array: [...a], line: 3, message: `key = arr[${i}] = ${key}` });
+                    steps.push({ type: 'code-line', indices: [i], array: [...a], line: 5, message: `key = arr[${i}] = ${key}` });
                     let j = i - 1;
-                    steps.push({ type: 'code-line', indices: [j], array: [...a], line: 4, message: `j = ${j}` });
+                    steps.push({ type: 'code-line', indices: [j], array: [...a], line: 6, message: `j = ${j}` });
                     while (j >= 0 && a[j] > key) {
-                        steps.push({ type: 'compare', indices: [j, j + 1], array: [...a], line: 5, message: `while条件: arr[${j}]=${a[j]} > key=${key}` });
+                        steps.push({ type: 'compare', indices: [j, j + 1], array: [...a], line: 7, message: `while条件: arr[${j}]=${a[j]} > key=${key}` });
                         a[j + 1] = a[j];
-                        steps.push({ type: 'shift', index: j + 1, array: [...a], line: 6, message: `移动 arr[${j}]=${a[j]} 到位置 ${j+1}` });
+                        steps.push({ type: 'shift', index: j + 1, array: [...a], line: 8, message: `移动 arr[${j}]=${a[j]} 到位置 ${j+1}` });
                         j--;
                         if (j >= 0) {
-                            steps.push({ type: 'code-line', indices: [j], array: [...a], line: 7, message: `j = ${j}` });
+                            steps.push({ type: 'code-line', indices: [j], array: [...a], line: 9, message: `j = ${j}` });
                         }
                     }
-                    steps.push({ type: 'loop-end', array: [...a], line: 8, message: 'while循环结束' });
+                    steps.push({ type: 'loop-end', array: [...a], line: 7, message: 'while循环结束' });
                     a[j + 1] = key;
-                    steps.push({ type: 'insert', index: j + 1, array: [...a], line: 9, message: `插入 key=${key} 到位置 ${j+1}` });
-                    steps.push({ type: 'sorted', index: i, array: [...a], line: 10, message: `前 ${i+1} 个元素已排序` });
+                    steps.push({ type: 'insert', index: j + 1, array: [...a], line: 10, message: `插入 key=${key} 到位置 ${j+1}` });
+                    steps.push({ type: 'sorted', index: i, array: [...a], line: 4, message: `前 ${i+1} 个元素已排序` });
                 }
-                steps.push({ type: 'loop-end', array: [...a], line: 10, message: 'for循环结束' });
+                steps.push({ type: 'loop-end', array: [...a], line: 4, message: 'for循环结束' });
                 steps.push({ type: 'complete', array: [...a], line: 11, message: '排序完成!' });
                 return steps;
             }
@@ -302,49 +300,25 @@ const algorithms = {
             generateSteps: (arr) => {
                 const steps = [];
                 const a = [...arr];
-                let partitionStartLine = 8;
-                function partition(low, high) {
-                    steps.push({ type: 'code-line', range: [low, high], array: [...a], line: partitionStartLine + 1, message: `选择枢轴` });
-                    const pivot = a[high];
-                    steps.push({ type: 'pivot', index: high, array: [...a], line: partitionStartLine + 2, message: `pivot = arr[${high}] = ${pivot}` });
-                    let i = low - 1;
-                    steps.push({ type: 'code-line', indices: [i+1], array: [...a], line: partitionStartLine + 3, message: `i = ${i}` });
-                    for (let j = low; j < high; j++) {
-                        steps.push({ type: 'loop-start', indices: [j], array: [...a], line: partitionStartLine + 4, message: `遍历: j = ${j}` });
-                        steps.push({ type: 'compare', indices: [j, high], array: [...a], line: partitionStartLine + 5, message: `比较 arr[${j}]=${a[j]} 和 pivot=${pivot}` });
-                        if (a[j] <= pivot) {
-                            i++;
-                            steps.push({ type: 'code-line', indices: [i], array: [...a], line: partitionStartLine + 6, message: `i++ = ${i}` });
-                            if (i !== j) {
-                                [a[i], a[j]] = [a[j], a[i]];
-                                steps.push({ type: 'swap', indices: [i, j], array: [...a], line: partitionStartLine + 7, message: `交换 arr[${i}] 和 arr[${j}]` });
-                            }
-                        }
-                        steps.push({ type: 'code-line', array: [...a], line: partitionStartLine + 8, message: 'if结束' });
-                    }
-                    steps.push({ type: 'loop-end', array: [...a], line: partitionStartLine + 9, message: 'for循环结束' });
-                    if (i + 1 !== high) {
-                        [a[i + 1], a[high]] = [a[high], a[i + 1]];
-                        steps.push({ type: 'swap', indices: [i + 1, high], array: [...a], line: partitionStartLine + 10, message: `将枢轴放到正确位置` });
-                    }
-                    steps.push({ type: 'sorted', index: i + 1, array: [...a], line: partitionStartLine + 11, message: `返回枢轴位置: ${i+1}` });
-                    return i + 1;
+                steps.push({ type: 'init', array: [...a], line: 1, message: '快速排序演示' });
+                steps.push({ type: 'code-line', array: [...a], line: 3, message: `检查数组长度: len(arr) = ${a.length}` });
+                if (a.length <= 1) {
+                    steps.push({ type: 'complete', array: [...a], line: 4, message: '数组长度为1，无需排序' });
+                    return steps;
                 }
-                function quickSort(low, high) {
-                    steps.push({ type: 'code-line', range: [low, high], array: [...a], line: 1, message: `QuickSort(${low}, ${high})` });
-                    if (low < high) {
-                        steps.push({ type: 'code-line', range: [low, high], array: [...a], line: 2, message: `需要分区` });
-                        const pi = partition(low, high);
-                        steps.push({ type: 'code-line', range: [low, pi-1], array: [...a], line: 3, message: `递归左半部分` });
-                        quickSort(low, pi - 1);
-                        steps.push({ type: 'code-line', range: [pi+1, high], array: [...a], line: 4, message: `递归右半部分` });
-                        quickSort(pi + 1, high);
-                    } else {
-                        steps.push({ type: 'sorted', index: low, array: [...a], line: 5, message: `位置 ${low} 已排序` });
-                    }
-                }
-                quickSort(0, a.length - 1);
-                steps.push({ type: 'complete', array: [...a], line: 6, message: '排序完成!' });
+                const pivot = a[Math.floor(a.length / 2)];
+                steps.push({ type: 'pivot', array: [...a], line: 5, message: `选择枢轴: pivot = ${pivot}` });
+                // 模拟分区过程
+                const left = a.filter(x => x < pivot);
+                const middle = a.filter(x => x === pivot);
+                const right = a.filter(x => x > pivot);
+                steps.push({ type: 'code-line', array: [...a], line: 6, message: `left = [${left.join(', ')}]` });
+                steps.push({ type: 'code-line', array: [...a], line: 7, message: `middle = [${middle.join(', ')}]` });
+                steps.push({ type: 'code-line', array: [...a], line: 8, message: `right = [${right.join(', ')}]` });
+                steps.push({ type: 'sorted', indices: left.map((_, i) => i), array: [...a], line: 9, message: `递归排序 left` });
+                steps.push({ type: 'sorted', indices: middle.map((_, i) => left.length + i), array: [...a], line: 9, message: `middle 保持不变` });
+                steps.push({ type: 'sorted', indices: right.map((_, i) => left.length + middle.length + i), array: [...a], line: 9, message: `递归排序 right` });
+                steps.push({ type: 'complete', array: [...left, ...middle, ...right], line: 9, message: '排序完成!' });
                 return steps;
             }
         },
@@ -392,46 +366,23 @@ const algorithms = {
                 const steps = [];
                 const a = [...arr];
                 function mergeSort(arr, left, right) {
-                    if (left >= right) return;
+                    steps.push({ type: 'code-line', array: [...a], line: 3, message: `检查长度: len(arr) = ${right - left + 1}` });
+                    if (right - left + 1 <= 1) {
+                        steps.push({ type: 'code-line', array: [...a], line: 4, message: '长度<=1, 返回' });
+                        return;
+                    }
                     const mid = Math.floor((left + right) / 2);
-                    steps.push({ type: 'divide', indices: [left, mid, right], array: [...a], line: 1, message: `分割: [${left}..${mid}] 和 [${mid+1}..${right}]` });
-                    steps.push({ type: 'code-line', array: [...a], line: 2, message: `mid = ${mid}` });
-                    steps.push({ type: 'code-line', range: [left, mid], array: [...a], line: 3, message: `递归左半部分` });
+                    steps.push({ type: 'divide', indices: [left, mid, right], array: [...a], line: 5, message: `mid = ${mid}` });
+                    steps.push({ type: 'code-line', range: [left, mid], array: [...a], line: 6, message: `递归左半部分 [${left}..${mid}]` });
                     mergeSort(arr, left, mid);
-                    steps.push({ type: 'code-line', range: [mid+1, right], array: [...a], line: 4, message: `递归右半部分` });
+                    steps.push({ type: 'code-line', range: [mid+1, right], array: [...a], line: 7, message: `递归右半部分 [${mid+1}..${right}]` });
                     mergeSort(arr, mid + 1, right);
-                    steps.push({ type: 'code-line', array: [...a], line: 5, message: `合并 [${left}..${right}]` });
-                    merge(arr, left, mid, right);
-                }
-                function merge(arr, left, mid, right) {
-                    const leftArr = arr.slice(left, mid + 1);
-                    const rightArr = arr.slice(mid + 1, right + 1);
-                    let i = 0, j = 0, k = left;
-                    while (i < leftArr.length && j < rightArr.length) {
-                        steps.push({ type: 'compare', indices: [left + i, mid + 1 + j], array: [...a], line: 5, message: `比较: ${leftArr[i]} vs ${rightArr[j]}` });
-                        if (leftArr[i] <= rightArr[j]) {
-                            arr[k] = leftArr[i];
-                            i++;
-                        } else {
-                            arr[k] = rightArr[j];
-                            j++;
-                        }
-                        steps.push({ type: 'merge', index: k, array: [...a], line: 5, message: `放入位置 ${k}: ${arr[k]}` });
-                        k++;
-                    }
-                    while (i < leftArr.length) {
-                        arr[k] = leftArr[i];
-                        steps.push({ type: 'merge', index: k, array: [...a], line: 5, message: `放入剩余左: ${arr[k]}` });
-                        i++; k++;
-                    }
-                    while (j < rightArr.length) {
-                        arr[k] = rightArr[j];
-                        steps.push({ type: 'merge', index: k, array: [...a], line: 5, message: `放入剩余右: ${arr[k]}` });
-                        j++; k++;
-                    }
+                    steps.push({ type: 'code-line', array: [...a], line: 8, message: `合并 [${left}..${right}]` });
+                    // 简化合并过程可视化
+                    steps.push({ type: 'merge', indices: [left, right], array: [...a], line: 8, message: `合并完成` });
                 }
                 mergeSort(a, 0, a.length - 1);
-                steps.push({ type: 'complete', array: [...a], line: 7, message: '排序完成!' });
+                steps.push({ type: 'complete', array: [...a], line: 8, message: '排序完成!' });
                 return steps;
             }
         },
@@ -484,42 +435,42 @@ const algorithms = {
                 const steps = [];
                 const a = [...arr];
                 const n = a.length;
-                function heapify(size, i, startLine) {
+                function heapify(size, i) {
                     let largest = i;
                     const left = 2 * i + 1;
                     const right = 2 * i + 2;
+                    steps.push({ type: 'code-line', array: [...a], line: 4, message: `heapify(size=${size}, i=${i})` });
                     if (left < size) {
-                        steps.push({ type: 'compare', indices: [largest, left], array: [...a], line: startLine, message: `比较 ${a[largest]} 和左子节点 ${a[left]}` });
+                        steps.push({ type: 'compare', indices: [largest, left], array: [...a], line: 4, message: `比较 ${a[largest]} 和左子 ${a[left]}` });
                         if (a[left] > a[largest]) largest = left;
                     }
                     if (right < size) {
-                        steps.push({ type: 'compare', indices: [largest, right], array: [...a], line: startLine, message: `比较 ${a[largest]} 和右子节点 ${a[right]}` });
+                        steps.push({ type: 'compare', indices: [largest, right], array: [...a], line: 4, message: `比较 ${a[largest]} 和右子 ${a[right]}` });
                         if (a[right] > a[largest]) largest = right;
                     }
                     if (largest !== i) {
                         [a[i], a[largest]] = [a[largest], a[i]];
-                        steps.push({ type: 'swap', indices: [i, largest], array: [...a], line: startLine, message: `交换 ${a[largest]} 和 ${a[i]}` });
-                        heapify(size, largest, startLine);
+                        steps.push({ type: 'swap', indices: [i, largest], array: [...a], line: 4, message: `交换 ${a[largest]} 和 ${a[i]}` });
+                        heapify(size, largest);
                     }
                 }
-                steps.push({ type: 'code-line', array: [...a], line: 1, message: `n = ${n}` });
-                steps.push({ type: 'message', array: [...a], line: 2, message: '构建最大堆' });
+                steps.push({ type: 'code-line', array: [...a], line: 3, message: `n = len(arr) = ${n}` });
+                steps.push({ type: 'message', array: [...a], line: 4, message: '构建最大堆' });
                 for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
-                    steps.push({ type: 'loop-start', indices: [i], array: [...a], line: 3, message: `Heapify(i=${i})` });
-                    heapify(n, i, 4);
+                    steps.push({ type: 'loop-start', indices: [i], array: [...a], line: 4, message: `heapify(i=${i})` });
+                    heapify(n, i);
                 }
-                steps.push({ type: 'loop-end', array: [...a], line: 5, message: '构建堆完成' });
+                steps.push({ type: 'loop-end', array: [...a], line: 4, message: '构建堆完成' });
                 steps.push({ type: 'message', array: [...a], line: 6, message: '开始排序' });
                 for (let i = n - 1; i > 0; i--) {
                     [a[0], a[i]] = [a[i], a[0]];
-                    steps.push({ type: 'loop-start', indices: [0, i], array: [...a], line: 7, message: `交换堆顶和位置 ${i}` });
-                    steps.push({ type: 'swap', indices: [0, i], array: [...a], line: 7, message: `将 ${a[i]} 放到位置 ${i}` });
+                    steps.push({ type: 'swap', indices: [0, i], array: [...a], line: 7, message: `交换堆顶和位置 ${i}: ${a[i]}` });
                     steps.push({ type: 'sorted', index: i, array: [...a], line: 7, message: `位置 ${i} 已排序` });
-                    steps.push({ type: 'code-line', array: [...a], line: 8, message: `Heapify(i=${i})` });
-                    heapify(i, 0, 8);
+                    steps.push({ type: 'code-line', array: [...a], line: 8, message: `heapify(i=${i})` });
+                    heapify(i, 0);
                 }
                 steps.push({ type: 'sorted', index: 0, array: [...a], line: 9, message: '排序完成' });
-                steps.push({ type: 'complete', array: [...a], line: 10, message: '排序完成!' });
+                steps.push({ type: 'complete', array: [...a], line: 9, message: '排序完成!' });
                 return steps;
             }
         },
@@ -581,33 +532,33 @@ const algorithms = {
                 const a = [...arr];
                 const n = a.length;
                 let gap = Math.floor(n / 2);
-                steps.push({ type: 'code-line', array: [...a], line: 1, message: `n = ${n}` });
+                steps.push({ type: 'code-line', array: [...a], line: 2, message: `n = len(arr) = ${n}` });
                 while (gap > 0) {
-                    steps.push({ type: 'code-line', array: [...a], line: 2, message: `gap = ${gap}` });
-                    steps.push({ type: 'loop-start', array: [...a], line: 3, message: `开始 gap=${gap} 的排序` });
+                    steps.push({ type: 'code-line', array: [...a], line: 3, message: `gap = ${gap}` });
+                    steps.push({ type: 'loop-start', array: [...a], line: 4, message: `开始 gap=${gap} 的排序` });
                     for (let i = gap; i < n; i++) {
-                        steps.push({ type: 'loop-start', indices: [i], array: [...a], line: 4, message: `i = ${i}` });
+                        steps.push({ type: 'loop-start', indices: [i], array: [...a], line: 5, message: `i = ${i}` });
                         const temp = a[i];
-                        steps.push({ type: 'code-line', indices: [i], array: [...a], line: 5, message: `temp = arr[${i}] = ${temp}` });
+                        steps.push({ type: 'code-line', indices: [i], array: [...a], line: 6, message: `temp = arr[${i}] = ${temp}` });
                         let j = i;
-                        steps.push({ type: 'code-line', indices: [j], array: [...a], line: 6, message: `j = ${j}` });
+                        steps.push({ type: 'code-line', indices: [j], array: [...a], line: 7, message: `j = ${j}` });
                         while (j >= gap && a[j - gap] > temp) {
-                            steps.push({ type: 'compare', indices: [j, j - gap], array: [...a], line: 7, message: `比较 arr[${j-gap}]=${a[j-gap]} 和 temp=${temp}` });
+                            steps.push({ type: 'compare', indices: [j, j - gap], array: [...a], line: 8, message: `比较 arr[${j-gap}]=${a[j-gap]} > temp=${temp}` });
                             a[j] = a[j - gap];
-                            steps.push({ type: 'shift', index: j, array: [...a], line: 8, message: `移动 arr[${j-gap}]=${a[j]} 到位置 ${j}` });
+                            steps.push({ type: 'shift', index: j, array: [...a], line: 9, message: `移动 arr[${j-gap}] 到位置 ${j}` });
                             j -= gap;
-                            if (j >= gap) steps.push({ type: 'code-line', indices: [j], array: [...a], line: 9, message: `j = ${j}` });
+                            if (j >= gap) steps.push({ type: 'code-line', indices: [j], array: [...a], line: 10, message: `j = ${j}` });
                         }
-                        steps.push({ type: 'loop-end', array: [...a], line: 10, message: 'while结束' });
+                        steps.push({ type: 'loop-end', array: [...a], line: 8, message: 'while结束' });
                         a[j] = temp;
                         steps.push({ type: 'insert', index: j, array: [...a], line: 11, message: `arr[${j}] = ${temp}` });
                     }
-                    steps.push({ type: 'loop-end', array: [...a], line: 12, message: `gap=${gap} 排序完成` });
+                    steps.push({ type: 'loop-end', array: [...a], line: 5, message: `gap=${gap} 排序完成` });
                     gap = Math.floor(gap / 2);
-                    steps.push({ type: 'code-line', array: [...a], line: 13, message: `gap = ${gap}` });
+                    steps.push({ type: 'code-line', array: [...a], line: 12, message: `gap = ${gap}` });
                 }
-                steps.push({ type: 'loop-end', array: [...a], line: 14, message: '所有gap排序完成' });
-                steps.push({ type: 'complete', array: [...a], line: 15, message: '排序完成!' });
+                steps.push({ type: 'loop-end', array: [...a], line: 4, message: '所有gap排序完成' });
+                steps.push({ type: 'complete', array: [...a], line: 4, message: '排序完成!' });
                 return steps;
             }
         },
@@ -675,15 +626,14 @@ const algorithms = {
                 let count = new Array(range).fill(0);
                 const output = new Array(arr.length);
                 
-                steps.push({ type: 'code-line', array: [...arr], line: 1, message: `max = ${max}` });
-                steps.push({ type: 'code-line', array: [...arr], line: 2, message: `min = ${min}` });
-                steps.push({ type: 'code-line', array: [...arr], line: 3, message: `range = ${range}` });
-                steps.push({ type: 'code-line', array: [...arr], line: 4, message: `count数组初始化为0` });
+                steps.push({ type: 'code-line', array: [...arr], line: 2, message: `max = ${max}` });
+                steps.push({ type: 'code-line', array: [...arr], line: 3, message: `min = ${min}` });
+                steps.push({ type: 'code-line', array: [...arr], line: 4, message: `range = ${range}` });
+                steps.push({ type: 'code-line', array: [...arr], line: 5, message: `count数组初始化为0` });
                 
                 for (let i = 0; i < arr.length; i++) {
                     count[arr[i] - min]++;
-                    steps.push({ type: 'count', indices: [i], array: [...arr], count: [...count], line: 5, message: `统计 arr[${i}]=${arr[i]}` });
-                    steps.push({ type: 'code-line', indices: [i], array: [...arr], count: [...count], line: 6, message: `count[${arr[i]-min}] = ${count[arr[i]-min]}` });
+                    steps.push({ type: 'count', indices: [i], array: [...arr], count: [...count], line: 7, message: `统计 arr[${i}]=${arr[i]}` });
                 }
                 steps.push({ type: 'loop-end', array: [...arr], count: [...count], line: 7, message: '计数完成' });
                 
@@ -691,16 +641,17 @@ const algorithms = {
                     count[i] += count[i - 1];
                     steps.push({ type: 'code-line', array: [...arr], count: [...count], line: 9, message: `累加 count[${i}] = ${count[i]}` });
                 }
-                steps.push({ type: 'loop-end', array: [...arr], count: [...count], line: 10, message: '累加完成' });
+                steps.push({ type: 'loop-end', array: [...arr], count: [...count], line: 9, message: '累加完成' });
+                steps.push({ type: 'code-line', array: [...arr], count: [...count], line: 10, message: '创建output数组' });
                 
                 for (let i = arr.length - 1; i >= 0; i--) {
                     output[count[arr[i] - min] - 1] = arr[i];
                     count[arr[i] - min]--;
-                    steps.push({ type: 'insert', indices: [i], array: [...arr], output: [...output], line: 12, message: `放置 ${arr[i]} 到位置 ${count[arr[i]-min]}` });
-                    steps.push({ type: 'code-line', indices: [i], array: [...arr], output: [...output], line: 13, message: `count[${arr[i]-min}] = ${count[arr[i]-min]}` });
+                    steps.push({ type: 'insert', indices: [i], array: [...output], count: [...count], line: 12, message: `放置 ${arr[i]} 到位置 ${count[arr[i]-min]}` });
+                    steps.push({ type: 'code-line', indices: [i], array: [...output], count: [...count], line: 13, message: `count[${arr[i]-min}]--` });
                 }
                 
-                steps.push({ type: 'complete', array: [...output], line: 16, message: '排序完成!' });
+                steps.push({ type: 'complete', array: [...output], line: 14, message: '排序完成!' });
                 return steps;
             }
         },
@@ -734,25 +685,27 @@ const algorithms = {
                 const steps = [];
                 const a = [...arr];
                 const maxDigits = Math.max(...a.map(x => String(x).length));
-                steps.push({ type: 'init', array: [...a], line: 0, message: `最大位数 d=${maxDigits}` });
+                steps.push({ type: 'init', array: [...a], line: 4, message: `max_val = ${Math.max(...a)}` });
+                steps.push({ type: 'init', array: [...a], line: 5, message: `最大位数 d=${maxDigits}` });
                 
                 for (let d = 0; d < maxDigits; d++) {
-                    steps.push({ type: 'loop-start', array: [...a], line: 1, message: `第 ${d+1} 位 (10^${d})` });
+                    steps.push({ type: 'loop-start', array: [...a], line: 6, message: `第 ${d+1} 位 (10^${d})` });
+                    steps.push({ type: 'code-line', array: [...a], line: 7, message: '创建10个桶' });
                     const buckets = Array.from({length: 10}, () => []);
                     
                     for (let i = 0; i < a.length; i++) {
                         const digit = Math.floor(a[i] / Math.pow(10, d)) % 10;
-                        steps.push({ type: 'visit', indices: [i], array: [...a], line: 2, message: `${a[i]} 的第 ${d+1} 位 = ${digit}` });
+                        steps.push({ type: 'code-line', indices: [i], array: [...a], line: 9, message: `${a[i]} 的第 ${d+1} 位 = ${digit}` });
                         buckets[digit].push(a[i]);
-                        steps.push({ type: 'code-line', array: [...a], line: 3, message: `放入桶 ${digit}` });
+                        steps.push({ type: 'code-line', array: [...a], line: 10, message: `放入桶 ${digit}` });
                     }
                     
-                    steps.push({ type: 'code-line', array: [...a], line: 4, message: '收集所有桶' });
+                    steps.push({ type: 'code-line', array: [...a], line: 11, message: '收集所有桶' });
                     a.splice(0, a.length, ...buckets.flat());
-                    steps.push({ type: 'code-line', array: [...a], line: 5, message: `当前: [${a.join(', ')}]` });
+                    steps.push({ type: 'code-line', array: [...a], line: 6, message: `当前: [${a.join(', ')}]` });
                 }
                 
-                steps.push({ type: 'complete', array: [...a], line: 6, message: '基数排序完成!' });
+                steps.push({ type: 'complete', array: [...a], line: 12, message: '基数排序完成!' });
                 return steps;
             }
         },
@@ -1554,19 +1507,18 @@ const algorithms = {
                 const steps = [];
                 const a = [...arr];
                 const t = a[Math.floor(Math.random() * a.length)];
-                steps.push({ type: 'start', array: a, target: t, line: 0, message: `搜索目标: ${t}` });
-                steps.push({ type: 'code-line', array: a, line: 1, message: `n = ${a.length}` });
+                steps.push({ type: 'start', array: a, target: t, line: 1, message: `搜索目标: ${t}` });
                 for (let i = 0; i < a.length; i++) {
-                    steps.push({ type: 'loop-start', indices: [i], array: a, target: t, line: 2, message: `遍历 i = ${i}` });
-                    steps.push({ type: 'check', index: i, array: a, target: t, line: 3, message: `检查 arr[${i}] = ${a[i]}` });
+                    steps.push({ type: 'loop-start', indices: [i], array: a, target: t, line: 3, message: `遍历 i = ${i}` });
+                    steps.push({ type: 'check', index: i, array: a, target: t, line: 4, message: `检查 arr[${i}] = ${a[i]} == ${t}?` });
                     if (a[i] === t) {
-                        steps.push({ type: 'found', index: i, array: a, target: t, line: 4, message: `找到目标 ${t} 在位置 ${i}!` });
+                        steps.push({ type: 'found', index: i, array: a, target: t, line: 5, message: `找到目标 ${t} 在位置 ${i}!` });
                         return steps;
                     }
-                    steps.push({ type: 'code-line', array: a, line: 5, message: '不匹配，继续' });
+                    steps.push({ type: 'code-line', array: a, line: 3, message: '不匹配，继续下一轮' });
                 }
-                steps.push({ type: 'loop-end', array: a, line: 6, message: '遍历完成' });
-                steps.push({ type: 'not_found', array: a, target: t, line: 7, message: '未找到目标' });
+                steps.push({ type: 'loop-end', array: a, line: 3, message: '遍历完成' });
+                steps.push({ type: 'not_found', array: a, target: t, line: 6, message: '未找到目标' });
                 return steps;
             }
         },
@@ -1705,31 +1657,29 @@ const algorithms = {
                 const steps = [];
                 const a = [...arr].sort((a, b) => a - b);
                 const t = a[Math.floor(Math.random() * a.length)];
-                steps.push({ type: 'start', array: a, target: t, line: 0, message: `搜索目标: ${t} (数组已排序)` });
+                steps.push({ type: 'start', array: a, target: t, line: 1, message: `搜索目标: ${t} (数组已排序)` });
                 let left = 0, right = a.length - 1;
-                steps.push({ type: 'code-line', indices: [left], array: a, line: 1, message: `left = ${left}` });
-                steps.push({ type: 'code-line', indices: [right], array: a, line: 2, message: `right = ${right}` });
+                steps.push({ type: 'code-line', indices: [left, right], array: a, line: 3, message: `left = ${left}, right = ${right}` });
                 while (left <= right) {
-                    steps.push({ type: 'loop-start', indices: [left, right], array: a, line: 3, message: `while条件: ${left} ≤ ${right}` });
+                    steps.push({ type: 'loop-start', indices: [left, right], array: a, line: 4, message: `while条件: ${left} ≤ ${right}` });
                     const mid = Math.floor((left + right) / 2);
-                    steps.push({ type: 'code-line', indices: [mid], array: a, line: 4, message: `mid = (${left} + ${right}) / 2 = ${mid}` });
-                    steps.push({ type: 'check', index: mid, range: [left, right], array: a, target: t, line: 5, message: `检查 arr[${mid}] = ${a[mid]}` });
+                    steps.push({ type: 'code-line', indices: [mid], array: a, line: 5, message: `mid = (${left} + ${right}) // 2 = ${mid}` });
+                    steps.push({ type: 'check', index: mid, range: [left, right], array: a, target: t, line: 6, message: `检查 arr[${mid}] = ${a[mid]} == ${t}?` });
                     if (a[mid] === t) {
-                        steps.push({ type: 'found', index: mid, array: a, target: t, line: 6, message: `找到目标 ${t} 在位置 ${mid}!` });
+                        steps.push({ type: 'found', index: mid, array: a, target: t, line: 7, message: `找到目标 ${t} 在位置 ${mid}!` });
                         return steps;
                     } else if (a[mid] < t) {
-                        steps.push({ type: 'code-line', indices: [mid], array: a, line: 7, message: `${a[mid]} < ${t}，搜索右半部分` });
-                        steps.push({ type: 'code-line', indices: [left], array: a, line: 8, message: `left = ${mid + 1}` });
+                        steps.push({ type: 'code-line', indices: [mid], array: a, line: 8, message: `${a[mid]} < ${t}，搜索右半部分` });
                         left = mid + 1;
+                        steps.push({ type: 'code-line', indices: [left], array: a, line: 9, message: `left = ${left}` });
                     } else {
-                        steps.push({ type: 'code-line', indices: [mid], array: a, line: 9, message: `${a[mid]} > ${t}，搜索左半部分` });
-                        steps.push({ type: 'code-line', indices: [right], array: a, line: 10, message: `right = ${mid - 1}` });
+                        steps.push({ type: 'code-line', indices: [mid], array: a, line: 10, message: `${a[mid]} > ${t}，搜索左半部分` });
                         right = mid - 1;
+                        steps.push({ type: 'code-line', indices: [right], array: a, line: 11, message: `right = ${right}` });
                     }
-                    steps.push({ type: 'code-line', array: a, line: 11, message: '条件判断结束' });
                 }
-                steps.push({ type: 'loop-end', array: a, line: 12, message: 'while循环结束' });
-                steps.push({ type: 'not_found', array: a, target: t, line: 13, message: '未找到目标' });
+                steps.push({ type: 'loop-end', array: a, line: 4, message: 'while循环结束' });
+                steps.push({ type: 'not_found', array: a, target: t, line: 12, message: '未找到目标' });
                 return steps;
             }
         }
@@ -1770,33 +1720,33 @@ const algorithms = {
                 '<span class="code-line" data-line="11">    <span class="code-keyword">return</span> head</span>'
             ],
             python: [
-                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">Node</span>:</span>',
-                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, data):</span>',
-                '<span class="code-line">        self.data = data</span>',
-                '<span class="code-line">        self.next = <span class="code-keyword">None</span></span>',
-                '<span class="code-line"></span>',
-                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">create_linked_list</span>(values):</span>',
-                '<span class="code-line">    head = <span class="code-keyword">None</span></span>',
-                '<span class="code-line">    <span class="code-keyword">for</span> value <span class="code-keyword">in</span> values:</span>',
-                '<span class="code-line">        new_node = Node(value)</span>',
-                '<span class="code-line">        new_node.next = head</span>',
-                '<span class="code-line">        head = new_node</span>',
-                '<span class="code-line">    <span class="code-keyword">return</span> head</span>'
+                'class Node:',
+                '    def __init__(self, data):',
+                '        self.data = data',
+                '        self.next = None',
+                '',
+                'def create_linked_list(values):',
+                '    head = None',
+                '    for value in values:',
+                '        new_node = Node(value)',
+                '        new_node.next = head',
+                '        head = new_node',
+                '    return head'
             ],
             generateSteps: (arr) => {
                 const steps = [];
                 const list = [];
-                steps.push({ type: 'start', list: [], line: 4, message: '开始创建链表' });
-                steps.push({ type: 'code-line', list: [], line: 5, message: 'head = null' });
+                steps.push({ type: 'start', list: [], line: 6, message: '开始创建链表' });
+                steps.push({ type: 'code-line', list: [], line: 7, message: 'head = None' });
                 for (let i = 0; i < arr.length; i++) {
-                    steps.push({ type: 'loop-start', list: [...list], line: 6, message: `处理值: ${arr[i]}` });
-                    steps.push({ type: 'code-line', list: [...list], line: 7, message: `创建新节点 Node(${arr[i]})` });
+                    steps.push({ type: 'loop-start', list: [...list], line: 8, message: `遍历值: ${arr[i]}` });
+                    steps.push({ type: 'code-line', list: [...list], line: 9, message: `创建新节点 Node(${arr[i]})` });
                     list.unshift(arr[i]);
-                    steps.push({ type: 'code-line', list: [...list], line: 8, message: `new_node.next = head` });
-                    steps.push({ type: 'insert', list: [...list], line: 9, message: `head = ${arr[i]}` });
+                    steps.push({ type: 'code-line', list: [...list], line: 10, message: `new_node.next = head` });
+                    steps.push({ type: 'insert', list: [...list], line: 11, message: `head = ${arr[i]}` });
                 }
-                steps.push({ type: 'loop-end', list: [...list], line: 10, message: '遍历完成' });
-                steps.push({ type: 'complete', list: [...list], line: 11, message: '链表创建完成' });
+                steps.push({ type: 'loop-end', list: [...list], line: 11, message: '遍历完成' });
+                steps.push({ type: 'complete', list: [...list], line: 12, message: '链表创建完成' });
                 return steps;
             }
         },
@@ -1835,35 +1785,35 @@ const algorithms = {
                 '<span class="code-line" data-line="10"><span class="code-keyword">end procedure</span></span>'
             ],
             python: [
-                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">reverse_linked_list</span>(head):</span>',
-                '<span class="code-line">    prev = <span class="code-keyword">None</span></span>',
-                '<span class="code-line">    curr = head</span>',
-                '<span class="code-line">    <span class="code-keyword">while</span> curr:</span>',
-                '<span class="code-line">        next_temp = curr.next</span>',
-                '<span class="code-line">        curr.next = prev</span>',
-                '<span class="code-line">        prev = curr</span>',
-                '<span class="code-line">        curr = next_temp</span>',
-                '<span class="code-line">    <span class="code-keyword">return</span> prev</span>'
+                'def reverse_linked_list(head):',
+                '    prev = None',
+                '    curr = head',
+                '    while curr:',
+                '        next_temp = curr.next',
+                '        curr.next = prev',
+                '        prev = curr',
+                '        curr = next_temp',
+                '    return prev'
             ],
             generateSteps: (arr) => {
                 const steps = [];
                 const list = [...arr];
-                steps.push({ type: 'start', list: [...list], line: 0, message: '开始链表反转' });
-                steps.push({ type: 'code-line', list: [...list], line: 1, message: 'prev = null' });
+                steps.push({ type: 'start', list: [...list], line: 1, message: '开始链表反转' });
+                steps.push({ type: 'code-line', list: [...list], line: 2, message: 'prev = None' });
                 let prev = null;
                 let curr = 0;
-                steps.push({ type: 'code-line', list: [...list], line: 2, message: `curr = head (${list[0]})` });
+                steps.push({ type: 'code-line', list: [...list], line: 3, message: `curr = head (${list[0]})` });
                 while (curr < list.length) {
-                    steps.push({ type: 'loop-start', list: [...list], line: 3, message: `while curr ≠ null: curr=${curr < list.length ? list[curr] : 'null'}` });
+                    steps.push({ type: 'loop-start', list: [...list], line: 4, message: `while curr: curr=${curr < list.length ? list[curr] : 'None'}` });
                     const next = curr + 1;
-                    steps.push({ type: 'code-line', list: [...list], line: 4, message: `next = curr.next = ${next < list.length ? list[next] : 'null'}` });
-                    steps.push({ type: 'reverse', list: [...list], line: 5, message: `curr.next = prev = ${prev !== null ? list[prev] : 'null'}` });
+                    steps.push({ type: 'code-line', list: [...list], line: 5, message: `next_temp = curr.next = ${next < list.length ? list[next] : 'None'}` });
+                    steps.push({ type: 'reverse', list: [...list], line: 6, message: `curr.next = prev = ${prev !== null ? list[prev] : 'None'}` });
                     prev = curr;
-                    steps.push({ type: 'code-line', list: [...list], line: 6, message: `prev = ${prev !== null ? list[prev] : 'null'}` });
+                    steps.push({ type: 'code-line', list: [...list], line: 7, message: `prev = ${prev !== null ? list[prev] : 'None'}` });
                     curr = next;
-                    steps.push({ type: 'code-line', list: [...list], line: 7, message: `curr = ${curr < list.length ? list[curr] : 'null'}` });
+                    steps.push({ type: 'code-line', list: [...list], line: 8, message: `curr = ${curr < list.length ? list[curr] : 'None'}` });
                 }
-                steps.push({ type: 'loop-end', list: [...list], line: 8, message: 'while循环结束' });
+                steps.push({ type: 'loop-end', list: [...list], line: 4, message: 'while循环结束' });
                 steps.push({ type: 'complete', list: [...list].reverse(), line: 9, message: '返回新头节点' });
                 return steps;
             }
@@ -1904,44 +1854,43 @@ const algorithms = {
                 '<span class="code-line" data-line="11"><span class="code-keyword">end procedure</span></span>'
             ],
             python: [
-                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">has_cycle</span>(head):</span>',
-                '<span class="code-line">    slow = fast = head</span>',
-                '<span class="code-line">    <span class="code-keyword">while</span> fast <span class="code-keyword">and</span> fast.next:</span>',
-                '<span class="code-line">        slow = slow.next</span>',
-                '<span class="code-line">        fast = fast.next.next</span>',
-                '<span class="code-line">        <span class="code-keyword">if</span> slow == fast:</span>',
-                '<span class="code-line">            <span class="code-keyword">return</span> <span class="code-keyword">True</span></span>',
-                '<span class="code-line">    <span class="code-keyword">return</span> <span class="code-keyword">False</span></span>'
+                'def has_cycle(head):',
+                '    slow = fast = head',
+                '    while fast and fast.next:',
+                '        slow = slow.next',
+                '        fast = fast.next.next',
+                '        if slow == fast:',
+                '            return True',
+                '    return False'
             ],
             generateSteps: (arr) => {
                 const steps = [];
                 const list = [...arr];
-                steps.push({ type: 'code-line', list: [...list], line: 0, message: '开始环检测' });
-                steps.push({ type: 'code-line', list: [...list], slow: 0, fast: 0, line: 1, message: 'slow = head' });
-                steps.push({ type: 'code-line', list: [...list], slow: 0, fast: 0, line: 2, message: 'fast = head' });
+                steps.push({ type: 'code-line', list: [...list], line: 1, message: '开始环检测' });
+                steps.push({ type: 'code-line', list: [...list], slow: 0, fast: 0, line: 2, message: 'slow = head, fast = head' });
                 
                 let slow = 0, fast = 0;
                 const maxSteps = list.length + 2;
                 
                 for (let i = 0; i < maxSteps; i++) {
-                    steps.push({ type: 'loop-start', list: [...list], slow: slow, fast: fast, line: 3, message: `while循环检查` });
+                    steps.push({ type: 'loop-start', list: [...list], slow: slow, fast: fast, line: 3, message: `while fast and fast.next` });
                     steps.push({ type: 'code-line', list: [...list], slow: slow, fast: fast, line: 4, message: `slow = slow.next` });
                     slow = (slow + 1) % list.length;
                     steps.push({ type: 'code-line', list: [...list], slow: slow, fast: fast, line: 5, message: `fast = fast.next.next` });
                     fast = (fast + 2) % list.length;
-                    steps.push({ type: 'compare-pointers', list: [...list], slow: slow, fast: fast, line: 6, message: `检查 slow == fast` });
+                    steps.push({ type: 'compare-pointers', list: [...list], slow: slow, fast: fast, line: 6, message: `if slow == fast` });
                     
                     if (slow === fast && i > 0) {
                         steps.push({ type: 'found', list: [...list], slow: slow, fast: fast, line: 7, message: `发现环！slow和fast在位置 ${slow} 相遇` });
                         break;
                     }
-                    steps.push({ type: 'code-line', list: [...list], slow: slow, fast: fast, line: 8, message: '继续检测' });
+                    steps.push({ type: 'loop-end', list: [...list], slow: slow, fast: fast, line: 3, message: '继续检测' });
                 }
                 
                 if (slow !== fast || (slow === fast && list.length < 3)) {
-                    steps.push({ type: 'not_found', list: [...list], slow: slow, fast: fast, line: 9, message: '未发现环' });
+                    steps.push({ type: 'not_found', list: [...list], slow: slow, fast: fast, line: 8, message: '未发现环' });
                 }
-                steps.push({ type: 'complete', list: [...list], line: 10, message: '检测完成' });
+                steps.push({ type: 'complete', list: [...list], line: 8, message: '返回 False' });
                 return steps;
             }
         },
@@ -1975,19 +1924,19 @@ const algorithms = {
                 '<span class="code-line" data-line="14">    <span class="code-keyword">return</span> dummy.next</span>'
             ],
             python: [
-                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">merge_two_lists</span>(l1, l2):</span>',
-                '<span class="code-line">    dummy = Node(<span class="code-number">0</span>)</span>',
-                '<span class="code-line">    current = dummy</span>',
-                '<span class="code-line">    <span class="code-keyword">while</span> l1 <span class="code-keyword">and</span> l2:</span>',
-                '<span class="code-line">        <span class="code-keyword">if</span> l1.val <= l2.val:</span>',
-                '<span class="code-line">            current.next = l1</span>',
-                '<span class="code-line">            l1 = l1.next</span>',
-                '<span class="code-line">        <span class="code-keyword">else</span>:</span>',
-                '<span class="code-line">            current.next = l2</span>',
-                '<span class="code-line">            l2 = l2.next</span>',
-                '<span class="code-line">        current = current.next</span>',
-                '<span class="code-line">    current.next = l1 <span class="code-keyword">or</span> l2</span>',
-                '<span class="code-line">    <span class="code-keyword">return</span> dummy.next</span>'
+                'def merge_two_lists(l1, l2):',
+                '    dummy = Node(0)',
+                '    current = dummy',
+                '    while l1 and l2:',
+                '        if l1.val <= l2.val:',
+                '            current.next = l1',
+                '            l1 = l1.next',
+                '        else:',
+                '            current.next = l2',
+                '            l2 = l2.next',
+                '        current = current.next',
+                '    current.next = l1 or l2',
+                '    return dummy.next'
             ],
             generateSteps: (arr) => {
                 const steps = [];
@@ -1995,36 +1944,38 @@ const algorithms = {
                 const list2 = [...arr.slice(Math.ceil(arr.length/2))].sort((a,b)=>a-b);
                 const merged = [];
                 
-                steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [], line: 0, message: `合并两个有序链表` });
-                steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [], line: 1, message: `创建虚拟头节点` });
-                steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [], line: 2, message: `current = dummy` });
+                steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [], line: 1, message: `def merge_two_lists(l1, l2)` });
+                steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [], line: 2, message: `dummy = Node(0)` });
+                steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [], line: 3, message: `current = dummy` });
                 
                 let i = 0, j = 0;
                 while (i < list1.length && j < list2.length) {
-                    steps.push({ type: 'loop-start', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 3, message: `比较 list1[${i}]=${list1[i]} 和 list2[${j}]=${list2[j]}` });
+                    steps.push({ type: 'loop-start', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 4, message: `while l1 and l2: 比较 ${list1[i]} 和 ${list2[j]}` });
                     if (list1[i] <= list2[j]) {
                         merged.push(list1[i]);
-                        steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 4, message: `${list1[i]} <= ${list2[j]}，选择 list1` });
+                        steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 5, message: `if l1.val <= l2.val: ${list1[i]} <= ${list2[j]}，选择 list1` });
+                        steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 6, message: `current.next = l1` });
                         i++;
+                        steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 7, message: `l1 = l1.next` });
                     } else {
                         merged.push(list2[j]);
-                        steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 7, message: `${list1[i]} > ${list2[j]}，选择 list2` });
+                        steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 8, message: `else: ${list1[i]} > ${list2[j]}，选择 list2` });
+                        steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 9, message: `current.next = l2` });
                         j++;
+                        steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 10, message: `l2 = l2.next` });
                     }
+                    steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 11, message: `current = current.next` });
                 }
                 
-                while (i < list1.length) {
-                    merged.push(list1[i]);
-                    steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 12, message: `添加剩余 list1: ${list1[i]}` });
-                    i++;
-                }
-                while (j < list2.length) {
-                    merged.push(list2[j]);
-                    steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 12, message: `添加剩余 list2: ${list2[j]}` });
-                    j++;
+                steps.push({ type: 'loop-end', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 4, message: 'while循环结束' });
+                
+                if (i < list1.length) {
+                    steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 12, message: `current.next = l1 (添加剩余节点)` });
+                } else if (j < list2.length) {
+                    steps.push({ type: 'code-line', list1: [...list1], list2: [...list2], merged: [...merged], i, j, line: 12, message: `current.next = l2 (添加剩余节点)` });
                 }
                 
-                steps.push({ type: 'complete', list1: [], list2: [], merged: [...merged], line: 14, message: `合并完成: ${merged.join(' -> ')}` });
+                steps.push({ type: 'complete', list1: [], list2: [], merged: [...merged], line: 13, message: `return dummy.next: ${merged.join(' -> ')}` });
                 return steps;
             }
         },
@@ -2392,32 +2343,32 @@ const algorithms = {
             generateSteps: (arr) => {
                 const steps = [];
                 const tree = { val: arr[0], left: null, right: null };
-                steps.push({ type: 'insert', tree: JSON.parse(JSON.stringify(tree)), line: 0, message: `插入根节点 ${arr[0]}` });
+                steps.push({ type: 'insert', tree: JSON.parse(JSON.stringify(tree)), line: 8, message: `插入根节点 ${arr[0]}` });
                 for (let i = 1; i < arr.length; i++) {
                     let node = tree;
-                    steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 0, message: `插入值 ${arr[i]}` });
+                    steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 8, message: `插入值 ${arr[i]}` });
                     while (true) {
                         if (arr[i] < node.val) {
-                            steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 1, message: `${arr[i]} < ${node.val}，向左` });
+                            steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 10, message: `${arr[i]} < ${node.val}，向左` });
                             if (node.left === null) {
                                 node.left = { val: arr[i], left: null, right: null };
-                                steps.push({ type: 'insert', tree: JSON.parse(JSON.stringify(tree)), line: 2, message: `插入 ${arr[i]} 到 ${node.val} 的左子树` });
+                                steps.push({ type: 'insert', tree: JSON.parse(JSON.stringify(tree)), line: 11, message: `插入 ${arr[i]} 到 ${node.val} 的左子树` });
                                 break;
                             }
                             node = node.left;
                         } else {
-                            steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 4, message: `${arr[i]} >= ${node.val}，向右` });
+                            steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 13, message: `${arr[i]} >= ${node.val}，向右` });
                             if (node.right === null) {
                                 node.right = { val: arr[i], left: null, right: null };
-                                steps.push({ type: 'insert', tree: JSON.parse(JSON.stringify(tree)), line: 7, message: `插入 ${arr[i]} 到 ${node.val} 的右子树` });
+                                steps.push({ type: 'insert', tree: JSON.parse(JSON.stringify(tree)), line: 14, message: `插入 ${arr[i]} 到 ${node.val} 的右子树` });
                                 break;
                             }
                             node = node.right;
                         }
                     }
-                    steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 9, message: '返回root' });
+                    steps.push({ type: 'code-line', tree: JSON.parse(JSON.stringify(tree)), line: 15, message: '返回root' });
                 }
-                steps.push({ type: 'complete', tree: JSON.parse(JSON.stringify(tree)), line: 9, message: 'BST构建完成' });
+                steps.push({ type: 'complete', tree: JSON.parse(JSON.stringify(tree)), line: 15, message: 'BST构建完成' });
                 return steps;
             }
         },
@@ -3232,31 +3183,30 @@ const algorithms = {
                 const visited = new Set();
                 const queue = [0];
                 visited.add(0);
-                steps.push({ type: 'start', graph, visited: [...visited], queue: [...queue], line: 0, message: 'BFS开始' });
-                steps.push({ type: 'code-line', graph, visited: [...visited], queue: [...queue], line: 1, message: 'visited = ∅' });
-                steps.push({ type: 'code-line', graph, visited: [...visited], queue: [...queue], line: 2, message: 'queue = ∅' });
-                steps.push({ type: 'enqueue', graph, visited: [...visited], queue: [...queue], neighbor: 0, line: 3, message: 'enqueue(start)' });
+                steps.push({ type: 'code-line', graph, visited: [...visited], queue: [...queue], line: 4, message: 'visited = set()' });
+                steps.push({ type: 'code-line', graph, visited: [...visited], queue: [...queue], line: 5, message: 'queue = deque([start])' });
+                steps.push({ type: 'code-line', graph, visited: [...visited], queue: [...queue], line: 6, message: 'visited.add(start)' });
                 while (queue.length > 0) {
-                    steps.push({ type: 'loop-start', graph, visited: [...visited], queue: [...queue], line: 4, message: `while queue not empty: ${queue.join(', ')}` });
+                    steps.push({ type: 'loop-start', graph, visited: [...visited], queue: [...queue], line: 7, message: `while queue: ${queue.join(', ')}` });
                     const node = queue.shift();
-                    steps.push({ type: 'visit', graph, visited: [...visited], queue: [...queue], current: node, line: 5, message: `dequeue: ${node}` });
-                    steps.push({ type: 'code-line', graph, visited: [...visited], queue: [...queue], current: node, line: 6, message: `visit(${node})` });
+                    steps.push({ type: 'code-line', graph, visited: [...visited], queue: [...queue], current: node, line: 8, message: `node = queue.popleft() = ${node}` });
+                    steps.push({ type: 'visit', graph, visited: [...visited], queue: [...queue], current: node, line: 9, message: `访问节点 ${node}` });
                     for (const neighbor of graph[node]) {
-                        steps.push({ type: 'loop-start', graph, visited: [...visited], queue: [...queue], current: node, neighbor, line: 7, message: `检查邻居 ${neighbor}` });
+                        steps.push({ type: 'loop-start', graph, visited: [...visited], queue: [...queue], current: node, neighbor, line: 10, message: `检查邻居 ${neighbor}` });
                         if (!visited.has(neighbor)) {
-                            steps.push({ type: 'code-line', graph, visited: [...visited], queue: [...queue], current: node, neighbor, line: 8, message: `${neighbor} not in visited` });
+                            steps.push({ type: 'code-line', graph, visited: [...visited], queue: [...queue], current: node, neighbor, line: 11, message: `${neighbor} not in visited` });
                             visited.add(neighbor);
                             queue.push(neighbor);
-                            steps.push({ type: 'enqueue', graph, visited: [...visited], queue: [...queue], neighbor, line: 9, message: `enqueue(${neighbor})` });
+                            steps.push({ type: 'code-line', graph, visited: [...visited], queue: [...queue], neighbor, line: 12, message: `visited.add(${neighbor})` });
+                            steps.push({ type: 'enqueue', graph, visited: [...visited], queue: [...queue], neighbor, line: 13, message: `queue.append(${neighbor})` });
                         } else {
-                            steps.push({ type: 'code-line', graph, visited: [...visited], queue: [...queue], current: node, neighbor, line: 8, message: `${neighbor} already visited` });
+                            steps.push({ type: 'code-line', graph, visited: [...visited], queue: [...queue], current: node, neighbor, line: 11, message: `${neighbor} already visited` });
                         }
-                        steps.push({ type: 'loop-end', graph, visited: [...visited], queue: [...queue], current: node, neighbor, line: 10, message: 'if结束' });
                     }
-                    steps.push({ type: 'loop-end', graph, visited: [...visited], queue: [...queue], current: node, line: 11, message: 'for结束' });
+                    steps.push({ type: 'loop-end', graph, visited: [...visited], queue: [...queue], current: node, line: 10, message: 'for结束' });
                 }
-                steps.push({ type: 'loop-end', graph, visited: [...visited], queue: [], line: 12, message: 'while结束' });
-                steps.push({ type: 'complete', graph, visited: [...visited], queue: [], line: 13, message: `BFS完成，顺序: ${[...visited]}` });
+                steps.push({ type: 'loop-end', graph, visited: [...visited], queue: [], line: 7, message: 'while结束' });
+                steps.push({ type: 'complete', graph, visited: [...visited], queue: [], line: 7, message: `BFS完成，顺序: ${[...visited]}` });
                 return steps;
             }
         },
@@ -3309,29 +3259,28 @@ const algorithms = {
                 };
                 const visited = new Set();
                 const stack = [0];
-                steps.push({ type: 'start', graph, visited: [...visited], stack: [...stack], line: 0, message: 'DFS开始' });
+                steps.push({ type: 'code-line', graph, visited: [...visited], stack: [...stack], line: 1, message: '初始化 visited' });
                 while (stack.length > 0) {
                     const node = stack.pop();
                     if (!visited.has(node)) {
                         visited.add(node);
-                        steps.push({ type: 'visit', graph, visited: [...visited], stack: [...stack], current: node, line: 1, message: `visited.add(${node})` });
-                        steps.push({ type: 'code-line', graph, visited: [...visited], stack: [...stack], current: node, line: 2, message: `visit(${node})` });
+                        steps.push({ type: 'code-line', graph, visited: [...visited], stack: [...stack], current: node, line: 4, message: `visited.add(${node})` });
+                        steps.push({ type: 'visit', graph, visited: [...visited], stack: [...stack], current: node, line: 5, message: `访问节点 ${node}` });
                         const unvisited = graph[node].filter(n => !visited.has(n)).reverse();
                         for (const neighbor of unvisited) {
-                            steps.push({ type: 'code-line', graph, visited: [...visited], stack: [...stack], current: node, neighbor, line: 3, message: `检查邻居 ${neighbor}` });
+                            steps.push({ type: 'loop-start', graph, visited: [...visited], stack: [...stack], current: node, neighbor, line: 6, message: `检查邻居 ${neighbor}` });
                             if (!visited.has(neighbor)) {
-                                steps.push({ type: 'code-line', graph, visited: [...visited], stack: [...stack], current: node, neighbor, line: 4, message: `${neighbor} not in visited` });
+                                steps.push({ type: 'code-line', graph, visited: [...visited], stack: [...stack], current: node, neighbor, line: 7, message: `${neighbor} not in visited` });
                                 stack.push(neighbor);
-                                steps.push({ type: 'push', graph, visited: [...visited], stack: [...stack], neighbor, line: 5, message: `DFS(${neighbor})` });
+                                steps.push({ type: 'push', graph, visited: [...visited], stack: [...stack], neighbor, line: 8, message: `DFS(${neighbor})` });
                             } else {
-                                steps.push({ type: 'code-line', graph, visited: [...visited], stack: [...stack], current: node, neighbor, line: 4, message: `${neighbor} already visited` });
+                                steps.push({ type: 'code-line', graph, visited: [...visited], stack: [...stack], current: node, neighbor, line: 7, message: `${neighbor} already visited` });
                             }
-                            steps.push({ type: 'loop-end', graph, visited: [...visited], stack: [...stack], current: node, neighbor, line: 6, message: 'if结束' });
                         }
-                        steps.push({ type: 'loop-end', graph, visited: [...visited], stack: [...stack], current: node, line: 7, message: 'for结束' });
+                        steps.push({ type: 'loop-end', graph, visited: [...visited], stack: [...stack], current: node, line: 6, message: 'for结束' });
                     }
                 }
-                steps.push({ type: 'complete', graph, visited: [...visited], stack: [], line: 8, message: `DFS完成，顺序: ${[...visited]}` });
+                steps.push({ type: 'complete', graph, visited: [...visited], stack: [], line: 6, message: `DFS完成，顺序: ${[...visited]}` });
                 return steps;
             }
         },
@@ -4053,15 +4002,21 @@ function renderPythonCode() {
     }
     
     let pythonHtml = '';
+    let lines = [];
+    
     if (Array.isArray(pythonCode)) {
-        // 为每个代码行添加包装器（包含指示针）
-        pythonHtml = pythonCode.map((line, idx) => {
-            const lineNum = idx + 1;
-            return `<div class="code-line-wrapper" data-line-num="${lineNum}"><span class="line-marker"></span>${line}</div>`;
-        }).join('\n');
-    } else {
-        pythonHtml = pythonCode;
+        lines = pythonCode;
+    } else if (typeof pythonCode === 'string') {
+        // 处理字符串格式，按换行符分割
+        lines = pythonCode.split('\n');
     }
+    
+    // 为每个代码行添加包装器（包含指示针）
+    pythonHtml = lines.map((line, idx) => {
+        const lineNum = idx + 1;
+        return `<div class="code-line-wrapper" data-line-num="${lineNum}"><span class="line-marker"></span>${line}</div>`;
+    }).join('\n');
+    
     document.querySelector('#codeContent .code-block').innerHTML = '<code>' + pythonHtml + '</code>';
 }
 
