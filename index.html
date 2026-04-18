@@ -3,1392 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>算法可视化 | Algorithm Visualizer</title>
+    <title>算法可视化教学 | Algorithm Visualizer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-light: #818cf8;
-            --primary-dark: #4f46e5;
-            --secondary: #0891b2;
-            --accent: #ec4899;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --bg: #f8fafc;
-            --bg-card: #ffffff;
-            --bg-elevated: #f1f5f9;
-            --text: #1e293b;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --comparing: #ec4899;
-            --swapping: #0891b2;
-            --sorted: #10b981;
-            --pivot: #f59e0b;
-            --found: #22c55e;
-            --shadow: rgba(0,0,0,0.08);
-        }
-
-        [data-theme="dark"] {
-            --bg: #0f172a;
-            --bg-card: #1e293b;
-            --bg-elevated: #334155;
-            --text: #f1f5f9;
-            --text-muted: #94a3b8;
-            --border: #475569;
-            --shadow: rgba(0,0,0,0.3);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Noto Sans SC', 'Inter', system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            line-height: 1.6;
-            transition: background 0.3s, color 0.3s;
-        }
-
-        /* Header */
-        .header {
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 8px var(--shadow);
-        }
-
-        .header-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-
-        .logo h1 {
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-
-        .logo span { color: var(--primary); }
-
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .theme-toggle {
-            background: var(--bg-elevated);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 0.5rem 0.75rem;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.2s;
-        }
-
-        .theme-toggle:hover {
-            border-color: var(--primary);
-        }
-
-        /* Category Tabs */
-        .category-tabs {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .category-tab {
-            padding: 0.6rem 1.2rem;
-            border: none;
-            background: transparent;
-            color: var(--text-muted);
-            font-family: inherit;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .category-tab:hover {
-            background: var(--bg-elevated);
-            color: var(--text);
-        }
-
-        .category-tab.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .speed-control {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: var(--bg-elevated);
-            padding: 0.4rem 0.75rem;
-            border-radius: 8px;
-        }
-
-        .speed-control label { font-size: 0.8rem; color: var(--text-muted); }
-
-        .speed-slider {
-            width: 80px;
-            height: 4px;
-            -webkit-appearance: none;
-            background: var(--border);
-            border-radius: 2px;
-            cursor: pointer;
-        }
-
-        .speed-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px;
-            height: 14px;
-            background: var(--primary);
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .speed-value {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--primary);
-            min-width: 35px;
-        }
-
-        /* Main */
-        .main {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1.5rem 2rem;
-        }
-
-        /* Algorithm Cards */
-        .section-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 18px;
-            background: var(--primary);
-            border-radius: 2px;
-        }
-
-        .algorithm-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-            gap: 0.75rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .algorithm-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 1rem 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-
-        .algorithm-card:hover {
-            border-color: var(--primary-light);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px var(--shadow);
-        }
-
-        .algorithm-card.active {
-            border-color: var(--primary);
-            background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(8,145,178,0.08));
-        }
-
-        .algorithm-card-icon { font-size: 1.4rem; margin-bottom: 0.4rem; }
-        .algorithm-card-name { font-size: 0.85rem; font-weight: 500; }
-        .algorithm-card-complexity { font-size: 0.7rem; color: var(--text-muted); margin-top: 0.2rem; }
-
-        /* Algorithm Info */
-        .algorithm-info {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 1.25rem;
-            border: 1px solid var(--border);
-            margin-bottom: 1rem;
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        @media (max-width: 768px) {
-            .algorithm-info { grid-template-columns: 1fr; }
-        }
-
-        .algorithm-info h2 { font-size: 1.1rem; margin-bottom: 0.3rem; }
-        .algorithm-info p { font-size: 0.85rem; color: var(--text-muted); }
-
-        .complexity-badges {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .complexity-badge {
-            padding: 0.3rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .complexity-badge.best { background: rgba(16,185,129,0.15); color: var(--success); }
-        .complexity-badge.avg { background: rgba(245,158,11,0.15); color: var(--warning); }
-        .complexity-badge.worst { background: rgba(239,68,68,0.15); color: var(--error); }
-        .complexity-badge.space { background: rgba(8,145,178,0.15); color: var(--secondary); }
-
-        /* Visualization */
-        .visualization-container {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 1.25rem;
-            margin-bottom: 1rem;
-            border: 1px solid var(--border);
-        }
-
-        .visualization-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding-bottom: 0.75rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .visualization-title {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .visualization-title h2 { font-size: 1.1rem; }
-
-        .visualization-badge {
-            background: var(--primary);
-            color: white;
-            font-size: 0.7rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 20px;
-        }
-
-        .step-indicator {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .step-counter {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .step-counter span { color: var(--primary); font-weight: 600; }
-
-        .progress-bar {
-            width: 120px;
-            height: 6px;
-            background: var(--bg-elevated);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
-            border-radius: 3px;
-            transition: width 0.3s ease;
-        }
-
-        /* Canvas */
-        .visualization-canvas {
-            min-height: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-            background: var(--bg-elevated);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            overflow: auto;
-            position: relative;
-        }
-
-        /* Legend */
-        .legend {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-            padding: 0.75rem;
-            background: var(--bg-elevated);
-            border-radius: 8px;
-            margin-top: 0.75rem;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-
-        .legend-color {
-            width: 14px;
-            height: 14px;
-            border-radius: 3px;
-        }
-
-        /* Array Visualization */
-        .array-container {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-
-        .array-bar {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: all 0.25s ease;
-        }
-
-        .array-bar-value {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 4px;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .array-bar-inner {
-            width: 32px;
-            background: linear-gradient(180deg, var(--primary-light), var(--primary));
-            border-radius: 4px 4px 0 0;
-            transition: all 0.25s ease;
-            min-height: 25px;
-        }
-
-        .array-bar.comparing .array-bar-inner { background: linear-gradient(180deg, #f472b6, #db2777); }
-        .array-bar.swapping .array-bar-inner { background: linear-gradient(180deg, #22d3ee, #0891b2); }
-        .array-bar.sorted .array-bar-inner { background: linear-gradient(180deg, #34d399, #059669); }
-        .array-bar.pivot .array-bar-inner { background: linear-gradient(180deg, #fbbf24, #d97706); }
-        .array-bar.found .array-bar-inner { background: linear-gradient(180deg, #4ade80, #16a34a); }
-
-        /* Linked List */
-        .linked-list-container {
-            display: flex;
-            align-items: center;
-            gap: 0;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .ll-node { display: flex; align-items: center; }
-
-        .ll-node-box {
-            display: flex;
-            border: 2px solid var(--primary);
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .ll-node-data {
-            padding: 0.6rem 0.8rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            font-size: 0.9rem;
-            min-width: 40px;
-            text-align: center;
-            background: var(--bg-card);
-        }
-
-        .ll-node-pointer {
-            padding: 0.6rem 0.4rem;
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            background: var(--bg-elevated);
-            border-left: 2px solid var(--primary);
-        }
-
-        .ll-arrow {
-            width: 25px;
-            height: 2px;
-            background: var(--primary);
-            position: relative;
-            margin: 0 -2px;
-        }
-
-        .ll-arrow::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: -3px;
-            border: 4px solid transparent;
-            border-left-color: var(--primary);
-        }
-
-        .ll-null {
-            padding: 0.5rem 0.75rem;
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            border: 2px dashed var(--border);
-            border-radius: 6px;
-        }
-
-        .ll-node.highlight .ll-node-box { border-color: var(--comparing); }
-        .ll-node.highlight .ll-node-data { background: rgba(236,72,153,0.1); color: var(--comparing); }
-        .ll-node.inserting .ll-node-box { border-color: var(--swapping); }
-        .ll-node.sorted .ll-node-box { border-color: var(--sorted); }
-
-        /* Tree */
-        .tree-container {
-            position: relative;
-            min-width: 550px;
-            min-height: 220px;
-        }
-
-        .tree-node {
-            position: absolute;
-            width: 38px;
-            height: 38px;
-            background: linear-gradient(135deg, var(--primary-light), var(--primary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: white;
-            transition: all 0.3s ease;
-            z-index: 10;
-        }
-
-        .tree-node.highlight { background: linear-gradient(135deg, #f472b6, #db2777); transform: scale(1.15); }
-        .tree-node.sorted { background: linear-gradient(135deg, #34d399, #059669); }
-        .tree-node.current { background: linear-gradient(135deg, #fbbf24, #d97706); transform: scale(1.15); }
-
-        .tree-edge {
-            position: absolute;
-            background: var(--border);
-            height: 2px;
-            transform-origin: left center;
-            z-index: 5;
-        }
-
-        .tree-edge.highlight { background: var(--comparing); height: 3px; }
-
-        /* Graph */
-        .graph-container {
-            position: relative;
-            width: 450px;
-            height: 280px;
-        }
-
-        .graph-node {
-            position: absolute;
-            width: 42px;
-            height: 42px;
-            background: linear-gradient(135deg, var(--primary-light), var(--primary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            color: white;
-            transition: all 0.3s ease;
-            z-index: 10;
-        }
-
-        .graph-node.visited { background: linear-gradient(135deg, #34d399, #059669); }
-        .graph-node.current { background: linear-gradient(135deg, #f472b6, #db2777); transform: scale(1.15); }
-        .graph-node.in-queue { background: linear-gradient(135deg, #fbbf24, #d97706); }
-
-        .graph-edge {
-            position: absolute;
-            height: 2px;
-            background: var(--border);
-            transform-origin: left center;
-            z-index: 5;
-        }
-
-        .graph-edge.visited { background: var(--sorted); height: 3px; }
-
-        .graph-edgeLabel {
-            position: absolute;
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            background: var(--bg-card);
-            padding: 0 3px;
-            border-radius: 3px;
-        }
-
-        /* Control Bar */
-        .control-bar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem;
-            padding: 1rem;
-            background: var(--bg-elevated);
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .control-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.4rem;
-            padding: 0.55rem 1rem;
-            border: none;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .control-btn svg { width: 16px; height: 16px; }
-
-        .control-btn.primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-        }
-
-        .control-btn.primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
-        }
-
-        .control-btn.secondary {
-            background: var(--bg-card);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .control-btn.secondary:hover { border-color: var(--primary-light); }
-
-        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
-
-        .control-divider {
-            width: 1px;
-            height: 24px;
-            background: var(--border);
-            margin: 0 0.5rem;
-        }
-
-        /* Code Panels */
-        .code-panels {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        @media (max-width: 900px) {
-            .code-panels { grid-template-columns: 1fr; }
-        }
-
-        .code-panel {
-            background: var(--bg-card);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-
-        .code-panel-header {
-            background: var(--bg-elevated);
-            padding: 0.6rem 1rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .code-content {
-            padding: 0.75rem;
-            overflow-x: auto;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            line-height: 1.6;
-            max-height: 280px;
-        }
-
-        .code-line {
-            display: flex;
-            padding: 0.1rem 0.4rem;
-            border-radius: 4px;
-            transition: background 0.2s;
-        }
-
-        .code-line.active { background: rgba(99,102,241,0.15); }
-        .code-line .line-number { color: var(--text-muted); min-width: 1.8rem; text-align: right; margin-right: 0.75rem; opacity: 0.5; }
-        .code-line .line-content { flex: 1; }
-
-        .code-keyword { color: #7c3aed; }
-        .code-function { color: #0891b2; }
-        .code-string { color: #059669; }
-        .code-number { color: #d97706; }
-        .code-comment { color: #94a3b8; font-style: italic; }
-        .code-operator { color: #ec4899; }
-        .code-type { color: #0891b2; }
-
-        /* Step Description */
-        .step-description {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 1rem 1.25rem;
-            border: 1px solid var(--border);
-            margin-bottom: 1rem;
-        }
-
-        .step-description h3 { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-        .step-text { font-size: 0.95rem; }
-        .step-text .highlight { color: var(--accent); font-weight: 600; }
-        .step-text .value { color: var(--secondary); font-weight: 600; }
-
-        /* Custom Input */
-        .custom-input {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 1rem 1.25rem;
-            border: 1px solid var(--border);
-        }
-
-        .custom-input h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem; }
-
-        .input-group {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .input-group input {
-            flex: 1;
-            min-width: 180px;
-            padding: 0.65rem 0.9rem;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-        }
-
-        .input-group input:focus { outline: none; border-color: var(--primary); }
-        .input-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; }
-        .input-error { color: var(--error); font-size: 0.75rem; margin-top: 0.4rem; display: none; }
-        .input-error.show { display: block; }
-
-        /* Completion Overlay */
-        .completion-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s;
-        }
-
-        .completion-overlay.show { opacity: 1; visibility: visible; }
-
-        .completion-card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 2rem;
-            text-align: center;
-            max-width: 380px;
-            transform: scale(0.9);
-            transition: transform 0.3s;
-        }
-
-        .completion-overlay.show .completion-card { transform: scale(1); }
-
-        .completion-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--success), #059669);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 1.5rem;
-        }
-
-        .completion-title { font-size: 1.2rem; font-weight: 600; color: var(--success); margin-bottom: 0.4rem; }
-        .completion-stats { color: var(--text-muted); margin-bottom: 1.5rem; }
-
-        /* Animations */
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
-        .array-bar.comparing { animation: pulse 0.4s ease infinite; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        .array-bar { animation: fadeIn 0.3s ease; }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-        /* Tooltip */
-        .tooltip {
-            position: relative;
-        }
-
-        .tooltip::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 0.3rem 0.6rem;
-            background: var(--text);
-            color: var(--bg);
-            font-size: 0.7rem;
-            border-radius: 4px;
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.2s;
-        }
-
-        .tooltip:hover::after { opacity: 1; visibility: visible; }
-
-        /* Shortcuts hint */
-        .shortcuts-hint {
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 0.5rem;
-        }
-
-        .shortcuts-hint kbd {
-            background: var(--bg-elevated);
-            padding: 0.15rem 0.4rem;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            border: 1px solid var(--border);
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- 头部 -->
     <header class="header">
         <div class="header-content">
             <div class="logo">
-                <div class="logo-icon">⚡</div>
-                <h1>算法<span>可视化</span></h1>
-            </div>
-            <nav class="category-tabs" id="categoryTabs"></nav>
-            <div class="header-right">
-                <div class="speed-control">
-                    <label>速度</label>
-                    <input type="range" class="speed-slider" id="speedSlider" min="0.25" max="4" step="0.25" value="1">
-                    <span class="speed-value" id="speedValue">1x</span>
+                <div class="logo-icon">📊</div>
+                <div class="logo-text">
+                    <h1>算法可视化教学</h1>
+                    <span>Algorithm Visualizer</span>
                 </div>
-                <button class="theme-toggle" id="themeToggle" title="切换主题">🌙</button>
+            </div>
+            <div class="header-actions">
+                <button class="theme-toggle" id="themeToggle" title="切换主题">
+                    <span class="theme-icon">🌙</span>
+                </button>
             </div>
         </div>
     </header>
 
-    <main class="main">
-        <section>
-            <h2 class="section-title">选择算法</h2>
-            <div class="algorithm-cards" id="algorithmCards"></div>
-        </section>
-
-        <div class="algorithm-info" id="algorithmInfo" style="display:none;">
-            <div>
-                <h2 id="algoName"></h2>
-                <p id="algoDesc"></p>
-            </div>
-            <div class="complexity-badges" id="complexityBadges"></div>
-        </div>
-
-        <div class="visualization-container" id="visualContainer" style="display:none;">
-            <div class="visualization-header">
-                <div class="visualization-title">
-                    <h2 id="visualTitle">可视化</h2>
-                    <span class="visualization-badge" id="visualBadge">数组</span>
-                </div>
-                <div class="step-indicator">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progressFill" style="width:0%"></div>
-                    </div>
-                    <span class="step-counter">步骤 <span id="stepCurrent">0</span> / <span id="stepTotal">0</span></span>
-                </div>
-            </div>
-            <div class="visualization-canvas" id="visualizationCanvas"></div>
-            <div class="legend" id="legend" style="display:none;">
-                <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#818cf8,#6366f1)"></div>默认</div>
-                <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#f472b6,#db2777)"></div>比较中</div>
-                <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#22d3ee,#0891b2)"></div>交换中</div>
-                <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#fbbf24,#d97706)"></div>枢轴</div>
-                <div class="legend-item"><div class="legend-color" style="background:linear-gradient(135deg,#34d399,#059669)"></div>已排序</div>
-            </div>
-        </div>
-
-        <div class="control-bar" id="controlBar" style="display:none;">
-            <button class="control-btn secondary" id="randomBtn" title="随机数据">🎲 随机</button>
-            <button class="control-btn secondary" id="prevBtn" title="上一步">◀ 上一步</button>
-            <button class="control-btn primary" id="startBtn" title="开始/暂停">
-                <span id="startIcon">▶</span> <span id="startText">开始</span>
+    <!-- 分类导航 -->
+    <nav class="category-nav">
+        <div class="category-tabs">
+            <button class="category-tab active" data-category="sorting">
+                <span>📊</span> 排序算法
             </button>
-            <button class="control-btn secondary" id="nextBtn" title="下一步">下一步 ▶</button>
-            <div class="control-divider"></div>
-            <button class="control-btn secondary" id="resetBtn" title="重置">↺ 重置</button>
+            <button class="category-tab" data-category="searching">
+                <span>🔍</span> 搜索算法
+            </button>
+            <button class="category-tab" data-category="linked-list">
+                <span>🔗</span> 链表
+            </button>
+            <button class="category-tab" data-category="tree">
+                <span>🌳</span> 树结构
+            </button>
+            <button class="category-tab" data-category="graph">
+                <span>🔀</span> 图算法
+            </button>
         </div>
+    </nav>
 
-        <div class="code-panels" id="codePanels" style="display:none;">
-            <div class="code-panel">
-                <div class="code-panel-header">📝 伪代码</div>
-                <div class="code-content" id="pseudocodePanel"></div>
+    <!-- 主页内容 -->
+    <main class="main">
+        <!-- 左侧边栏：算法列表 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>算法列表</h3>
             </div>
-            <div class="code-panel">
-                <div class="code-panel-header">🐍 Python</div>
-                <div class="code-content" id="pythoncodePanel"></div>
+            <div class="algorithm-list" id="algorithmList">
+                <!-- 由JS动态生成 -->
+            </div>
+        </aside>
+
+        <!-- 中间内容区 -->
+        <div class="content">
+            <!-- 算法信息卡片 -->
+            <div class="algorithm-header" id="algorithmHeader">
+                <div class="algorithm-title">
+                    <h2 id="currentAlgoName">选择一个算法开始学习</h2>
+                    <p id="currentAlgoDesc">从左侧列表选择一个算法，查看详细讲解和动画演示</p>
+                </div>
+                <div class="complexity-badges" id="complexityBadges">
+                    <!-- 复杂度标签由JS动态生成 -->
+                </div>
+            </div>
+
+            <!-- Tab导航 -->
+            <div class="content-tabs">
+                <button class="content-tab active" data-tab="theory">
+                    <span class="tab-icon">📖</span> 算法原理
+                </button>
+                <button class="content-tab" data-tab="python">
+                    <span class="tab-icon">🐍</span> Python实现
+                </button>
+                <button class="content-tab" data-tab="visualization">
+                    <span class="tab-icon">🎬</span> 可视化演示
+                </button>
+            </div>
+
+            <!-- Tab内容区 -->
+            <div class="tab-content active" id="tab-theory">
+                <div class="theory-content" id="theoryContent">
+                    <div class="placeholder-message">
+                        <div class="placeholder-icon">📚</div>
+                        <p>请选择一个算法查看详细原理讲解</p>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="tab-content" id="tab-python">
+                <div class="code-container">
+                    <div class="code-panel python">
+                        <div class="code-header">
+                            <span class="code-lang">🐍 Python</span>
+                            <button class="copy-btn" onclick="copyCode('pythonCode')">复制代码</button>
+                        </div>
+                        <pre class="code-block" id="pythonCode"><code>请选择一个算法</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="tab-visualization">
+                <!-- 可视化控制栏 -->
+                <div class="viz-controls">
+                    <div class="viz-controls-left">
+                        <button class="viz-btn" id="btnStart" title="开始/暂停">
+                            <span>▶</span> 开始
+                        </button>
+                        <button class="viz-btn" id="btnStep" title="单步执行">
+                            <span>⏭</span> 单步
+                        </button>
+                        <button class="viz-btn" id="btnReset" title="重置">
+                            <span>↺</span> 重置
+                        </button>
+                    </div>
+                    <div class="viz-controls-center">
+                        <span class="step-info" id="stepInfo">步骤: 0 / 0</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="viz-controls-right">
+                        <label class="speed-label">速度:</label>
+                        <input type="range" class="speed-slider" id="speedSlider" min="0.25" max="4" step="0.25" value="1">
+                        <span class="speed-value" id="speedValue">1x</span>
+                        <button class="viz-btn small" id="btnRandom" title="随机数据">
+                            🎲
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 可视化画布 -->
+                <div class="viz-canvas" id="vizCanvas">
+                    <!-- 伪代码面板 - 右下角悬浮 -->
+                    <div class="pseudocode-panel" id="pseudocodePanel">
+                        <div class="pseudocode-header">
+                            <span>📝 伪代码</span>
+                            <button class="pseudocode-toggle" id="pseudocodeToggle">−</button>
+                        </div>
+                        <pre class="pseudocode-block" id="pseudocodeBlock"><code>请选择一个算法</code></pre>
+                    </div>
+                    <div class="placeholder-message">
+                        <div class="placeholder-icon">🎬</div>
+                        <p>选择一个算法开始可视化演示</p>
+                    </div>
+                </div>
+
+                <!-- 步骤说明 -->
+                <div class="step-description" id="stepDescription">
+                    <span class="step-label">当前操作:</span>
+                    <span class="step-text">--</span>
+                </div>
+
+                <!-- 图例 -->
+                <div class="viz-legend" id="vizLegend">
+                    <div class="legend-item">
+                        <span class="legend-color comparing"></span>
+                        <span>比较中</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color swapping"></span>
+                        <span>交换中</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color sorted"></span>
+                        <span>已排序</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="legend-color pivot"></span>
+                        <span>枢轴</span>
+                    </div>
+                </div>
+
+                <!-- 自定义输入 -->
+                <div class="custom-input">
+                    <label>自定义数据:</label>
+                    <input type="text" id="customInput" placeholder="例如: 64, 34, 25, 12, 22">
+                    <button class="apply-btn" id="btnApply">应用</button>
+                </div>
             </div>
         </div>
-
-        <div class="step-description" id="stepDesc">
-            <h3>当前步骤</h3>
-            <p class="step-text" id="stepText">请选择一个算法开始演示</p>
-        </div>
-
-        <div class="custom-input" id="customInputSection">
-            <h3>📥 自定义数据</h3>
-            <div class="input-group">
-                <input type="text" id="customInput" placeholder="输入数据，逗号分隔，如: 64, 34, 25, 12, 22">
-                <button class="control-btn primary" id="applyInputBtn">应用</button>
-            </div>
-            <p class="input-hint" id="inputHint">输入1-12个整数，范围1-99</p>
-            <p class="input-error" id="inputError">输入格式错误</p>
-        </div>
-
-        <p class="shortcuts-hint">
-            快捷键: <kbd>Space</kbd> 开始/暂停 | <kbd>←</kbd><kbd>→</kbd> 上一步/下一步 | <kbd>R</kbd> 重置
-        </p>
     </main>
 
-    <div class="completion-overlay" id="completionOverlay">
-        <div class="completion-card">
-            <div class="completion-icon">✓</div>
-            <h2 class="completion-title" id="completionTitle">算法完成!</h2>
-            <p class="completion-stats" id="completionStats">共执行 0 步</p>
-            <button class="control-btn primary" id="closeCompletionBtn">确定</button>
-        </div>
-    </div>
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>算法可视化教学平台 | 使用纯前端技术构建 | 可部署至 GitHub Pages</p>
+    </footer>
 
-    <script>
-        // ==================== 算法数据库 ====================
-        const algorithmData = {
-            sort: {
-                name: '排序算法', icon: '📊', color: '#6366f1',
-                algorithms: [
-                    { id:'bubble', name:'冒泡排序', icon:'🫧', desc:'相邻比较，大的冒泡到末尾', complexity:{best:'O(n)',avg:'O(n²)',worst:'O(n²)',space:'O(1)'}, visualType:'array',
-                      pseudocode:['procedure bubbleSort(arr)','    n ← length(arr)','    for i ← 0 to n-1 do','        for j ← 0 to n-i-2 do','            if arr[j] > arr[j+1] then','                swap(arr[j], arr[j+1])','            end if','        end for','    end for','end procedure'],
-                      python:['def bubble_sort(arr):','    n = len(arr)','    for i in range(n):','        for j in range(n - i - 1):','            if arr[j] > arr[j + 1]:','                arr[j], arr[j + 1] = arr[j + 1], arr[j]','    return arr'],
-                      gen:function*(a){const n=a.length;for(let i=0;i<n;i++){for(let j=0;j<n-i-1;j++){yield{type:'compare',idx:[j,j+1],d:`比较 ${a[j]} 和 ${a[j+1]}`};if(a[j]>a[j+1]){yield{type:'swap',idx:[j,j+1],d:`${a[j]}>${a[j+1]}，交换`};[a[j],a[j+1]]=[a[j+1],a[j]]}}yield{type:'sorted',idx:[n-i-1],d:`位置${n-i-1}已排序`}}yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'selection', name:'选择排序', icon:'👆', desc:'找最小放到已排序末尾', complexity:{best:'O(n²)',avg:'O(n²)',worst:'O(n²)',space:'O(1)'}, visualType:'array',
-                      pseudocode:['procedure selectionSort(arr)','    n ← length(arr)','    for i ← 0 to n-2 do','        minIdx ← i','        for j ← i+1 to n-1 do','            if arr[j] < arr[minIdx] then','                minIdx ← j','            end if','        end for','        swap(arr[i], arr[minIdx])','    end for','end procedure'],
-                      python:['def selection_sort(arr):','    n = len(arr)','    for i in range(n - 1):','        min_idx = i','        for j in range(i + 1, n):','            if arr[j] < arr[min_idx]:','                min_idx = j','        arr[i], arr[min_idx] = arr[min_idx], arr[i]','    return arr'],
-                      gen:function*(a){const n=a.length;for(let i=0;i<n-1;i++){let mi=i;yield{type:'pivot',idx:[i],d:`假设 arr[${i}]=${a[i]} 最小`};for(let j=i+1;j<n;j++){yield{type:'compare',idx:[mi,j],d:`比较 ${a[j]} 和 ${a[mi]}`};if(a[j]<a[mi]){mi=j;yield{type:'pivot',idx:[mi],d:`新最小值 ${a[mi]}`}}}if(mi!==i){yield{type:'swap',idx:[i,mi],d:`交换 ${a[i]} 和 ${a[mi]}`};[a[i],a[mi]]=[a[mi],a[i]]}yield{type:'sorted',idx:[i],d:`位置${i}完成`}}yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'insertion', name:'插入排序', icon:'🃏', desc:'像整理扑克牌', complexity:{best:'O(n)',avg:'O(n²)',worst:'O(n²)',space:'O(1)'}, visualType:'array',
-                      pseudocode:['procedure insertionSort(arr)','    n ← length(arr)','    for i ← 1 to n-1 do','        key ← arr[i]','        j ← i - 1','        while j >= 0 and arr[j] > key do','            arr[j+1] ← arr[j]','            j ← j - 1','        end while','        arr[j+1] ← key','    end for','end procedure'],
-                      python:['def insertion_sort(arr):','    n = len(arr)','    for i in range(1, n):','        key = arr[i]','        j = i - 1','        while j >= 0 and arr[j] > key:','            arr[j + 1] = arr[j]','            j -= 1','        arr[j + 1] = key','    return arr'],
-                      gen:function*(a){const n=a.length;yield{type:'sorted',idx:[0],d:`初始 arr[0]=${a[0]}`};for(let i=1;i<n;i++){const k=a[i];yield{type:'pivot',idx:[i],d:`取 key=${k}`};let j=i-1;while(j>=0&&a[j]>k){yield{type:'compare',idx:[j,j+1],d:`${a[j]}>${k}，右移`};a[j+1]=a[j];yield{type:'swap',idx:[j,j+1],d:`移动到${j+1}`};j--}a[j+1]=k;yield{type:'sorted',idx:Array.from({length:i+1},(_,x)=>x),d:`key=${k}插入位置${j+1}`}}yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'shell', name:'希尔排序', icon:'🐚', desc:'分组插入排序', complexity:{best:'O(n log n)',avg:'O(n^1.3)',worst:'O(n²)',space:'O(1)'}, visualType:'array',
-                      pseudocode:['procedure shellSort(arr)','    n ← length(arr)','    gap ← n / 2','    while gap > 0 do','        for i ← gap to n-1 do','            temp ← arr[i]','            j ← i','            while j >= gap and arr[j-gap] > temp do','                arr[j] ← arr[j-gap]','                j ← j - gap','            end while','            arr[j] ← temp','        end for','        gap ← gap / 2','    end while','end procedure'],
-                      python:['def shell_sort(arr):','    n = len(arr)','    gap = n // 2','    while gap > 0:','        for i in range(gap, n):','            temp = arr[i]','            j = i','            while j >= gap and arr[j-gap] > temp:','                arr[j] = arr[j-gap]','                j -= gap','            arr[j] = temp','        gap //= 2','    return arr'],
-                      gen:function*(a){const n=a.length;let g=Math.floor(n/2);yield{type:'pivot',idx:[],d:`初始 gap=${g}`};while(g>0){for(let i=g;i<n;i++){const t=a[i];yield{type:'pivot',idx:[i],d:`处理 arr[${i}]=${t}，gap=${g}`};let j=i;while(j>=g&&a[j-g]>t){yield{type:'compare',idx:[j-g,j],d:`比较`};a[j]=a[j-g];yield{type:'swap',idx:[j-g,j],d:`右移`};j-=g}a[j]=t}yield{type:'sorted',idx:Array.from({length:n},(_,x)=>x),d:`gap=${g}轮完成`};g=Math.floor(g/2);if(g>0)yield{type:'pivot',idx:[],d:`新gap=${g}`}}yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'merge', name:'归并排序', icon:'🔀', desc:'分治合并', complexity:{best:'O(n log n)',avg:'O(n log n)',worst:'O(n log n)',space:'O(n)'}, visualType:'array',
-                      pseudocode:['procedure mergeSort(arr, l, r)','    if l < r then','        m ← (l + r) / 2','        mergeSort(arr, l, m)','        mergeSort(arr, m+1, r)','        merge(arr, l, m, r)','    end if','end procedure','','procedure merge(arr, l, m, r)','    合并两个有序子数组','end procedure'],
-                      python:['def merge_sort(arr, l, r):','    if l < r:','        m = (l + r) // 2','        merge_sort(arr, l, m)','        merge_sort(arr, m + 1, r)','        merge(arr, l, m, r)','','def merge(arr, l, m, r):','    left = arr[l:m+1]','    right = arr[m+1:r+1]','    i = j = 0; k = l','    while i < len(left) and j < len(right):','        arr[k] = left[i] if left[i] <= right[j] else right[j]'],
-                      gen:function*(a){const self=this;function*mg(l,m,r){const la=a.slice(l,m+1),ra=a.slice(m+1,r+1);yield{type:'compare',idx:Array.from({length:r-l+1},(_,i)=>l+i),d:`合并[${l}..${m}]和[${m+1}..${r}]`};let i=0,j=0,k=l;while(i<la.length&&j<ra.length){if(la[i]<=ra[j])a[k++]=la[i++];else a[k++]=ra[j++]}while(i<la.length)a[k++]=la[i++];while(j<ra.length)a[k++]=ra[j++];yield{type:'sorted',idx:Array.from({length:r-l+1},(_,i)=>l+i),d:`合并完成`}}function*ms(l,r){if(l<r){const m=Math.floor((l+r)/2);yield*ms(l,m);yield*ms(m+1,r);yield*mg(l,m,r)}}yield*ms(0,a.length-1);yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'quick', name:'快速排序', icon:'⚡', desc:'枢轴分区递归', complexity:{best:'O(n log n)',avg:'O(n log n)',worst:'O(n²)',space:'O(log n)'}, visualType:'array',
-                      pseudocode:['procedure quickSort(arr, lo, hi)','    if lo < hi then','        pi ← partition(arr, lo, hi)','        quickSort(arr, lo, pi-1)','        quickSort(arr, pi+1, hi)','    end if','end procedure','','procedure partition(arr, lo, hi)','    pivot ← arr[hi]','    i ← lo - 1','    for j ← lo to hi-1 do','        if arr[j] <= pivot then','            i ← i + 1','            swap(arr[i], arr[j])','    swap(arr[i+1], arr[hi])','    return i + 1','end procedure'],
-                      python:['def quick_sort(arr, lo, hi):','    if lo < hi:','        pi = partition(arr, lo, hi)','        quick_sort(arr, lo, pi - 1)','        quick_sort(arr, pi + 1, hi)','','def partition(arr, lo, hi):','    pivot = arr[hi]','    i = lo - 1','    for j in range(lo, hi):','        if arr[j] <= pivot:','            i += 1','            arr[i], arr[j] = arr[j], arr[i]','    arr[i + 1], arr[hi] = arr[hi], arr[i + 1]','    return i + 1'],
-                      gen:function*(a){function*pt(lo,hi){const pv=a[hi];yield{type:'pivot',idx:[hi],d:`pivot=${pv}`};let i=lo-1;for(let j=lo;j<hi;j++){yield{type:'compare',idx:[j,hi],d:`比较${a[j]}和${pv}`};if(a[j]<=pv){i++;if(i!==j){yield{type:'swap',idx:[i,j],d:`交换`};[a[i],a[j]]=[a[j],a[i]]}}}if(i+1!==hi){yield{type:'swap',idx:[i+1,hi],d:`pivot归位`};[a[i+1],a[hi]]=[a[hi],a[i+1]]}yield{type:'sorted',idx:[i+1],d:`${a[i+1]}就位`};return i+1}function*qs(lo,hi){if(lo<hi){const pi=yield*pt(lo,hi);yield*qs(lo,pi-1);yield*qs(pi+1,hi)}else if(lo===hi)yield{type:'sorted',idx:[lo],d:`${a[lo]}就位`}}yield*qs(0,a.length-1);yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'heap', name:'堆排序', icon:'🌲', desc:'最大堆排序', complexity:{best:'O(n log n)',avg:'O(n log n)',worst:'O(n log n)',space:'O(1)'}, visualType:'array',
-                      pseudocode:['procedure heapSort(arr)','    n ← length(arr)','    // 构建最大堆','    for i ← n/2-1 downto 0 do','        heapify(arr, n, i)','    end for','    // 逐个取出','    for i ← n-1 downto 1 do','        swap(arr[0], arr[i])','        heapify(arr, i, 0)','    end for','end procedure'],
-                      python:['def heap_sort(arr):','    n = len(arr)','    for i in range(n // 2 - 1, -1, -1):','        heapify(arr, n, i)','    for i in range(n - 1, 0, -1):','        arr[0], arr[i] = arr[i], arr[0]','        heapify(arr, i, 0)','','def heapify(arr, n, i):','    largest = i','    l, r = 2*i+1, 2*i+2','    if l < n and arr[l] > arr[largest]:','        largest = l','    if r < n and arr[r] > arr[largest]:','        largest = r','    if largest != i:','        arr[i], arr[largest] = arr[largest], arr[i]','        heapify(arr, n, largest)'],
-                      gen:function*(a){const n=a.length;function*hp(sz,i){let l=2*i+1,r=2*i+2,largest=i;if(l<sz){yield{type:'compare',idx:[largest,l],d:`比较`};if(a[l]>a[largest])largest=l}if(r<sz){yield{type:'compare',idx:[largest,r],d:`比较`};if(a[r]>a[largest])largest=r}if(largest!==i){yield{type:'swap',idx:[i,largest],d:`交换`};[a[i],a[largest]]=[a[largest],a[i]];yield*hp(sz,largest)}}yield{type:'pivot',idx:[],d:'构建最大堆'};for(let i=Math.floor(n/2)-1;i>=0;i--)yield*hp(n,i);yield{type:'sorted',idx:Array.from({length:n},(_,x)=>x),d:'堆构建完成'};for(let i=n-1;i>0;i--){yield{type:'swap',idx:[0,i],d:`取出堆顶${a[0]}到${i}`};[a[0],a[i]]=[a[i],a[0]];yield{type:'sorted',idx:[i],d:`位置${i}固定`};yield*hp(i,0)}yield{type:'sorted',idx:[0],d:'完成'};yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'counting', name:'计数排序', icon:'🔢', desc:'统计计数重建', complexity:{best:'O(n+k)',avg:'O(n+k)',worst:'O(n+k)',space:'O(k)'}, visualType:'array',
-                      pseudocode:['procedure countingSort(arr)','    max ← max(arr)','    count ← array(max+1, 0)','    // 统计','    for i ← 0 to n-1 do','        count[arr[i]] ← count[arr[i]] + 1','    // 累加','    for i ← 1 to max do','        count[i] ← count[i] + count[i-1]','    // 重建','    for i ← n-1 downto 0 do','        output[count[arr[i]]-1] ← arr[i]','end procedure'],
-                      python:['def counting_sort(arr):','    max_val = max(arr)','    count = [0] * (max_val + 1)','    for val in arr:','        count[val] += 1','    for i in range(1, len(count)):','        count[i] += count[i - 1]','    output = [0] * len(arr)','    for val in reversed(arr):','        output[count[val] - 1] = val','        count[val] -= 1','    return output'],
-                      gen:function*(a){const mv=Math.max(...a),cnt=new Array(mv+1).fill(0),out=new Array(a.length);yield{type:'pivot',idx:[],d:`max=${mv}`};for(let i=0;i<a.length;i++){cnt[a[i]]++;yield{type:'compare',idx:[i],d:`统计${a[i]}`}}yield{type:'sorted',idx:Array.from({length:a.length},(_,x)=>x),d:`计数:${cnt.join(',')}`};for(let i=1;i<=mv;i++)cnt[i]+=cnt[i-1];yield{type:'pivot',idx:[],d:`累加完成`};for(let i=a.length-1;i>=0;i--){out[cnt[a[i]]-1]=a[i];cnt[a[i]]--;yield{type:'sorted',idx:[cnt[a[i]]],d:`放置${a[i]}`}}a.splice(0,a.length,...out);yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'radix', name:'基数排序', icon:'📐', desc:'按位排序', complexity:{best:'O(nk)',avg:'O(nk)',worst:'O(nk)',space:'O(n+k)'}, visualType:'array',
-                      pseudocode:['procedure radixSort(arr)','    max ← max(arr)','    exp ← 1','    while max/exp > 0 do','        countingSortByDigit(arr, exp)','        exp ← exp * 10','    end while','end procedure'],
-                      python:['def radix_sort(arr):','    max_val = max(arr)','    exp = 1','    while max_val // exp > 0:','        counting_sort_digit(arr, exp)','        exp *= 10','','def counting_sort_digit(arr, exp):','    n = len(arr)','    output = [0] * n','    count = [0] * 10','    for i in range(n):','        digit = (arr[i] // exp) % 10','        count[digit] += 1'],
-                      gen:function*(a){const mv=Math.max(...a);let exp=1;while(Math.floor(mv/exp)>0){yield{type:'pivot',idx:[],d:`按第${exp}位`};const out=new Array(a.length),cnt=new Array(10).fill(0);for(let i=0;i<a.length;i++){const d=Math.floor(a[i]/exp)%10;cnt[d]++;yield{type:'compare',idx:[i],d:`${a[i]}第${exp}位=${d}`}}for(let i=1;i<10;i++)cnt[i]+=cnt[i-1];for(let i=a.length-1;i>=0;i--){const d=Math.floor(a[i]/exp)%10;out[cnt[d]-1]=a[i];cnt[d]--}a.splice(0,a.length,...out);yield{type:'sorted',idx:Array.from({length:a.length},(_,x)=>x),d:`完成:${a.join(',')}`};exp*=10}yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'bucket', name:'桶排序', icon:'🪣', desc:'分桶插入排序', complexity:{best:'O(n+k)',avg:'O(n+k)',worst:'O(n²)',space:'O(n+k)'}, visualType:'array',
-                      pseudocode:['procedure bucketSort(arr)','    创建n个桶','    for i ← 0 to n-1 do','        将arr[i]放入对应桶','    for each bucket do','        对桶内排序','    合并所有桶','end procedure'],
-                      python:['def bucket_sort(arr):','    n = len(arr)','    buckets = [[] for _ in range(n)]','    for val in arr:','        idx = min(val * n // (max(arr) + 1), n-1)','        buckets[idx].append(val)','    for bucket in buckets:','        bucket.sort()','    return [val for bucket in buckets for val in bucket]'],
-                      gen:function*(a){const n=a.length,mv=Math.max(...a),bk=new Array(n).fill().map(()=>[]);yield{type:'pivot',idx:[],d:`创建${n}个桶`};for(let i=0;i<a.length;i++){const idx=Math.min(Math.floor(a[i]*(n-1)/(mv||1)),n-1);bk[idx].push(a[i]);yield{type:'compare',idx:[i],d:`${a[i]}放入桶${idx}`}}for(let i=0;i<n;i++)if(bk[i].length>0){bk[i].sort((x,y)=>x-y);yield{type:'sorted',idx:[],d:`桶${i}排序:${bk[i].join(',')}`}}const flat=bk.flat();a.splice(0,a.length,...flat);yield{type:'sorted',idx:Array.from({length:a.length},(_,x)=>x),d:`合并:${a.join(',')}`};yield{type:'complete',d:'完成!'}},
-                    }
-                ]
-            },
-            search: {
-                name: '搜索算法', icon: '🔍', color: '#0891b2',
-                algorithms: [
-                    { id:'linear', name:'线性搜索', icon:'👀', desc:'逐个检查', complexity:{best:'O(1)',avg:'O(n)',worst:'O(n)',space:'O(1)'}, visualType:'array',
-                      pseudocode:['procedure linearSearch(arr, target)','    for i ← 0 to n-1 do','        if arr[i] = target then','            return i','    return -1','end procedure'],
-                      python:['def linear_search(arr, target):','    for i, val in enumerate(arr):','        if val == target:','            return i','    return -1'],
-                      gen:function*(a,t){for(let i=0;i<a.length;i++){yield{type:'compare',idx:[i],d:`检查${a[i]}`};if(a[i]===t){yield{type:'found',idx:[i],d:`找到${t}!`};return}}yield{type:'complete',d:`未找到${t}`}},
-                    },
-                    { id:'binary', name:'二分搜索', icon:'⚔️', desc:'折半查找', complexity:{best:'O(1)',avg:'O(log n)',worst:'O(log n)',space:'O(1)'}, visualType:'array',
-                      pseudocode:['procedure binarySearch(arr, target)','    lo ← 0, hi ← n-1','    while lo <= hi do','        mid ← (lo + hi) / 2','        if arr[mid] = target then','            return mid','        else if arr[mid] < target then','            lo ← mid + 1','        else hi ← mid - 1','    end while','    return -1','end procedure'],
-                      python:['def binary_search(arr, target):','    lo, hi = 0, len(arr) - 1','    while lo <= hi:','        mid = (lo + hi) // 2','        if arr[mid] == target:','            return mid','        elif arr[mid] < target:','            lo = mid + 1','        else: hi = mid - 1','    return -1'],
-                      gen:function*(a,t){let lo=0,hi=a.length-1;while(lo<=hi){const mid=Math.floor((lo+hi)/2);yield{type:'compare',idx:Array.from({length:hi-lo+1},(_,i)=>lo+i),d:`搜索[${lo},${hi}]，查mid=${mid}`};yield{type:'pivot',idx:[mid],d:`arr[${mid}]=<span class="value">${a[mid]}</span>`};if(a[mid]===t){yield{type:'found',idx:[mid],d:`找到<span class="highlight">${t}</span>!`};return}else if(a[mid]<t){lo=mid+1;yield{type:'compare',idx:[mid],d:`${a[mid]}<${t}，右半`}}else{hi=mid-1;yield{type:'compare',idx:[mid],d:`${a[mid]}>${t}，左半`}}}yield{type:'complete',d:`未找到${t}`}},
-                    }
-                ]
-            },
-            linkedlist: {
-                name: '链表', icon: '🔗', color: '#ec4899',
-                algorithms: [
-                    { id:'ll_create', name:'创建链表', icon:'➕', desc:'从数组创建链表', complexity:{best:'O(n)',avg:'O(n)',worst:'O(n)',space:'O(n)'}, visualType:'linkedlist',
-                      pseudocode:['procedure createList(arr)','    head ← Node(arr[0])','    current ← head','    for i ← 1 to n-1 do','        current.next ← Node(arr[i])','        current ← current.next','    return head','end procedure'],
-                      python:['class ListNode:','    def __init__(self, val=0):','        self.val = val','        self.next = None','','def create_linked_list(arr):','    if not arr: return None','    head = ListNode(arr[0])','    cur = head','    for val in arr[1:]:','        cur.next = ListNode(val)','        cur = cur.next','    return head'],
-                      gen:function*(a){for(let i=0;i<a.length;i++){yield{type:'sorted',idx:[i],d:`创建节点${a[i]}`}}yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'ll_insert', name:'插入节点', icon:'📥', desc:'指定位置插入', complexity:{best:'O(1)',avg:'O(n)',worst:'O(n)',space:'O(1)'}, visualType:'linkedlist',
-                      pseudocode:['procedure insertNode(head, pos, val)','    new ← Node(val)','    if pos = 0 then','        new.next ← head','        return new','    cur ← head','    for i ← 0 to pos-2 do','        cur ← cur.next','    new.next ← cur.next','    cur.next ← new','    return head','end procedure'],
-                      python:['def insert_node(head, pos, val):','    new = ListNode(val)','    if pos == 0:','        new.next = head','        return new','    cur = head','    for _ in range(pos - 1):','        cur = cur.next','    new.next = cur.next','    cur.next = new','    return head'],
-                      gen:function*(a,pos,v){const p=pos!==undefined?pos:Math.floor(a.length/2),val=v!==undefined?v:Math.floor(Math.random()*50)+10;yield{type:'pivot',idx:[],d:`在${p}插入${val}`};for(let i=0;i<a.length;i++){if(i===p-1||(p===0&&i===0))yield{type:'compare',idx:[i],d:`前驱${a[i]}`};else if(i<p)yield{type:'sorted',idx:[i],d:`遍历${a[i]}`}}yield{type:'inserting',idx:[p],d:`插入${val}`};yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'ll_delete', name:'删除节点', icon:'🗑️', desc:'删除指定位置', complexity:{best:'O(1)',avg:'O(n)',worst:'O(n)',space:'O(1)'}, visualType:'linkedlist',
-                      pseudocode:['procedure deleteNode(head, pos)','    if pos = 0 then','        return head.next','    cur ← head','    for i ← 0 to pos-2 do','        cur ← cur.next','    cur.next ← cur.next.next','    return head','end procedure'],
-                      python:['def delete_node(head, pos):','    if pos == 0:','        return head.next','    cur = head','    for _ in range(pos - 1):','        cur = cur.next','    cur.next = cur.next.next','    return head'],
-                      gen:function*(a,pos){const p=pos!==undefined?pos:Math.floor(a.length/2);yield{type:'pivot',idx:[],d:`删除位置${p}，值${a[p]}`};for(let i=0;i<a.length;i++){if(i===p-1)yield{type:'compare',idx:[i],d:`前驱${a[i]}`};else if(i<p)yield{type:'sorted',idx:[i],d:`遍历${a[i]}`};else if(i===p)yield{type:'inserting',idx:[i],d:`删除${a[i]}`}}yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'ll_search', name:'查找节点', icon:'🔎', desc:'查找指定值', complexity:{best:'O(1)',avg:'O(n)',worst:'O(n)',space:'O(1)'}, visualType:'linkedlist',
-                      pseudocode:['procedure searchNode(head, target)','    cur ← head, idx ← 0','    while cur ≠ null do','        if cur.val = target then','            return idx','        cur ← cur.next','        idx ← idx + 1','    return -1','end procedure'],
-                      python:['def search_node(head, target):','    cur, idx = head, 0','    while cur:','        if cur.val == target:','            return idx','        cur = cur.next','        idx += 1','    return -1'],
-                      gen:function*(a,t){for(let i=0;i<a.length;i++){yield{type:'compare',idx:[i],d:`检查${a[i]}`};if(a[i]===t){yield{type:'found',idx:[i],d:`找到${t}!`};return}}yield{type:'complete',d:`未找到${t}`}},
-                    },
-                    { id:'ll_reverse', name:'链表反转', icon:'🔄', desc:'反转链表方向', complexity:{best:'O(n)',avg:'O(n)',worst:'O(n)',space:'O(1)'}, visualType:'linkedlist',
-                      pseudocode:['procedure reverseList(head)','    prev ← null','    cur ← head','    while cur ≠ null do','        next ← cur.next','        cur.next ← prev','        prev ← cur','        cur ← next','    return prev','end procedure'],
-                      python:['def reverse_list(head):','    prev = None','    cur = head','    while cur:','        nxt = cur.next','        cur.next = prev','        prev = cur','        cur = nxt','    return prev'],
-                      gen:function*(a){yield{type:'pivot',idx:[],d:'开始反转'};for(let i=0;i<a.length;i++){yield{type:'swap',idx:[i],d:`反转节点${a[i]}`};yield{type:'sorted',idx:[i],d:`节点${a[i]}完成`}}yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'ll_doubly_create', name:'双向链表创建', icon:'↔️', desc:'创建双向链表', complexity:{best:'O(n)',avg:'O(n)',worst:'O(n)',space:'O(n)'}, visualType:'linkedlist',
-                      pseudocode:['procedure createDoublyList(arr)','    head ← DNode(arr[0])','    prev ← head','    for i ← 1 to n-1 do','        new ← DNode(arr[i])','        prev.next ← new','        new.prev ← prev','        prev ← new','    return head','end procedure'],
-                      python:['class DListNode:','    def __init__(self, val=0):','        self.val = val','        self.prev = None','        self.next = None','','def create_doubly_list(arr):','    head = DListNode(arr[0])','    prev = head','    for val in arr[1:]:','        new = DListNode(val)','        prev.next = new','        new.prev = prev','        prev = new','    return head'],
-                      gen:function*(a){for(let i=0;i<a.length;i++){yield{type:'sorted',idx:[i],d:`创建双向节点${a[i]}`}}yield{type:'complete',d:'完成!'}},
-                    }
-                ]
-            },
-            tree: {
-                name: '树', icon: '🌳', color: '#10b981',
-                algorithms: [
-                    { id:'tree_preorder', name:'前序遍历', icon:'📋', desc:'根→左→右', complexity:{best:'O(n)',avg:'O(n)',worst:'O(n)',space:'O(h)'}, visualType:'tree',
-                      treeData:{nodes:[{v:50,x:280,y:25},{v:30,x:140,y:75},{v:70,x:420,y:75},{v:20,x:70,y:125},{v:40,x:210,y:125},{v:60,x:350,y:125},{v:80,x:490,y:125}],edges:[{f:0,t:1},{f:0,t:2},{f:1,t:3},{f:1,t:4},{f:2,t:5},{f:2,t:6}],left:[1,3,4,-1,-1,5,6,-1],right:[2,-1,-1,-1,-1,-1,-1,-1]},
-                      pseudocode:['procedure preorder(node)','    if node = null then return','    visit(node.val)','    preorder(node.left)','    preorder(node.right)','end procedure'],
-                      python:['def preorder(node):','    if not node: return','    print(node.val)','    preorder(node.left)','    preorder(node.right)'],
-                      gen:function*(nd,ed){const ord=[];function*tr(i){if(i===-1)return;ord.push(i);yield{type:'current',idx:[i],d:`访问${nd[i].v}`};yield*tr(ed[i].l);yield*tr(ed[i].r)}}yield*tr(0);yield{type:'complete',d:`顺序:[${ord.map(i=>nd[i].v).join(',')}]`}},
-                    },
-                    { id:'tree_inorder', name:'中序遍历', icon:'📜', desc:'左→根→右(有序)', complexity:{best:'O(n)',avg:'O(n)',worst:'O(n)',space:'O(h)'}, visualType:'tree',
-                      treeData:{nodes:[{v:50,x:280,y:25},{v:30,x:140,y:75},{v:70,x:420,y:75},{v:20,x:70,y:125},{v:40,x:210,y:125},{v:60,x:350,y:125},{v:80,x:490,y:125}],edges:[{f:0,t:1},{f:0,t:2},{f:1,t:3},{f:1,t:4},{f:2,t:5},{f:2,t:6}],left:[1,3,4,-1,-1,5,6,-1],right:[2,-1,-1,-1,-1,-1,-1,-1]},
-                      pseudocode:['procedure inorder(node)','    if node = null then return','    inorder(node.left)','    visit(node.val)','    inorder(node.right)','end procedure'],
-                      python:['def inorder(node):','    if not node: return','    inorder(node.left)','    print(node.val)','    inorder(node.right)'],
-                      gen:function*(nd,ed){const ord=[];function*tr(i){if(i===-1)return;yield*tr(ed[i].l);ord.push(i);yield{type:'current',idx:[i],d:`访问${nd[i].v}`};yield*tr(ed[i].r)}}yield*tr(0);yield{type:'complete',d:`顺序:[${ord.map(i=>nd[i].v).join(',')}]`}},
-                    },
-                    { id:'tree_postorder', name:'后序遍历', icon:'📑', desc:'左→右→根', complexity:{best:'O(n)',avg:'O(n)',worst:'O(n)',space:'O(h)'}, visualType:'tree',
-                      treeData:{nodes:[{v:50,x:280,y:25},{v:30,x:140,y:75},{v:70,x:420,y:75},{v:20,x:70,y:125},{v:40,x:210,y:125},{v:60,x:350,y:125},{v:80,x:490,y:125}],edges:[{f:0,t:1},{f:0,t:2},{f:1,t:3},{f:1,t:4},{f:2,t:5},{f:2,t:6}],left:[1,3,4,-1,-1,5,6,-1],right:[2,-1,-1,-1,-1,-1,-1,-1]},
-                      pseudocode:['procedure postorder(node)','    if node = null then return','    postorder(node.left)','    postorder(node.right)','    visit(node.val)','end procedure'],
-                      python:['def postorder(node):','    if not node: return','    postorder(node.left)','    postorder(node.right)','    print(node.val)'],
-                      gen:function*(nd,ed){const ord=[];function*tr(i){if(i===-1)return;yield*tr(ed[i].l);yield*tr(ed[i].r);ord.push(i);yield{type:'current',idx:[i],d:`访问${nd[i].v}`}}yield*tr(0);yield{type:'complete',d:`顺序:[${ord.map(i=>nd[i].v).join(',')}]`}},
-                    },
-                    { id:'bst_insert', name:'BST插入', icon:'🌱', desc:'插入保持BST性质', complexity:{best:'O(log n)',avg:'O(log n)',worst:'O(n)',space:'O(h)'}, visualType:'tree',
-                      treeData:{nodes:[{v:50,x:280,y:25},{v:30,x:140,y:75},{v:70,x:420,y:75},{v:20,x:70,y:125},{v:40,x:210,y:125},{v:60,x:350,y:125},{v:80,x:490,y:125}],edges:[{f:0,t:1},{f:0,t:2},{f:1,t:3},{f:1,t:4},{f:2,t:5},{f:2,t:6}],left:[1,3,4,-1,-1,5,6,-1],right:[2,-1,-1,-1,-1,-1,-1,-1]},
-                      pseudocode:['procedure bstInsert(node, val)','    if node = null then','        return Node(val)','    if val < node.val then','        node.left ← bstInsert(node.left,val)','    else','        node.right ← bstInsert(node.right,val)','    return node','end procedure'],
-                      python:['def bst_insert(node, val):','    if not node:','        return TreeNode(val)','    if val < node.val:','        node.left = bst_insert(node.left, val)','    else:','        node.right = bst_insert(node.right, val)','    return node'],
-                      gen:function*(nd,ed,val){const v=val||Math.floor(Math.random()*60)+15;yield{type:'pivot',idx:[],d:`插入${v}`};yield{type:'current',idx:[0],d:`根${nd[0].v}，${v<nd[0].v?'左':'右'}`};let cur=0,path=[0];while(true){const nv=nd[cur].v;if(v<nv){const l=ed[cur].l;if(l===-1){yield{type:'sorted',idx:path,d:`找到位置`};break}cur=l;path.push(cur);yield{type:'current',idx:[cur],d:`向左${nd[cur].v}`}}else{const r=ed[cur].r;if(r===-1){yield{type:'sorted',idx:path,d:`找到位置`};break}cur=r;path.push(cur);yield{type:'current',idx:[cur],d:`向右${nd[cur].v}`}}}yield{type:'complete',d:'完成!'}},
-                    },
-                    { id:'bst_search', name:'BST搜索', icon:'🎯', desc:'BST中查找', complexity:{best:'O(log n)',avg:'O(log n)',worst:'O(n)',space:'O(h)'}, visualType:'tree',
-                      treeData:{nodes:[{v:50,x:280,y:25},{v:30,x:140,y:75},{v:70,x:420,y:75},{v:20,x:70,y:125},{v:40,x:210,y:125},{v:60,x:350,y:125},{v:80,x:490,y:125}],edges:[{f:0,t:1},{f:0,t:2},{f:1,t:3},{f:1,t:4},{f:2,t:5},{f:2,t:6}],left:[1,3,4,-1,-1,5,6,-1],right:[2,-1,-1,-1,-1,-1,-1,-1]},
-                      pseudocode:['procedure bstSearch(node, target)','    while node ≠ null do','        if node.val = target then','            return node','        if target < node.val then','            node ← node.left','        else','            node ← node.right','    return null','end procedure'],
-                      python:['def bst_search(node, target):','    while node:','        if node.val == target:','            return node','        elif target < node.val:','            node = node.left','        else:','            node = node.right','    return None'],
-                      gen:function*(nd,ed,t){let cur=0;yield{type:'pivot',idx:[],d:`搜索${t}`};while(cur!==-1){yield{type:'current',idx:[cur],d:`检查${nd[cur].v}`};if(nd[cur].v===t){yield{type:'found',idx:[cur],d:`找到${t}!`};return}else if(t<nd[cur].v){cur=ed[cur].l;if(cur!==-1)yield{type:'compare',idx:[cur],d:`向左`}}else{cur=ed[cur].r;if(cur!==-1)yield{type:'compare',idx:[cur],d:`向右`}}}yield{type:'complete',d:`未找到${t}`}},
-                    },
-                    { id:'avl_rotate', name:'AVL旋转', icon:'🔄', desc:'AVL树旋转演示', complexity:{best:'O(1)',avg:'O(1)',worst:'O(1)',space:'O(1)'}, visualType:'tree',
-                      treeData:{nodes:[{v:30,x:280,y:25},{v:20,x:140,y:75},{v:40,x:420,y:75},{v:10,x:70,y:125}],edges:[{f:0,t:1},{f:0,t:2},{f:1,t:3}],left:[1,3,-1,-1],right:[2,-1,-1,-1]},
-                      pseudocode:['// 右旋 (LL型)','procedure rightRotate(y)','    x ← y.left','    T2 ← x.right','    x.right ← y','    y.left ← T2','    return x','','// 左旋 (RR型)','procedure leftRotate(x)','    y ← x.right','    T2 ← y.left','    y.left ← x','    x.right ← T2','    return y'],
-                      python:['def right_rotate(y):','    x = y.left','    T2 = x.right','    x.right = y','    y.left = T2','    return x','','def left_rotate(x):','    y = x.right','    T2 = y.left','    y.left = x','    x.right = T2','    return y'],
-                      gen:function*(nd,ed){yield{type:'current',idx:[0],d:`根节点${nd[0].v}，需要右旋`};yield{type:'pivot',idx:[1],d:`旋转节点${nd[1].v}`};yield{type:'sorted',idx:[2],d:`子树${nd[2].v}重新连接`};yield{type:'sorted',idx:Array.from({length:nd.length},(_,i)=>i),d:'旋转完成'};yield{type:'complete',d:'完成!'}},
-                    }
-                ]
-            },
-            graph: {
-                name: '图', icon: '🔀', color: '#f59e0b',
-                algorithms: [
-                    { id:'bfs', name:'BFS广度优先', icon:'🌊', desc:'按层访问', complexity:{best:'O(V+E)',avg:'O(V+E)',worst:'O(V+E)',space:'O(V)'}, visualType:'graph',
-                      graphData:{nodes:[{v:'A',x:45,y:120},{v:'B',x:140,y:45},{v:'C',x:140,y:195},{v:'D',x:255,y:75},{v:'E',x:255,y:165},{v:'F',x:370,y:120}],edges:[{f:0,t:1,w:4},{f:0,t:2,w:2},{f:1,t:3,w:5},{f:1,t:4,w:1},{f:2,t:4,w:3},{f:3,t:5,w:2},{f:4,t:5,w:6}]},
-                      pseudocode:['procedure bfs(graph, start)','    visited ← {start}','    queue ← [start]','    while queue not empty do','        v ← dequeue()','        for neighbor in graph[v] do','            if neighbor not in visited then','                visited.add(neighbor)','                enqueue(neighbor)','        end for','    end while','end procedure'],
-                      python:['from collections import deque','','def bfs(graph, start):','    visited = {start}','    queue = deque([start])','    while queue:','        v = queue.popleft()','        for neighbor in graph[v]:','            if neighbor not in visited:','                visited.add(neighbor)','                queue.append(neighbor)'],
-                      gen:function*(g){const vis=new Set(),q=[0];vis.add(0);yield{type:'queued',idx:[0],d:`起点${g.nodes[0].v}入队`};while(q.length>0){const n=q.shift();yield{type:'current',idx:[n],d:`访问${g.nodes[n].v}`};const nb=[];g.edges.forEach(e=>{if(e.f===n&&!vis.has(e.t))nb.push(e.t);if(e.t===n&&!vis.has(e.f)&&!g.directed)nb.push(e.f)});for(const nn of nb){if(!vis.has(nn)){vis.add(nn);q.push(nn);yield{type:'queued',idx:[nn],d:`${g.nodes[nn].v}入队`}}}}yield{type:'complete',d:`完成:[${[...vis].map(i=>g.nodes[i].v).join(',')}]`}},
-                    },
-                    { id:'dfs', name:'DFS深度优先', icon:'🧭', desc:'深入回溯', complexity:{best:'O(V+E)',avg:'O(V+E)',worst:'O(V+E)',space:'O(V)'}, visualType:'graph',
-                      graphData:{nodes:[{v:'A',x:45,y:120},{v:'B',x:140,y:45},{v:'C',x:140,y:195},{v:'D',x:255,y:75},{v:'E',x:255,y:165},{v:'F',x:370,y:120}],edges:[{f:0,t:1,w:4},{f:0,t:2,w:2},{f:1,t:3,w:5},{f:1,t:4,w:1},{f:2,t:4,w:3},{f:3,t:5,w:2},{f:4,t:5,w:6}]},
-                      pseudocode:['procedure dfs(graph, start)','    visited ← empty set','    stack ← [start]','    while stack not empty do','        v ← pop()','        if v not in visited then','            visited.add(v)','            for neighbor in graph[v] do','                push(neighbor)','        end if','    end while','end procedure'],
-                      python:['def dfs(graph, start):','    visited = set()','    stack = [start]','    while stack:','        v = stack.pop()','        if v not in visited:','            visited.add(v)','            for neighbor in graph[v]:','                stack.append(neighbor)'],
-                      gen:function*(g){const vis=new Set(),st=[0];while(st.length>0){const n=st.pop();if(vis.has(n))continue;vis.add(n);yield{type:'current',idx:[n],d:`访问${g.nodes[n].v}`};const nb=[];g.edges.forEach(e=>{if(e.f===n&&!vis.has(e.t))nb.push(e.t);if(e.t===n&&!vis.has(e.f)&&!g.directed)nb.push(e.f)});for(const nn of[...nb].reverse())if(!vis.has(nn))st.push(nn)}yield{type:'complete',d:`完成:[${[...vis].map(i=>g.nodes[i].v).join(',')}]`}},
-                    },
-                    { id:'dijkstra', name:'Dijkstra最短路', icon:'📍', desc:'最短路径', complexity:{best:'O(V²)',avg:'O(E log V)',worst:'O(E log V)',space:'O(V)'}, visualType:'graph',
-                      graphData:{nodes:[{v:'A',x:45,y:120},{v:'B',x:140,y:45},{v:'C',x:140,y:195},{v:'D',x:255,y:75},{v:'E',x:255,y:165},{v:'F',x:370,y:120}],edges:[{f:0,t:1,w:4},{f:0,t:2,w:2},{f:1,t:3,w:5},{f:1,t:4,w:1},{f:2,t:4,w:3},{f:3,t:5,w:2},{f:4,t:5,w:6}]},
-                      pseudocode:['procedure dijkstra(graph, src)','    dist[src] ← 0','    for each v ≠ src do','        dist[v] ← ∞','    S ← empty set','    while src not in S do','        u ← vertex with min dist not in S','        add u to S','        for each neighbor v of u do','            if dist[u] + w(u,v) < dist[v] then','                dist[v] ← dist[u] + w(u,v)','    end while','end procedure'],
-                      python:['import heapq','','def dijkstra(graph, src):','    dist = {v: float(\'inf\') for v in graph}','    dist[src] = 0','    pq = [(0, src)]','    while pq:','        d, u = heapq.heappop(pq)','        if d > dist[u]: continue','        for v, w in graph[u]:','            if dist[u] + w < dist[v]:','                dist[v] = dist[u] + w','                heapq.heappush(pq, (dist[v], v))','    return dist'],
-                      gen:function*(g){const dist=new Array(g.nodes.length).fill(Infinity),vis=new Set();dist[0]=0;yield{type:'pivot',idx:[0],d:`起点A，距离0`};while(vis.size<g.nodes.length){let minD=Infinity,minI=-1;for(let i=0;i<dist.length;i++)if(!vis.has(i)&&dist[i]<minD){minD=dist[i];minI=i}if(minI===-1)break;vis.add(minI);yield{type:'current',idx:[minI],d:`访问${g.nodes[minI].v}，距离${dist[minI]}`};g.edges.forEach(e=>{if(e.f===minI&&!vis.has(e.t)){const nd=dist[minI]+e.w;if(nd<dist[e.t]){dist[e.t]=nd;yield{type:'queued',idx:[e.t],d:`${g.nodes[e.t].v}距离${nd}`}}}})}}yield{type:'complete',d:`完成!`}},
-                    }
-                ]
-            }
-        };
-
-        // ==================== 状态 ====================
-        const S = {
-            cat:'sort', algo:null, arr:[], orig:[], steps:[], step:-1, playing:false, speed:1, id:null, target:50
-        };
-
-        // ==================== DOM ====================
-        const $ = id => document.getElementById(id);
-        const catTabs = $('categoryTabs');
-        const algoCards = $('algorithmCards');
-        const algoInfo = $('algorithmInfo');
-        const visualContainer = $('visualContainer');
-        const controlBar = $('controlBar');
-        const codePanels = $('codePanels');
-        const canvas = $('visualizationCanvas');
-        const legend = $('legend');
-
-        // ==================== 初始化 ====================
-        function init() {
-            renderCats();
-            selectCat('sort');
-            bindEvents();
-        }
-
-        function renderCats() {
-            catTabs.innerHTML = Object.keys(algorithmData).map(k =>
-                `<button class="category-tab${k==='sort'?' active':''}" data-cat="${k}">${algorithmData[k].icon} ${algorithmData[k].name}</button>`
-            ).join('');
-        }
-
-        function selectCat(cat) {
-            S.cat = cat;
-            S.algo = null;
-            document.querySelectorAll('.category-tab').forEach(t => t.classList.toggle('active', t.dataset.cat === cat));
-            algoCards.innerHTML = algorithmData[cat].algorithms.map(a =>
-                `<div class="algorithm-card" data-id="${a.id}"><div class="algorithm-card-icon">${a.icon}</div><div class="algorithm-card-name">${a.name}</div><div class="algorithm-card-complexity">${a.complexity.avg}</div></div>`
-            ).join('');
-            algoInfo.style.display = 'none';
-            visualContainer.style.display = 'none';
-            controlBar.style.display = 'none';
-            codePanels.style.display = 'none';
-            $('stepText').textContent = '请选择一个算法';
-        }
-
-        function selectAlgo(id) {
-            const cat = algorithmData[S.cat];
-            const a = cat.algorithms.find(x => x.id === id);
-            if (!a) return;
-            S.algo = a;
-            S.arr = genData(a);
-            S.orig = [...S.arr];
-            S.steps = [];
-            S.step = -1;
-
-            document.querySelectorAll('.algorithm-card').forEach(c => c.classList.toggle('active', c.dataset.id === id));
-            $('algoName').textContent = a.name;
-            $('algoDesc').textContent = a.desc;
-            $('complexityBadges').innerHTML = `<span class="complexity-badge best">最佳 ${a.complexity.best}</span><span class="complexity-badge avg">平均 ${a.complexity.avg}</span><span class="complexity-badge worst">最差 ${a.complexity.worst}</span><span class="complexity-badge space">空间 ${a.complexity.space}</span>`;
-            $('visualBadge').textContent = {array:'数组',linkedlist:'链表',tree:'树',graph:'图'}[a.visualType] || '数组';
-            $('visualTitle').textContent = a.name + ' 可视化';
-            $('inputHint').textContent = a.visualType === 'array' || a.visualType === 'linkedlist' ? '输入1-12个整数' : '暂不支持自定义';
-            $('customInput').disabled = a.visualType !== 'array' && a.visualType !== 'linkedlist';
-            $('applyInputBtn').disabled = a.visualType !== 'array' && a.visualType !== 'linkedlist';
-            algoInfo.style.display = 'grid';
-            visualContainer.style.display = 'block';
-            controlBar.style.display = 'flex';
-            codePanels.style.display = 'grid';
-            legend.style.display = a.visualType === 'array' ? 'flex' : 'none';
-
-            renderCode();
-            renderViz();
-            $('stepText').textContent = '点击开始';
-            updateProgress();
-        }
-
-        function genData(a) {
-            const n = a.visualType === 'linkedlist' ? 6 : 8;
-            const base = S.cat === 'linkedlist' ? 10 : 15;
-            const arr = Array.from({length: n}, () => Math.floor(Math.random() * 70) + base);
-            if (S.cat === 'search') arr.sort((x,y) => x-y);
-            S.target = arr[Math.floor(Math.random() * arr.length)];
-            return arr;
-        }
-
-        // ==================== 代码渲染 ====================
-        function renderCode() {
-            const a = S.algo;
-            const hl = c => !c ? '&nbsp;' : c.replace(/\b(procedure|function|def|if|elif|else|while|for|in|return|class|from|import|not|and|or|True|False|None|new|then|end|to|downto|break|continue)\b/g,'<span class="code-keyword">$1</span>').replace(/\b(\d+)\b/g,'<span class="code-number">$1</span>').replace(/#.*/g,'<span class="code-comment">$1</span>').replace(/(\+|-|\*|\/|=|<|>|<=|>=|←|→|<>)/g,'<span class="code-operator">$1</span>');
-            $('pseudocodePanel').innerHTML = a.pseudocode.map((c,i) => `<div class="code-line" data-l="${i}"><span class="line-number">${i+1}</span><span class="line-content">${hl(c)}</span></div>`).join('');
-            $('pythoncodePanel').innerHTML = a.python.map((c,i) => `<div class="code-line" data-l="${i}"><span class="line-number">${i+1}</span><span class="line-content">${hl(c)}</span></div>`).join('');
-        }
-
-        // ==================== 可视化渲染 ====================
-        function renderViz() {
-            const a = S.algo;
-            switch (a.visualType) {
-                case 'array': renderArr(); break;
-                case 'linkedlist': renderLL(); break;
-                case 'tree': renderTree(a); break;
-                case 'graph': renderGraph(a); break;
-            }
-        }
-
-        function renderArr() {
-            const mx = Math.max(...S.arr);
-            canvas.innerHTML = `<div class="array-container">${S.arr.map((v,i) => `<div class="array-bar" data-i="${i}"><span class="array-bar-value">${v}</span><div class="array-bar-inner" style="height:${(v/mx)*140+25}px"></div></div>`).join('')}</div>`;
-        }
-
-        function renderLL() {
-            canvas.innerHTML = `<div class="linked-list-container">${S.arr.map((v,i) => `<div class="ll-node" data-i="${i}"><div class="ll-node-box"><span class="ll-node-data">${v}</span><span class="ll-node-pointer">→</span></div></div>${i<S.arr.length-1?'<div class="ll-arrow"></div>':'<div class="ll-null">NULL</div>'}`).join('')}</div>`;
-        }
-
-        function renderTree(a) {
-            const td = a.treeData;
-            canvas.innerHTML = `<div class="tree-container" style="min-width:550px">${td.edges.map((e,i) => {const f=td.nodes[e.f],t=td.nodes[e.t],dx=t.x-f.x,dy=t.y-f.y,l=Math.sqrt(dx*dx+dy*dy),a2=Math.atan2(dy,dx)*180/Math.PI;return `<div class="tree-edge" data-i="${i}" style="left:${f.x+19}px;top:${f.y+19}px;width:${l-38}px;transform:rotate(${a2}deg)"></div>`}).join('')}${td.nodes.map((n,i) => `<div class="tree-node" data-i="${i}" style="left:${n.x}px;top:${n.y}px">${n.v}</div>`).join('')}</div>`;
-        }
-
-        function renderGraph(a) {
-            const gd = a.graphData;
-            canvas.innerHTML = `<div class="graph-container">${gd.edges.map((e,i) => {const f=gd.nodes[e.f],t=gd.nodes[e.t],dx=t.x-f.x,dy=t.y-f.y,l=Math.sqrt(dx*dx+dy*dy),a2=Math.atan2(dy,dx)*180/Math.PI,mx=(f.x+t.x)/2,my=(f.y+t.y)/2;return `<div class="graph-edge" data-i="${i}" style="left:${f.x+21}px;top:${f.y+21}px;width:${l-42}px;transform:rotate(${a2}deg)"></div><span class="graph-edgeLabel" style="left:${mx}px;top:${my-8}px">${e.w}</span>`}).join('')}${gd.nodes.map((n,i) => `<div class="graph-node" data-i="${i}" style="left:${n.x}px;top:${n.y}px">${n.v}</div>`).join('')}</div>`;
-        }
-
-        function updateViz(step) {
-            const a = S.algo;
-            const clearCls = cls => document.querySelectorAll('.'+cls).forEach(el => el.classList.remove(cls));
-            clearCls('comparing'); clearCls('swapping'); clearCls('sorted'); clearCls('pivot'); clearCls('found'); clearCls('highlight'); clearCls('current'); clearCls('in-queue'); clearCls('inserting');
-
-            if (!step) return;
-            if (step.idx) step.idx.forEach(i => {
-                const el = document.querySelector(`[data-i="${i}"]`);
-                if (el && step.type) el.classList.add(step.type === 'compare' ? 'comparing' : step.type === 'swap' ? 'swapping' : step.type === 'pivot' ? 'pivot' : step.type === 'found' ? 'found' : 'sorted');
-            });
-        }
-
-        // ==================== 算法执行 ====================
-        function prepSteps() {
-            const a = S.algo;
-            S.steps = [];
-            if (!a) return;
-
-            if (a.visualType === 'array' || a.visualType === 'linkedlist') {
-                let arr = [...S.orig];
-                const gen = a.gen(arr, S.target);
-                let r;
-                while (!(r = gen.next()).done) S.steps.push({...r.value});
-            } else if (a.visualType === 'tree') {
-                const td = a.treeData;
-                const nd = [...td.nodes];
-                const ed = td.edges.map((e,i) => ({l:td.left[i],r:td.right[i]}));
-                const gen = a.gen(nd, ed, S.target);
-                let r;
-                while (!(r = gen.next()).done) S.steps.push({...r.value});
-            } else if (a.visualType === 'graph') {
-                const gd = {...a.graphData};
-                const gen = a.gen(gd);
-                let r;
-                while (!(r = gen.next()).done) S.steps.push({...r.value});
-            }
-        }
-
-        function execStep(idx) {
-            if (idx >= S.steps.length) { finish(); return; }
-            const step = S.steps[idx];
-            S.step = idx;
-            $('stepCurrent').textContent = idx + 1;
-            $('stepTotal').textContent = S.steps.length;
-            $('stepText').innerHTML = step.d;
-            updateViz(step);
-            updateProgress();
-        }
-
-        function updateProgress() {
-            const pct = S.steps.length ? ((S.step + 1) / S.steps.length * 100) : 0;
-            $('progressFill').style.width = pct + '%';
-        }
-
-        async function play() {
-            if (S.steps.length === 0) prepSteps();
-            if (S.step >= S.steps.length - 1) { reset(); return; }
-            S.playing = true;
-            updateCtrl();
-            while (S.playing && S.step < S.steps.length - 1) {
-                await new Promise(r => setTimeout(r, 400 / S.speed));
-                execStep(++S.step);
-            }
-            if (S.step >= S.steps.length - 1) finish();
-            S.playing = false;
-            updateCtrl();
-        }
-
-        function pause() {
-            S.playing = false;
-            updateCtrl();
-        }
-
-        function stepFwd() {
-            if (S.steps.length === 0) prepSteps();
-            if (S.step < S.steps.length - 1) execStep(++S.step);
-            else finish();
-        }
-
-        function stepBack() {
-            if (S.step > 0) execStep(--S.step);
-        }
-
-        function reset() {
-            pause();
-            S.arr = [...S.orig];
-            S.step = -1;
-            S.steps = [];
-            renderViz();
-            $('stepCurrent').textContent = '0';
-            $('stepTotal').textContent = '0';
-            $('stepText').textContent = '点击开始';
-            updateProgress();
-            updateCtrl();
-        }
-
-        function finish() {
-            pause();
-            $('completionTitle').textContent = S.algo.name + ' 完成!';
-            $('completionStats').textContent = `共 ${S.steps.length} 步`;
-            $('completionOverlay').classList.add('show');
-        }
-
-        function updateCtrl() {
-            const run = S.playing;
-            $('startBtn').className = `control-btn ${run?'secondary':'primary'}`;
-            $('startIcon').textContent = run ? '⏸' : '▶';
-            $('startText').textContent = run ? '暂停' : '开始';
-            $('prevBtn').disabled = run || S.step <= 0;
-        }
-
-        // ==================== 事件 ====================
-        function bindEvents() {
-            catTabs.addEventListener('click', e => { const t = e.target.closest('.category-tab'); if (t) selectCat(t.dataset.cat); });
-            algoCards.addEventListener('click', e => { const t = e.target.closest('.algorithm-card'); if (t) selectAlgo(t.dataset.id); });
-            $('startBtn').addEventListener('click', () => S.playing ? pause() : play());
-            $('nextBtn').addEventListener('click', stepFwd);
-            $('prevBtn').addEventListener('click', stepBack);
-            $('resetBtn').addEventListener('click', reset);
-            $('randomBtn').addEventListener('click', () => { if (!S.playing && S.algo) { S.arr = genData(S.algo); S.orig = [...S.arr]; reset(); renderViz(); }});
-
-            $('speedSlider').addEventListener('input', e => { S.speed = parseFloat(e.target.value); $('speedValue').textContent = S.speed + 'x'; });
-
-            $('applyInputBtn').addEventListener('click', () => {
-                const v = $('customInput').value.trim();
-                if (!v) return;
-                const nums = v.split(/[,，\s]+/).map(s => parseInt(s.trim())).filter(n => !isNaN(n) && n > 0 && n < 100);
-                if (nums.length < 1 || nums.length > 12) { $('inputError').classList.add('show'); return; }
-                $('inputError').classList.remove('show');
-                S.arr = nums; S.orig = [...nums]; S.target = nums[Math.floor(Math.random() * nums.length)];
-                reset(); renderViz();
-            });
-
-            $('themeToggle').addEventListener('click', () => {
-                document.body.dataset.theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
-                $('themeToggle').textContent = document.body.dataset.theme === 'dark' ? '☀️' : '🌙';
-            });
-
-            $('closeCompletionBtn').addEventListener('click', () => $('completionOverlay').classList.remove('show'));
-
-            document.addEventListener('keydown', e => {
-                if (e.target.tagName === 'INPUT') return;
-                if (e.code === 'Space') { e.preventDefault(); S.playing ? pause() : play(); }
-                if (e.code === 'ArrowRight') stepFwd();
-                if (e.code === 'ArrowLeft') stepBack();
-                if (e.code === 'KeyR') reset();
-            });
-        }
-
-        init();
-    </script>
+    <script src="main.js"></script>
 </body>
 </html>
