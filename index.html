@@ -1,1 +1,1380 @@
-hello
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>算法动画讲解 | Algorithm Visualizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #22d3ee;
+            --accent: #f472b6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg: #0f172a;
+            --bg-card: #1e293b;
+            --bg-elevated: #334155;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #475569;
+            --comparing: #f472b6;
+            --swapping: #22d3ee;
+            --sorted: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        .logo h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper select {
+            appearance: none;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.5rem 2.5rem 0.5rem 1rem;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            min-width: 160px;
+        }
+
+        .select-wrapper::after {
+            content: '';
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-top-color: var(--text-muted);
+        }
+
+        .select-wrapper select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .speed-control label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .speed-slider {
+            width: 100px;
+            height: 6px;
+            -webkit-appearance: none;
+            background: var(--bg-elevated);
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .speed-value {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--secondary);
+            min-width: 40px;
+        }
+
+        /* Main Content */
+        .main {
+            padding: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Visualization Area */
+        .visualization-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+        }
+
+        .visualization-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .visualization-title {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .step-counter {
+            font-size: 0.9rem;
+            color: var(--secondary);
+            font-weight: 500;
+        }
+
+        .visualization-canvas {
+            height: 250px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 4px;
+            padding: 1rem;
+            background: var(--bg);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .array-bar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .array-bar-value {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 4px;
+        }
+
+        .array-bar-inner {
+            width: 100%;
+            background: linear-gradient(180deg, var(--primary), #4338ca);
+            border-radius: 4px 4px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .array-bar.comparing .array-bar-inner {
+            background: linear-gradient(180deg, var(--comparing), #db2777);
+        }
+
+        .array-bar.swapping .array-bar-inner {
+            background: linear-gradient(180deg, var(--swapping), #0891b2);
+        }
+
+        .array-bar.sorted .array-bar-inner {
+            background: linear-gradient(180deg, var(--success), #059669);
+        }
+
+        .array-bar.pivot .array-bar-inner {
+            background: linear-gradient(180deg, var(--warning), #d97706);
+        }
+
+        /* Control Bar */
+        .control-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .control-btn.primary {
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: white;
+        }
+
+        .control-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .control-btn.secondary {
+            background: var(--bg-elevated);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .control-btn.secondary:hover {
+            background: var(--border);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Code Panels */
+        .code-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 900px) {
+            .code-panels {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .code-panel {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .code-panel-header {
+            background: var(--bg-elevated);
+            padding: 0.75rem 1rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .code-panel-header svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .code-content {
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.8;
+        }
+
+        .code-line {
+            display: flex;
+            padding: 0 0.5rem;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .code-line.active {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .code-line .line-number {
+            color: var(--text-muted);
+            min-width: 2rem;
+            text-align: right;
+            margin-right: 1rem;
+            user-select: none;
+        }
+
+        .code-line .line-content {
+            flex: 1;
+        }
+
+        .code-keyword { color: #c084fc; }
+        .code-function { color: #60a5fa; }
+        .code-string { color: #34d399; }
+        .code-number { color: #fbbf24; }
+        .code-comment { color: #6b7280; font-style: italic; }
+        .code-operator { color: #f472b6; }
+
+        /* Step Description */
+        .step-description {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .step-description h3 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .step-text {
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .step-text .highlight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .step-text .value {
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        /* Custom Input */
+        .custom-input {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .custom-input h3 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .input-group input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.75rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .input-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .input-error {
+            color: #ef4444;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .input-error.show {
+            display: block;
+        }
+
+        /* Completion Message */
+        .completion-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .completion-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .completion-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2.5rem;
+            text-align: center;
+            border: 1px solid var(--border);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .completion-overlay.show .completion-card {
+            transform: scale(1);
+        }
+
+        .completion-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--success), #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .completion-icon svg {
+            width: 32px;
+            height: 32px;
+            fill: white;
+        }
+
+        .completion-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--success);
+        }
+
+        .completion-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .array-bar.comparing {
+            animation: pulse 0.5s ease infinite;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+            </div>
+            <h1>Algorithm Visualizer</h1>
+        </div>
+        <div class="header-controls">
+            <div class="select-wrapper">
+                <select id="algorithmSelect">
+                    <option value="bubble">冒泡排序</option>
+                    <option value="selection">选择排序</option>
+                    <option value="insertion">插入排序</option>
+                    <option value="quick">快速排序</option>
+                    <option value="merge">归并排序</option>
+                    <option value="binary">二分搜索</option>
+                </select>
+            </div>
+            <div class="speed-control">
+                <label>速度</label>
+                <input type="range" class="speed-slider" id="speedSlider" min="0.25" max="4" step="0.25" value="1">
+                <span class="speed-value" id="speedValue">1x</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="visualization-container">
+            <div class="visualization-header">
+                <span class="visualization-title">数据可视化</span>
+                <span class="step-counter" id="stepCounter">步骤 0 / 0</span>
+            </div>
+            <div class="visualization-canvas" id="visualizationCanvas"></div>
+        </div>
+
+        <div class="control-bar">
+            <button class="control-btn secondary" id="randomBtn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+                随机数据
+            </button>
+            <button class="control-btn primary" id="startBtn">
+                <svg viewBox="0 0 24 24" fill="currentColor" id="startIcon"><path d="M8 5v14l11-7z"/></svg>
+                <span id="startText">开始</span>
+            </button>
+            <button class="control-btn secondary" id="stepBtn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                单步
+            </button>
+            <button class="control-btn secondary" id="resetBtn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.65 6.35A7.958 7.958 0 0012 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0112 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                重置
+            </button>
+        </div>
+
+        <div class="code-panels">
+            <div class="code-panel">
+                <div class="code-panel-header">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                    伪代码
+                </div>
+                <div class="code-content" id="pseudocodePanel"></div>
+            </div>
+            <div class="code-panel">
+                <div class="code-panel-header">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                    Python
+                </div>
+                <div class="code-content" id="pythoncodePanel"></div>
+            </div>
+        </div>
+
+        <div class="step-description">
+            <h3>当前步骤</h3>
+            <p class="step-text" id="stepText">点击"开始"按钮开始算法演示</p>
+        </div>
+
+        <div class="custom-input">
+            <h3>自定义数据</h3>
+            <div class="input-group">
+                <input type="text" id="customInput" placeholder="输入数组，逗号分隔，如: 64, 34, 25, 12, 22, 11, 90">
+                <button class="control-btn primary" id="applyInputBtn">应用数据</button>
+            </div>
+            <p class="input-hint">输入1-20个整数，范围1-99</p>
+            <p class="input-error" id="inputError">输入格式错误，请检查并重试</p>
+        </div>
+    </main>
+
+    <div class="completion-overlay" id="completionOverlay">
+        <div class="completion-card">
+            <div class="completion-icon">
+                <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            </div>
+            <h2 class="completion-title">排序完成!</h2>
+            <p class="completion-subtitle">算法已成功执行完毕</p>
+            <button class="control-btn primary" id="closeCompletionBtn">继续探索</button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 算法数据定义 ====================
+        const algorithms = {
+            bubble: {
+                name: '冒泡排序',
+                pseudocode: [
+                    { code: 'procedure bubbleSort(arr)' },
+                    { code: '    n ← length(arr)' },
+                    { code: '    for i ← 0 to n-1 do' },
+                    { code: '        for j ← 0 to n-i-2 do' },
+                    { code: '            if arr[j] > arr[j+1] then' },
+                    { code: '                swap(arr[j], arr[j+1])' },
+                    { code: '            end if' },
+                    { code: '        end for' },
+                    { code: '    end for' },
+                    { code: 'end procedure' }
+                ],
+                python: [
+                    { code: 'def bubble_sort(arr):' },
+                    { code: '    n = len(arr)' },
+                    { code: '    for i in range(n):' },
+                    { code: '        for j in range(n - i - 1):' },
+                    { code: '            if arr[j] > arr[j + 1]:' },
+                    { code: '                arr[j], arr[j + 1] = arr[j + 1], arr[j]' },
+                    { code: '    return arr' }
+                ],
+                generator: function* (arr) {
+                    const n = arr.length;
+                    for (let i = 0; i < n; i++) {
+                        for (let j = 0; j < n - i - 1; j++) {
+                            yield { type: 'compare', indices: [j, j + 1], description: `比较 arr[${j}]=${arr[j]} 和 arr[${j + 1}]=${arr[j + 1}]` };
+                            if (arr[j] > arr[j + 1]) {
+                                yield { type: 'swap', indices: [j, j + 1], description: `${arr[j]} > ${arr[j + 1]}，交换位置` };
+                                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                            }
+                        }
+                        yield { type: 'sorted', indices: [n - i - 1], description: `arr[${n - i - 1}]=${arr[n - i - 1]} 已排序完成` };
+                    }
+                    yield { type: 'complete', description: '冒泡排序完成!' };
+                }
+            },
+            selection: {
+                name: '选择排序',
+                pseudocode: [
+                    { code: 'procedure selectionSort(arr)' },
+                    { code: '    n ← length(arr)' },
+                    { code: '    for i ← 0 to n-2 do' },
+                    { code: '        minIdx ← i' },
+                    { code: '        for j ← i+1 to n-1 do' },
+                    { code: '            if arr[j] < arr[minIdx] then' },
+                    { code: '                minIdx ← j' },
+                    { code: '            end if' },
+                    { code: '        end for' },
+                    { code: '        swap(arr[i], arr[minIdx])' },
+                    { code: '    end for' },
+                    { code: 'end procedure' }
+                ],
+                python: [
+                    { code: 'def selection_sort(arr):' },
+                    { code: '    n = len(arr)' },
+                    { code: '    for i in range(n - 1):' },
+                    { code: '        min_idx = i' },
+                    { code: '        for j in range(i + 1, n):' },
+                    { code: '            if arr[j] < arr[min_idx]:' },
+                    { code: '                min_idx = j' },
+                    { code: '        arr[i], arr[min_idx] = arr[min_idx], arr[i]' },
+                    { code: '    return arr' }
+                ],
+                generator: function* (arr) {
+                    const n = arr.length;
+                    for (let i = 0; i < n - 1; i++) {
+                        let minIdx = i;
+                        yield { type: 'compare', indices: [i], description: `从位置 ${i} 开始寻找最小值，当前假设 arr[${i}]=${arr[i]} 最小` };
+                        for (let j = i + 1; j < n; j++) {
+                            yield { type: 'compare', indices: [minIdx, j], description: `比较 arr[${j}]=${arr[j]} 和当前最小值 arr[${minIdx}]=${arr[minIdx]}` };
+                            if (arr[j] < arr[minIdx]) {
+                                minIdx = j;
+                                yield { type: 'pivot', indices: [minIdx], description: `发现新的最小值 arr[${minIdx}]=${arr[minIdx]}` };
+                            }
+                        }
+                        if (minIdx !== i) {
+                            yield { type: 'swap', indices: [i, minIdx], description: `交换 arr[${i}]=${arr[i]} 和 arr[${minIdx}]=${arr[minIdx]}` };
+                            [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+                        }
+                        yield { type: 'sorted', indices: [i], description: `arr[${i}]=${arr[i]} 已放置到正确位置` };
+                    }
+                    yield { type: 'sorted', indices: [n - 1], description: `arr[${n - 1}]=${arr[n - 1]} 已排序完成` };
+                    yield { type: 'complete', description: '选择排序完成!' };
+                }
+            },
+            insertion: {
+                name: '插入排序',
+                pseudocode: [
+                    { code: 'procedure insertionSort(arr)' },
+                    { code: '    n ← length(arr)' },
+                    { code: '    for i ← 1 to n-1 do' },
+                    { code: '        key ← arr[i]' },
+                    { code: '        j ← i - 1' },
+                    { code: '        while j >= 0 and arr[j] > key do' },
+                    { code: '            arr[j+1] ← arr[j]' },
+                    { code: '            j ← j - 1' },
+                    { code: '        end while' },
+                    { code: '        arr[j+1] ← key' },
+                    { code: '    end for' },
+                    { code: 'end procedure' }
+                ],
+                python: [
+                    { code: 'def insertion_sort(arr):' },
+                    { code: '    n = len(arr)' },
+                    { code: '    for i in range(1, n):' },
+                    { code: '        key = arr[i]' },
+                    { code: '        j = i - 1' },
+                    { code: '        while j >= 0 and arr[j] > key:' },
+                    { code: '            arr[j + 1] = arr[j]' },
+                    { code: '            j -= 1' },
+                    { code: '        arr[j + 1] = key' },
+                    { code: '    return arr' }
+                ],
+                generator: function* (arr) {
+                    const n = arr.length;
+                    yield { type: 'sorted', indices: [0], description: `arr[0]=${arr[0]} 作为已排序部分的首元素` };
+                    for (let i = 1; i < n; i++) {
+                        const key = arr[i];
+                        yield { type: 'pivot', indices: [i], description: `取出 key=${key}，准备插入已排序部分` };
+                        let j = i - 1;
+                        while (j >= 0 && arr[j] > key) {
+                            yield { type: 'compare', indices: [j, j + 1], description: `arr[${j}]=${arr[j]} > key=${key}，向右移动` };
+                            arr[j + 1] = arr[j];
+                            yield { type: 'swap', indices: [j, j + 1], description: `arr[${j + 1}] = ${arr[j + 1]}` };
+                            j--;
+                        }
+                        arr[j + 1] = key;
+                        yield { type: 'sorted', indices: Array.from({ length: i + 1 }, (_, k) => k), description: `key=${key} 插入到位置 ${j + 1}，已排序: [${arr.slice(0, i + 1).join(', ')}]` };
+                    }
+                    yield { type: 'complete', description: '插入排序完成!' };
+                }
+            },
+            quick: {
+                name: '快速排序',
+                pseudocode: [
+                    { code: 'procedure quickSort(arr, low, high)' },
+                    { code: '    if low < high then' },
+                    { code: '        pi ← partition(arr, low, high)' },
+                    { code: '        quickSort(arr, low, pi - 1)' },
+                    { code: '        quickSort(arr, pi + 1, high)' },
+                    { code: '    end if' },
+                    { code: 'end procedure' },
+                    { code: '' },
+                    { code: 'procedure partition(arr, low, high)' },
+                    { code: '    pivot ← arr[high]' },
+                    { code: '    i ← low - 1' },
+                    { code: '    for j ← low to high - 1 do' },
+                    { code: '        if arr[j] <= pivot then' },
+                    { code: '            i ← i + 1' },
+                    { code: '            swap(arr[i], arr[j])' },
+                    { code: '    swap(arr[i+1], arr[high])' },
+                    { code: '    return i + 1' },
+                    { code: 'end procedure' }
+                ],
+                python: [
+                    { code: 'def quick_sort(arr, low, high):' },
+                    { code: '    if low < high:' },
+                    { code: '        pi = partition(arr, low, high)' },
+                    { code: '        quick_sort(arr, low, pi - 1)' },
+                    { code: '        quick_sort(arr, pi + 1, high)' },
+                    { code: '' },
+                    { code: 'def partition(arr, low, high):' },
+                    { code: '    pivot = arr[high]' },
+                    { code: '    i = low - 1' },
+                    { code: '    for j in range(low, high):' },
+                    { code: '        if arr[j] <= pivot:' },
+                    { code: '            i += 1' },
+                    { code: '            arr[i], arr[j] = arr[j], arr[i]' },
+                    { code: '    arr[i + 1], arr[high] = arr[high], arr[i + 1]' },
+                    { code: '    return i + 1' }
+                ],
+                generator: function* () {
+                    const arr = this.arr;
+                    const self = this;
+
+                    function* partition(low, high) {
+                        const pivot = arr[high];
+                        yield { type: 'pivot', indices: [high], description: `选择 pivot=${pivot} (arr[${high}])` };
+                        let i = low - 1;
+                        for (let j = low; j < high; j++) {
+                            yield { type: 'compare', indices: [j, high], description: `比较 arr[${j}]=${arr[j]} 和 pivot=${pivot}` };
+                            if (arr[j] <= pivot) {
+                                i++;
+                                if (i !== j) {
+                                    yield { type: 'swap', indices: [i, j], description: `${arr[j]} <= ${pivot}，交换 arr[${i}] 和 arr[${j}]` };
+                                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                                }
+                            }
+                        }
+                        if (i + 1 !== high) {
+                            yield { type: 'swap', indices: [i + 1, high], description: `将 pivot 放到正确位置 arr[${i + 1}]` };
+                            [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+                        }
+                        yield { type: 'sorted', indices: [i + 1], description: `pivot=${arr[i + 1]} 已就位` };
+                        return i + 1;
+                    }
+
+                    function* quickSort(low, high) {
+                        if (low < high) {
+                            const pi = yield* partition(low, high);
+                            yield* quickSort(low, pi - 1);
+                            yield* quickSort(pi + 1, high);
+                        } else if (low === high) {
+                            yield { type: 'sorted', indices: [low], description: `arr[${low}]=${arr[low]} 已就位` };
+                        }
+                    }
+
+                    yield* quickSort(0, arr.length - 1);
+                    yield { type: 'complete', description: '快速排序完成!' };
+                }
+            },
+            merge: {
+                name: '归并排序',
+                pseudocode: [
+                    { code: 'procedure mergeSort(arr, left, right)' },
+                    { code: '    if left < right then' },
+                    { code: '        mid ← (left + right) / 2' },
+                    { code: '        mergeSort(arr, left, mid)' },
+                    { code: '        mergeSort(arr, mid+1, right)' },
+                    { code: '        merge(arr, left, mid, right)' },
+                    { code: '    end if' },
+                    { code: 'end procedure' },
+                    { code: '' },
+                    { code: 'procedure merge(arr, left, mid, right)' },
+                    { code: '    合并两个有序子数组' },
+                    { code: '    将结果放回 arr[left..right]' },
+                    { code: 'end procedure' }
+                ],
+                python: [
+                    { code: 'def merge_sort(arr, left, right):' },
+                    { code: '    if left < right:' },
+                    { code: '        mid = (left + right) // 2' },
+                    { code: '        merge_sort(arr, left, mid)' },
+                    { code: '        merge_sort(arr, mid + 1, right)' },
+                    { code: '        merge(arr, left, mid, right)' },
+                    { code: '' },
+                    { code: 'def merge(arr, left, mid, right):' },
+                    { code: '    left_arr = arr[left:mid+1]' },
+                    { code: '    right_arr = arr[mid+1:right+1]' },
+                    { code: '    i = j = 0; k = left' },
+                    { code: '    while i < len(left_arr) and j < len(right_arr):' },
+                    { code: '        arr[k] = left_arr[i] if left_arr[i] <= right_arr[j] else right_arr[j]' },
+                    { code: '    # 复制剩余元素' }
+                ],
+                generator: function* () {
+                    const arr = this.arr;
+                    const self = this;
+
+                    function* merge(left, mid, right) {
+                        const leftArr = arr.slice(left, mid + 1);
+                        const rightArr = arr.slice(mid + 1, right + 1);
+                        yield { type: 'compare', indices: Array.from({ length: right - left + 1 }, (_, i) => left + i), description: `合并区间 [${left}..${right}]，左:${leftArr.join(',')} 右:${rightArr.join(',')}` };
+                        let i = 0, j = 0, k = left;
+                        while (i < leftArr.length && j < rightArr.length) {
+                            if (leftArr[i] <= rightArr[j]) {
+                                arr[k] = leftArr[i];
+                                i++;
+                            } else {
+                                arr[k] = rightArr[j];
+                                j++;
+                            }
+                            k++;
+                        }
+                        while (i < leftArr.length) {
+                            arr[k] = leftArr[i];
+                            i++;
+                            k++;
+                        }
+                        while (j < rightArr.length) {
+                            arr[k] = rightArr[j];
+                            j++;
+                            k++;
+                        }
+                        yield { type: 'sorted', indices: Array.from({ length: right - left + 1 }, (_, i) => left + i), description: `区间 [${left}..${right}] 合并完成: [${arr.slice(left, right + 1).join(', ')}]` };
+                    }
+
+                    function* mergeSort(left, right) {
+                        if (left < right) {
+                            const mid = Math.floor((left + right) / 2);
+                            yield* mergeSort(left, mid);
+                            yield* mergeSort(mid + 1, right);
+                            yield* merge(left, mid, right);
+                        }
+                    }
+
+                    yield* mergeSort(0, arr.length - 1);
+                    yield { type: 'complete', description: '归并排序完成!' };
+                }
+            },
+            binary: {
+                name: '二分搜索',
+                pseudocode: [
+                    { code: 'procedure binarySearch(arr, target)' },
+                    { code: '    left ← 0' },
+                    { code: '    right ← length(arr) - 1' },
+                    { code: '    while left <= right do' },
+                    { code: '        mid ← (left + right) / 2' },
+                    { code: '        if arr[mid] = target then' },
+                    { code: '            return mid' },
+                    { code: '        else if arr[mid] < target then' },
+                    { code: '            left ← mid + 1' },
+                    { code: '        else' },
+                    { code: '            right ← mid - 1' },
+                    { code: '        end if' },
+                    { code: '    end while' },
+                    { code: '    return -1' },
+                    { code: 'end procedure' }
+                ],
+                python: [
+                    { code: 'def binary_search(arr, target):' },
+                    { code: '    left, right = 0, len(arr) - 1' },
+                    { code: '    while left <= right:' },
+                    { code: '        mid = (left + right) // 2' },
+                    { code: '        if arr[mid] == target:' },
+                    { code: '            return mid' },
+                    { code: '        elif arr[mid] < target:' },
+                    { code: '            left = mid + 1' },
+                    { code: '        else:' },
+                    { code: '            right = mid - 1' },
+                    { code: '    return -1' }
+                ],
+                generator: function* (arr, target) {
+                    let left = 0;
+                    let right = arr.length - 1;
+                    const sortedArr = [...arr].sort((a, b) => a - b);
+                    yield { type: 'sorted', indices: Array.from({ length: arr.length }, (_, i) => i), description: `排序数组: [${sortedArr.join(', ')}]` };
+                    yield { type: 'pivot', indices: [], description: `搜索目标: <span class="highlight">${target}</span>` };
+                    while (left <= right) {
+                        const mid = Math.floor((left + right) / 2);
+                        yield { type: 'compare', indices: [left, mid, right], description: `搜索区间 [${left}, ${right}]，检查中点 mid=${mid}` };
+                        yield { type: 'pivot', indices: [mid], description: `arr[${mid}] = <span class="value">${sortedArr[mid]}</span>` };
+                        if (sortedArr[mid] === target) {
+                            yield { type: 'sorted', indices: [mid], description: `找到目标 <span class="highlight">${target}</span> 在索引 ${mid}!` };
+                            return;
+                        } else if (sortedArr[mid] < target) {
+                            left = mid + 1;
+                            yield { type: 'compare', indices: [mid], description: `${sortedArr[mid]} < ${target}，搜索右半部分 [${left}..${right}]` };
+                        } else {
+                            right = mid - 1;
+                            yield { type: 'compare', indices: [mid], description: `${sortedArr[mid]} > ${target}，搜索左半部分 [${left}..${right}]` };
+                        }
+                    }
+                    yield { type: 'complete', description: `未找到目标 <span class="highlight">${target}</span>` };
+                }
+            }
+        };
+
+        // ==================== 状态管理 ====================
+        let state = {
+            array: [],
+            originalArray: [],
+            currentAlgorithm: 'bubble',
+            steps: [],
+            currentStep: -1,
+            isPlaying: false,
+            isPaused: false,
+            speed: 1,
+            animationId: null,
+            searchTarget: 50
+        };
+
+        // ==================== DOM 元素 ====================
+        const visualizationCanvas = document.getElementById('visualizationCanvas');
+        const algorithmSelect = document.getElementById('algorithmSelect');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValue = document.getElementById('speedValue');
+        const startBtn = document.getElementById('startBtn');
+        const startIcon = document.getElementById('startIcon');
+        const startText = document.getElementById('startText');
+        const stepBtn = document.getElementById('stepBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const randomBtn = document.getElementById('randomBtn');
+        const stepCounter = document.getElementById('stepCounter');
+        const stepText = document.getElementById('stepText');
+        const pseudocodePanel = document.getElementById('pseudocodePanel');
+        const pythoncodePanel = document.getElementById('pythoncodePanel');
+        const customInput = document.getElementById('customInput');
+        const applyInputBtn = document.getElementById('applyInputBtn');
+        const inputError = document.getElementById('inputError');
+        const completionOverlay = document.getElementById('completionOverlay');
+        const closeCompletionBtn = document.getElementById('closeCompletionBtn');
+
+        // ==================== 初始化 ====================
+        function init() {
+            generateRandomArray();
+            renderCodePanels();
+            bindEvents();
+        }
+
+        function generateRandomArray() {
+            const size = Math.floor(Math.random() * 10) + 8;
+            state.array = Array.from({ length: size }, () => Math.floor(Math.random() * 80) + 10);
+            state.originalArray = [...state.array];
+            state.searchTarget = state.array[Math.floor(Math.random() * state.array.length)];
+            renderVisualization();
+        }
+
+        // ==================== 渲染函数 ====================
+        function renderVisualization() {
+            visualizationCanvas.innerHTML = '';
+            const maxVal = Math.max(...state.array);
+            const barWidth = Math.max(20, Math.min(40, (visualizationCanvas.clientWidth - state.array.length * 4) / state.array.length));
+
+            state.array.forEach((val, idx) => {
+                const bar = document.createElement('div');
+                bar.className = 'array-bar';
+                bar.dataset.index = idx;
+
+                const height = (val / maxVal) * 180 + 20;
+                bar.innerHTML = `
+                    <span class="array-bar-value">${val}</span>
+                    <div class="array-bar-inner" style="height: ${height}px; width: ${barWidth}px;"></div>
+                `;
+
+                visualizationCanvas.appendChild(bar);
+            });
+        }
+
+        function renderCodePanels() {
+            const algo = algorithms[state.currentAlgorithm];
+            renderCode(pseudocodePanel, algo.pseudocode);
+            renderCode(pythoncodePanel, algo.python);
+        }
+
+        function renderCode(container, lines) {
+            container.innerHTML = lines.map((line, idx) => {
+                const highlighted = highlightSyntax(line.code);
+                return `<div class="code-line" data-line="${idx}">
+                    <span class="line-number">${idx + 1}</span>
+                    <span class="line-content">${highlighted}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function highlightSyntax(code) {
+            if (!code) return '';
+            return code
+                .replace(/\b(procedure|function|if|else|while|for|return|end|then|to|step|in|not|and|or|def|elif|while|range|len)\b/g, '<span class="code-keyword">$1</span>')
+                .replace(/\b(\d+)\b/g, '<span class="code-number">$1</span>')
+                .replace(/"([^"]*)"|'([^']*)'/g, '<span class="code-string">"$1$2"</span>')
+                .replace(/\b(swap|sort|search|partition|merge|quick|merge|bubble|selection|insertion)\b/g, '<span class="code-function">$1</span>')
+                .replace(/(\+|-|\*|\/|=|>|<|<=|>=|<>|<-|→)/g, '<span class="code-operator">$1</span>')
+                .replace(/(#.*)/g, '<span class="code-comment">$1</span>');
+        }
+
+        function highlightCodeLine(lineNumbers) {
+            document.querySelectorAll('.code-line').forEach(line => line.classList.remove('active'));
+            lineNumbers.forEach(num => {
+                const line = document.querySelector(`.code-line[data-line="${num}"]`);
+                if (line) line.classList.add('active');
+            });
+        }
+
+        function updateVisualization(indices, className, remove = false) {
+            const bars = visualizationCanvas.querySelectorAll('.array-bar');
+            if (remove) {
+                bars.forEach(bar => {
+                    bar.classList.remove('comparing', 'swapping', 'sorted', 'pivot');
+                });
+            }
+            indices.forEach(idx => {
+                if (idx >= 0 && idx < bars.length) {
+                    bars[idx].classList.remove('comparing', 'swapping', 'sorted', 'pivot');
+                    if (className) bars[idx].classList.add(className);
+                }
+            });
+        }
+
+        function updateStepCounter() {
+            stepCounter.textContent = `步骤 ${state.currentStep + 1} / ${state.steps.length}`;
+        }
+
+        // ==================== 算法执行 ====================
+        function prepareSteps() {
+            const algo = algorithms[state.currentAlgorithm];
+            const arr = [...state.originalArray];
+            state.steps = [];
+
+            if (state.currentAlgorithm === 'binary') {
+                const gen = algo.generator(arr, state.searchTarget);
+                let result;
+                while (!(result = gen.next()).done) {
+                    state.steps.push({ ...result.value, array: [...arr] });
+                }
+            } else {
+                const gen = algo.generator.call({ arr: [...state.originalArray] });
+                const arrCopy = [...state.originalArray];
+                let result;
+                while (!(result = gen.next()).done) {
+                    if (result.value.array) {
+                        arrCopy.splice(0, arrCopy.length, ...result.value.array);
+                    }
+                    state.steps.push({ ...result.value, array: [...arrCopy] });
+                }
+            }
+        }
+
+        async function executeStep(stepIndex) {
+            if (stepIndex >= state.steps.length) {
+                finishExecution();
+                return;
+            }
+
+            const step = state.steps[stepIndex];
+            state.currentStep = stepIndex;
+            updateStepCounter();
+            stepText.innerHTML = step.description;
+
+            // 更新数组可视化
+            state.array = [...step.array];
+            renderVisualization();
+
+            // 更新高亮和状态
+            let highlightLines = [];
+            if (step.type === 'compare') {
+                updateVisualization(step.indices, 'comparing', true);
+                highlightLines = getCompareLines();
+            } else if (step.type === 'swap') {
+                updateVisualization(step.indices, 'swapping', true);
+                highlightLines = getSwapLines();
+            } else if (step.type === 'sorted') {
+                updateVisualization(step.indices, 'sorted', true);
+                highlightLines = [];
+            } else if (step.type === 'pivot') {
+                updateVisualization(step.indices, 'pivot', true);
+                highlightLines = getPivotLines();
+            } else if (step.type === 'complete') {
+                updateVisualization([], null, true);
+            }
+
+            highlightCodeLine(highlightLines);
+        }
+
+        function getCompareLines() {
+            const lines = { bubble: [4], selection: [5, 6], insertion: [5, 6], quick: [10], merge: [3], binary: [3] };
+            return lines[state.currentAlgorithm] || [];
+        }
+
+        function getSwapLines() {
+            const lines = { bubble: [5], selection: [8], insertion: [6], quick: [11, 12], merge: [] };
+            return lines[state.currentAlgorithm] || [];
+        }
+
+        function getPivotLines() {
+            const lines = { quick: [7], insertion: [3], merge: [], binary: [4] };
+            return lines[state.currentAlgorithm] || [];
+        }
+
+        async function playAnimation() {
+            if (state.isPlaying && state.currentStep < state.steps.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 500 / state.speed));
+                state.currentStep++;
+                await executeStep(state.currentStep);
+                if (state.isPlaying) {
+                    state.animationId = requestAnimationFrame(playAnimation);
+                }
+            } else if (state.currentStep >= state.steps.length - 1) {
+                finishExecution();
+            }
+        }
+
+        function startExecution() {
+            if (state.steps.length === 0) {
+                prepareSteps();
+            }
+
+            if (state.currentStep >= state.steps.length - 1) {
+                resetExecution();
+                return;
+            }
+
+            state.isPlaying = true;
+            state.isPaused = false;
+            updateControls();
+            playAnimation();
+        }
+
+        function pauseExecution() {
+            state.isPlaying = false;
+            state.isPaused = true;
+            if (state.animationId) {
+                cancelAnimationFrame(state.animationId);
+            }
+            updateControls();
+        }
+
+        function stepForward() {
+            if (state.steps.length === 0) {
+                prepareSteps();
+            }
+            if (state.currentStep < state.steps.length - 1) {
+                state.currentStep++;
+                executeStep(state.currentStep);
+            } else {
+                finishExecution();
+            }
+        }
+
+        function resetExecution() {
+            pauseExecution();
+            state.array = [...state.originalArray];
+            state.currentStep = -1;
+            state.steps = [];
+            renderVisualization();
+            stepCounter.textContent = '步骤 0 / 0';
+            stepText.innerHTML = '点击"开始"按钮开始算法演示';
+            highlightCodeLine([]);
+            updateControls();
+        }
+
+        function finishExecution() {
+            pauseExecution();
+            updateVisualization([], null, true);
+            highlightCodeLine([]);
+            updateControls();
+            showCompletion();
+        }
+
+        function showCompletion() {
+            completionOverlay.classList.add('show');
+        }
+
+        function hideCompletion() {
+            completionOverlay.classList.remove('show');
+        }
+
+        // ==================== 控制更新 ====================
+        function updateControls() {
+            const isRunning = state.isPlaying;
+            startBtn.classList.toggle('primary', !isRunning);
+            startBtn.classList.toggle('secondary', isRunning);
+            startIcon.innerHTML = isRunning
+                ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
+                : '<path d="M8 5v14l11-7z"/>';
+            startText.textContent = isRunning ? '暂停' : (state.isPaused ? '继续' : '开始');
+            stepBtn.disabled = isRunning;
+            randomBtn.disabled = isRunning;
+            customInput.disabled = isRunning;
+            applyInputBtn.disabled = isRunning;
+        }
+
+        // ==================== 事件绑定 ====================
+        function bindEvents() {
+            algorithmSelect.addEventListener('change', (e) => {
+                state.currentAlgorithm = e.target.value;
+                resetExecution();
+                renderCodePanels();
+            });
+
+            speedSlider.addEventListener('input', (e) => {
+                state.speed = parseFloat(e.target.value);
+                speedValue.textContent = `${state.speed}x`;
+            });
+
+            startBtn.addEventListener('click', () => {
+                if (state.isPlaying) {
+                    pauseExecution();
+                } else {
+                    startExecution();
+                }
+            });
+
+            stepBtn.addEventListener('click', stepForward);
+            resetBtn.addEventListener('click', resetExecution);
+            randomBtn.addEventListener('click', () => {
+                if (!state.isPlaying) {
+                    generateRandomArray();
+                    resetExecution();
+                }
+            });
+
+            applyInputBtn.addEventListener('click', () => {
+                const input = customInput.value.trim();
+                if (!input) return;
+
+                const numbers = input.split(/[,，\s]+/).map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+
+                if (numbers.length < 1 || numbers.length > 20 || numbers.some(n => n < 1 || n > 99)) {
+                    inputError.classList.add('show');
+                    return;
+                }
+
+                inputError.classList.remove('show');
+                state.array = numbers;
+                state.originalArray = [...numbers];
+                state.searchTarget = numbers[Math.floor(Math.random() * numbers.length)];
+                resetExecution();
+                renderVisualization();
+            });
+
+            customInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    applyInputBtn.click();
+                }
+            });
+
+            closeCompletionBtn.addEventListener('click', hideCompletion);
+            completionOverlay.addEventListener('click', (e) => {
+                if (e.target === completionOverlay) {
+                    hideCompletion();
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                if (!state.isPlaying) {
+                    renderVisualization();
+                }
+            });
+        }
+
+        // ==================== 启动 ====================
+        init();
+    </script>
+</body>
+</html>
