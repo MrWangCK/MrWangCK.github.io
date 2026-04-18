@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 > nul
 echo ==============================================
 echo          GitHub Pages 一键自动上传
 echo              作者：MrWangCK
