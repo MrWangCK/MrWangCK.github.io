@@ -35,7 +35,6 @@
             </button>
         </div>
     </header>
-
     <!-- 主内容 -->
     <main class="main-container">
         <!-- 左侧边栏：算法列表 -->
@@ -47,7 +46,6 @@
                 <!-- 由JS动态生成 -->
             </div>
         </aside>
-
         <!-- 中间区域 -->
         <div class="center-area">
             <!-- 顶部信息栏：变量状态 -->
@@ -73,9 +71,8 @@
                     <span class="info-value" id="infoSwap">-</span>
                 </div>
             </div>
-
             <!-- 可视化画布 -->
-            <div class="viz-container">
+            <div class="viz-container" id="vizContainer">
                 <div class="viz-canvas" id="vizCanvas">
                     <div class="placeholder-message">
                         <div class="placeholder-icon">🎬</div>
@@ -83,7 +80,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- 底部控制栏 -->
             <div class="control-bar">
                 <div class="control-left">
@@ -113,7 +109,6 @@
                     <button class="ctrl-btn" id="btnRandom" title="随机数据">🎲</button>
                 </div>
             </div>
-
             <!-- 数据输入 -->
             <div class="input-bar">
                 <label>输入数据:</label>
@@ -121,7 +116,6 @@
                 <button class="apply-btn" id="btnApply">应用</button>
             </div>
         </div>
-
         <!-- 右侧代码面板 -->
         <aside class="code-panel">
             <div class="code-header">
@@ -134,7 +128,6 @@
             <div class="code-content" id="codeContent">
                 <pre class="code-block"><code>请选择一个算法</code></pre>
             </div>
-            
             <!-- 过程记录 -->
             <div class="process-section">
                 <div class="process-header">
@@ -147,7 +140,6 @@
             </div>
         </aside>
     </main>
-
     <script src="main.js"></script>
 </body>
 </html>

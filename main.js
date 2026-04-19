@@ -1032,33 +1032,34 @@ const algorithms = {
                 </div>
             `,
             python: [
-                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">SqStack</span>:</span>',
-                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
-                '<span class="code-line">        self.data = []</span>',
-                '<span class="code-line">        self.top = -<span class="code-number">1</span></span>',
-                '<span class="code-line">    </span>',
-                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">push</span>(self, e):</span>',
-                '<span class="code-line">        self.data.append(e)</span>',
-                '<span class="code-line">        self.top += <span class="code-number">1</span></span>',
-                '<span class="code-line">    </span>',
-                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">pop</span>(self):</span>',
-                '<span class="code-line">        <span class="code-keyword">if</span> self.top >= <span class="code-number">0</span>:</span>',
-                '<span class="code-line">            self.top -= <span class="code-number">1</span></span>',
-                '<span class="code-line">            <span class="code-keyword">return</span> self.data.pop()</span>'
+                'class SqStack:',
+                '    def __init__(self):',
+                '        self.data = []',
+                '        self.top = -1',
+                '    def push(self, e):',
+                '        self.data.append(e)',
+                '        self.top += 1',
+                '    def pop(self):',
+                '        if self.top >= 0:',
+                '            self.top -= 1',
+                '            return self.data.pop()'
             ],
             generateSteps: (arr) => {
                 const steps = [];
-                steps.push({ type: 'init', array: [...arr], line: 0, message: '初始化空栈, top=-1' });
+                steps.push({ type: 'init', array: [], top: -1, line: 1, message: '初始化空栈, top=-1' });
+                let stack = [];
                 arr.forEach((val, i) => {
-                    steps.push({ type: 'code-line', array: [...arr], line: 1, message: `push(${val}) 入栈` });
-                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 2, message: `top++` });
+                    stack.push(val);
+                    steps.push({ type: 'push', array: [...stack], top: stack.length - 1, line: 5, message: `push(${val}) 入栈` });
+                    steps.push({ type: 'code-line', array: [...stack], top: stack.length - 1, line: 6, message: `top++` });
                 });
-                steps.push({ type: 'loop-start', array: [...arr], line: 3, message: '开始出栈' });
+                steps.push({ type: 'loop-start', array: [...stack], top: stack.length - 1, line: 8, message: '开始出栈' });
                 arr.slice().reverse().forEach((val, i) => {
-                    steps.push({ type: 'code-line', array: [...arr], line: 4, message: `top--` });
-                    steps.push({ type: 'visit', indices: [arr.length - 1 - i], array: [...arr], line: 5, message: `pop() = ${val}` });
+                    steps.push({ type: 'pop', array: [...stack], top: stack.length - 1, line: 10, message: `top--` });
+                    stack.pop();
+                    steps.push({ type: 'visit', array: [...stack], top: stack.length - 1, line: 11, message: `pop() = ${val}` });
                 });
-                steps.push({ type: 'complete', array: [...arr], line: 6, message: '栈操作完成' });
+                steps.push({ type: 'complete', array: [...stack], top: -1, line: 12, message: '栈操作完成' });
                 return steps;
             }
         },
@@ -1078,12 +1079,10 @@ const algorithms = {
                 '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">LinkStack</span>:</span>',
                 '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
                 '<span class="code-line">        self.head = Node(<span class="code-number">0</span>)</span>',
-                '<span class="code-line">    </span>',
                 '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">push</span>(self, e):</span>',
                 '<span class="code-line">        s = Node(e)</span>',
                 '<span class="code-line">        s.next = self.head.next</span>',
                 '<span class="code-line">        self.head.next = s</span>',
-                '<span class="code-line">    </span>',
                 '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">pop</span>(self):</span>',
                 '<span class="code-line">        p = self.head.next</span>',
                 '<span class="code-line">        self.head.next = p.next</span>',
@@ -1114,32 +1113,35 @@ const algorithms = {
                 </div>
             `,
             python: [
-                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">SqQueue</span>:</span>',
-                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
-                '<span class="code-line">        self.data = []</span>',
-                '<span class="code-line">        self.front = <span class="code-number">0</span></span>',
-                '<span class="code-line">        self.rear = <span class="code-number">0</span></span>',
-                '<span class="code-line">    </span>',
-                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">enqueue</span>(self, e):</span>',
-                '<span class="code-line">        self.data.append(e)</span>',
-                '<span class="code-line">        self.rear += <span class="code-number">1</span></span>',
-                '<span class="code-line">    </span>',
-                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">dequeue</span>(self):</span>',
-                '<span class="code-line">        self.front += <span class="code-number">1</span></span>',
-                '<span class="code-line">        <span class="code-keyword">return</span> self.data[self.front-<span class="code-number">1</span>]</span>'
+                'class SqQueue:',
+                '    def __init__(self):',
+                '        self.data = []',
+                '        self.front = 0',
+                '        self.rear = 0',
+                '',
+                '    def enqueue(self, e):',
+                '        self.data.append(e)',
+                '        self.rear += 1',
+                '',
+                '    def dequeue(self):',
+                '        self.front += 1',
+                '        return self.data[self.front-1]'
             ],
             generateSteps: (arr) => {
                 const steps = [];
-                steps.push({ type: 'init', array: [...arr], line: 0, message: 'front=rear=0' });
+                steps.push({ type: 'init', array: [], head: 0, tail: -1, line: 1, message: 'front=rear=0' });
+                let queue = [];
                 arr.forEach((val, i) => {
-                    steps.push({ type: 'code-line', array: [...arr], line: 1, message: `入队 ${val}` });
-                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 2, message: `rear++` });
+                    queue.push(val);
+                    steps.push({ type: 'enqueue', array: [...queue], head: 0, tail: queue.length - 1, line: 6, message: `入队 ${val}` });
+                    steps.push({ type: 'code-line', array: [...queue], head: 0, tail: queue.length - 1, line: 7, message: `rear++` });
                 });
-                arr.forEach((val, i) => {
-                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `front++` });
-                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 4, message: `出队 ${val}` });
+                queue.forEach((val, i) => {
+                    steps.push({ type: 'dequeue', array: [...queue], head: 0, tail: queue.length - 1, line: 9, message: `front++` });
+                    queue.shift();
+                    steps.push({ type: 'visit', array: [...queue], head: 0, tail: queue.length - 1, line: 10, message: `出队 ${val}` });
                 });
-                steps.push({ type: 'complete', array: [...arr], line: 5, message: '队列操作完成' });
+                steps.push({ type: 'complete', array: [...queue], head: 0, tail: -1, line: 11, message: '队列操作完成' });
                 return steps;
             }
         },
@@ -1156,30 +1158,36 @@ const algorithms = {
                 </div>
             `,
             python: [
-                '<span class="code-line">MAXSIZE = <span class="code-number">100</span></span>',
-                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">CirQueue</span>:</span>',
-                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
-                '<span class="code-line">        self.data = [None]*MAXSIZE</span>',
-                '<span class="code-line">        self.front = <span class="code-number">0</span></span>',
-                '<span class="code-line">        self.rear = <span class="code-number">0</span></span>',
-                '<span class="code-line">    </span>',
-                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">enqueue</span>(self, e):</span>',
-                '<span class="code-line">        self.rear = (self.rear+<span class="code-number">1</span>) % MAXSIZE</span>',
-                '<span class="code-line">        self.data[self.rear] = e</span>',
-                '<span class="code-line">    </span>',
-                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">dequeue</span>(self):</span>',
-                '<span class="code-line">        self.front = (self.front+<span class="code-number">1</span>) % MAXSIZE</span>',
-                '<span class="code-line">        <span class="code-keyword">return</span> self.data[self.front]</span>'
+                'MAXSIZE = 100',
+                'class CirQueue:',
+                '    def __init__(self):',
+                '        self.data = [None]*MAXSIZE',
+                '        self.front = 0',
+                '        self.rear = 0',
+                '',
+                '    def enqueue(self, e):',
+                '        self.rear = (self.rear+1) % MAXSIZE',
+                '        self.data[self.rear] = e',
+                '',
+                '    def dequeue(self):',
+                '        self.front = (self.front+1) % MAXSIZE',
+                '        return self.data[self.front]'
             ],
             generateSteps: (arr) => {
                 const steps = [];
-                steps.push({ type: 'init', array: [...arr], line: 0, message: '初始化循环队列' });
+                steps.push({ type: 'init', array: [], head: 0, tail: -1, line: 2, message: '初始化循环队列' });
+                let queue = [];
                 arr.forEach((val, i) => {
-                    const pos = i % 8;
-                    steps.push({ type: 'code-line', array: [...arr], line: 1, message: `rear = (rear+1) % ${8}` });
-                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 2, message: `位置 ${pos}: ${val}` });
+                    queue.push(val);
+                    steps.push({ type: 'enqueue', array: [...queue], head: 0, tail: queue.length - 1, line: 8, message: `rear = (rear+1) % MAXSIZE` });
+                    steps.push({ type: 'code-line', array: [...queue], head: 0, tail: queue.length - 1, line: 9, message: `入队 ${val}` });
                 });
-                steps.push({ type: 'complete', array: [...arr], line: 3, message: '循环队列完成' });
+                queue.forEach((val, i) => {
+                    steps.push({ type: 'dequeue', array: [...queue], head: 0, tail: queue.length - 1, line: 11, message: `front = (front+1) % MAXSIZE` });
+                    queue.shift();
+                    steps.push({ type: 'visit', array: [...queue], head: 0, tail: queue.length - 1, line: 12, message: `出队 ${val}` });
+                });
+                steps.push({ type: 'complete', array: [...queue], head: 0, tail: -1, line: 13, message: '循环队列完成' });
                 return steps;
             }
         },
@@ -1196,32 +1204,39 @@ const algorithms = {
                 </div>
             `,
             python: [
-                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">bracket_match</span>(expr):</span>',
-                '<span class="code-line">    stack = []</span>',
-                '<span class="code-line">    pairs = {<span class="code-string">")"</span>: <span class="code-string">"("</span>, <span class="code-string">"]"</span>: <span class="code-string">"["</span>, <span class="code-string">"}"</span>: <span class="code-string">"{"</span>}</span>',
-                '<span class="code-line">    <span class="code-keyword">for</span> ch <span class="code-keyword">in</span> expr:</span>',
-                '<span class="code-line">        <span class="code-keyword">if</span> ch <span class="code-keyword">in</span> <span class="code-string">"([{"</span>:</span>',
-                '<span class="code-line">            stack.append(ch)</span>',
-                '<span class="code-line">        <span class="code-keyword">elif</span> ch <span class="code-keyword">in</span> <span class="code-string">")]}"</span>:</span>',
-                '<span class="code-line">            <span class="code-keyword">if</span> <span class="code-keyword">not</span> stack <span class="code-keyword">or</span> stack[-<span class="code-number">1</span>] != pairs[ch]:</span>',
-                '<span class="code-line">                <span class="code-keyword">return</span> <span class="code-keyword">False</span></span>',
-                '<span class="code-line">            stack.pop()</span>',
-                '<span class="code-line">    <span class="code-keyword">return</span> <span class="code-keyword">not</span> stack</span>'
+                'def bracket_match(expr):',
+                '    stack = []',
+                '    pairs = {")": "(", "]": "[", "}": "{"}',
+                '    for ch in expr:',
+                '        if ch in "([{":',
+                '            stack.append(ch)',
+                '        elif ch in ")]}":',
+                '            if not stack or stack[-1] != pairs[ch]:',
+                '                return False',
+                '            stack.pop()',
+                '    return not stack'
             ],
             generateSteps: (arr) => {
                 const brackets = ['(', ')', '[', ']', '{', '}'];
                 const steps = [];
-                steps.push({ type: 'init', array: [...arr], line: 0, message: '初始化空栈' });
+                steps.push({ type: 'init', array: [], top: -1, line: 1, message: '初始化空栈' });
+                let stack = [];
                 brackets.forEach((b, i) => {
                     if ('([{'.includes(b)) {
-                        steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `遇到 ${b}, 入栈` });
-                        steps.push({ type: 'code-line', array: [...arr], line: 2, message: `stack.append('${b}')` });
+                        stack.push(b);
+                        steps.push({ type: 'push', array: [...stack], top: stack.length - 1, indices: [i], line: 4, message: `遇到 ${b}, 入栈` });
+                        steps.push({ type: 'code-line', array: [...stack], top: stack.length - 1, line: 5, message: `stack.append('${b}')` });
                     } else {
-                        steps.push({ type: 'compare', indices: [i], array: [...arr], line: 3, message: `遇到 ${b}, 检查栈顶` });
-                        steps.push({ type: 'code-line', array: [...arr], line: 4, message: `匹配, pop()` });
+                        steps.push({ type: 'compare', array: [...stack], top: stack.length - 1, indices: [i], line: 6, message: `遇到 ${b}, 检查栈顶` });
+                        if (stack.length > 0 && stack[stack.length - 1] === {')': '(', ']': '[', '}': '{'}[b]) {
+                            steps.push({ type: 'pop', array: [...stack], top: stack.length - 1, line: 9, message: `匹配 ${b} 与 ${stack[stack.length - 1]}, pop()` });
+                            stack.pop();
+                        } else {
+                            steps.push({ type: 'complete', array: [...stack], top: stack.length - 1, line: 9, message: '匹配失败!' });
+                        }
                     }
                 });
-                steps.push({ type: 'complete', array: [...arr], line: 5, message: '匹配成功!' });
+                steps.push({ type: 'complete', array: [...stack], top: stack.length - 1, line: 11, message: stack.length === 0 ? '匹配成功!' : '栈非空' });
                 return steps;
             }
         },
@@ -1317,12 +1332,10 @@ const algorithms = {
                 '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">StackNoHead</span>:</span>',
                 '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self):</span>',
                 '<span class="code-line">        self.top = <span class="code-keyword">None</span></span>',
-                '<span class="code-line">    </span>',
                 '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">push</span>(self, e):</span>',
                 '<span class="code-line">        s = Node(e)</span>',
                 '<span class="code-line">        s.next = self.top</span>',
                 '<span class="code-line">        self.top = s</span>',
-                '<span class="code-line">    </span>',
                 '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">pop</span>(self):</span>',
                 '<span class="code-line">        p = self.top</span>',
                 '<span class="code-line">        self.top = p.next</span>',
@@ -2226,28 +2239,118 @@ const algorithms = {
                 </div>
             `,
             python: [
-                '<span class="code-line"><span class="code-keyword">class</span> <span class="code-function">TreeNode</span>:</span>',
-                '<span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span>(self, val):</span>',
-                '<span class="code-line">        self.val = val</span>',
-                '<span class="code-line">        self.lchild = <span class="code-keyword">None</span></span>',
-                '<span class="code-line">        self.rchild = <span class="code-keyword">None</span></span>',
-                '<span class="code-line"></span>',
-                '<span class="code-line"><span class="code-comment"># 先序遍历</span></span>',
-                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">pre_order</span>(root):</span>',
-                '<span class="code-line">    <span class="code-keyword">if</span> root:</span>',
-                '<span class="code-line">        <span class="code-function">visit</span>(root.val)</span>',
-                '<span class="code-line">        pre_order(root.lchild)</span>',
-                '<span class="code-line">        pre_order(root.rchild)</span>'
+                'class TreeNode:',
+                '    def __init__(self, val):',
+                '        self.val = val',
+                '        self.lchild = None',
+                '        self.rchild = None',
+                '',
+                'def build_tree(values):',
+                '    if not values: return None',
+                '    root = TreeNode(values[0])',
+                '    queue = [root]',
+                '    i = 1',
+                '    while queue and i < len(values):',
+                '        node = queue.pop(0)',
+                '        if i < len(values):',
+                '            node.lchild = TreeNode(values[i])',
+                '            queue.append(node.lchild)',
+                '            i += 1',
+                '        if i < len(values):',
+                '            node.rchild = TreeNode(values[i])',
+                '            queue.append(node.rchild)',
+                '            i += 1',
+                '    return root'
             ],
             generateSteps: (arr) => {
                 const steps = [];
-                steps.push({ type: 'init', array: [...arr], line: 0, message: '构建二叉树' });
-                arr.slice(0, 7).forEach((val, i) => {
-                    steps.push({ type: 'visit', indices: [i], array: [...arr], line: 1, message: `创建节点 ${val}` });
-                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `lchild = ${i*2+1 < arr.length ? arr[i*2+1] : 'null'}` });
-                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `rchild = ${i*2+2 < arr.length ? arr[i*2+2] : 'null'}` });
-                });
-                steps.push({ type: 'complete', array: [...arr], line: 4, message: '二叉树构建完成' });
+                const values = arr.slice(0, 7);
+                
+                // 构建完整的树结构用于参考
+                function buildFullTree(values) {
+                    if (!values || values.length === 0) return null;
+                    const root = { val: values[0], left: null, right: null };
+                    const queue = [root];
+                    let i = 1;
+                    while (queue.length > 0 && i < values.length) {
+                        const node = queue.shift();
+                        if (i < values.length) {
+                            node.left = { val: values[i], left: null, right: null };
+                            queue.push(node.left);
+                            i++;
+                        }
+                        if (i < values.length) {
+                            node.right = { val: values[i], left: null, right: null };
+                            queue.push(node.right);
+                            i++;
+                        }
+                    }
+                    return root;
+                }
+                
+                const fullTree = buildFullTree(values);
+                steps.push({ type: 'start', tree: null, line: 5, message: '开始构建二叉树' });
+                
+                // 逐层构建，每步添加一个节点
+                let currentTree = null;
+                let i = 0;
+                let level = 0;
+                let nodesInLevel = 1;
+                let nodesAdded = 0;
+                
+                while (i < values.length) {
+                    // 计算当前层能添加的节点数
+                    const nodesToAdd = Math.min(nodesInLevel, values.length - i);
+                    
+                    // 收集当前层的节点
+                    const levelNodes = [];
+                    for (let j = 0; j < nodesToAdd; j++) {
+                        levelNodes.push(values[i + j]);
+                    }
+                    
+                    // 创建当前层的树
+                    function buildLevelTree(values, startIdx, lvl, totalLevels) {
+                        if (startIdx >= values.length) return null;
+                        const root = { val: values[startIdx], left: null, right: null };
+                        const queue = [{ node: root, idx: startIdx }];
+                        let currentIdx = startIdx + 1;
+                        let currentLevel = 1;
+                        
+                        while (queue.length > 0 && currentIdx < values.length) {
+                            const levelSize = queue.length;
+                            for (let k = 0; k < levelSize && currentIdx < values.length; k++) {
+                                const item = queue.shift();
+                                if (currentIdx < values.length && currentLevel < lvl) {
+                                    item.node.left = { val: values[currentIdx], left: null, right: null };
+                                    queue.push({ node: item.node.left, idx: currentIdx });
+                                    currentIdx++;
+                                }
+                                if (currentIdx < values.length && currentLevel < lvl) {
+                                    item.node.right = { val: values[currentIdx], left: null, right: null };
+                                    queue.push({ node: item.node.right, idx: currentIdx });
+                                    currentIdx++;
+                                }
+                            }
+                            currentLevel++;
+                        }
+                        return root;
+                    }
+                    
+                    currentTree = buildLevelTree(values, 0, level + 1);
+                    steps.push({ 
+                        type: 'visit', 
+                        tree: JSON.parse(JSON.stringify(currentTree)), 
+                        indices: [i],
+                        line: 5, 
+                        message: `添加节点层 ${level}: [${levelNodes.join(', ')}]` 
+                    });
+                    
+                    i += nodesToAdd;
+                    level++;
+                    nodesInLevel *= 2;
+                }
+                
+                steps.push({ type: 'complete', tree: fullTree, line: 17, message: '二叉树构建完成' });
                 return steps;
             }
         },
@@ -2264,27 +2367,111 @@ const algorithms = {
                 </div>
             `,
             python: [
-                '<span class="code-line"><span class="code-comment"># 完全二叉树的顺序存储</span></span>',
-                '<span class="code-line"><span class="code-comment"># 父节点: i // 2</span></span>',
-                '<span class="code-line"><span class="code-comment"># 左子: 2*i, 右子: 2*i+1</span></span>',
-                '<span class="code-line"></span>',
-                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">parent</span>(i): <span class="code-keyword">return</span> i // <span class="code-number">2</span></span>',
-                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">left_child</span>(i): <span class="code-keyword">return</span> <span class="code-number">2</span>*i</span>',
-                '<span class="code-line"><span class="code-keyword">def</span> <span class="code-function">right_child</span>(i): <span class="code-keyword">return</span> <span class="code-number">2</span>*i+<span class="code-number">1</span></span>'
+                'def array_to_tree(arr):',
+                '    if not arr: return None',
+                '    root = arr[0]',
+                '    queue = [root]',
+                '    i = 1',
+                '    while queue and i < len(arr):',
+                '        node = queue.pop(0)',
+                '        if i < len(arr):',
+                '            node.lchild = arr[i]',
+                '            queue.append(arr[i])',
+                '            i += 1',
+                '        if i < len(arr):',
+                '            node.rchild = arr[i]',
+                '            queue.append(arr[i])',
+                '            i += 1',
+                '    return root'
             ],
             generateSteps: (arr) => {
                 const steps = [];
-                const n = 8;
-                steps.push({ type: 'init', array: [...arr], line: 0, message: '顺序存储二叉树' });
-                for (let i = 1; i < Math.min(n, arr.length + 1); i++) {
-                    const parent = Math.floor(i / 2);
-                    const left = 2 * i;
-                    const right = 2 * i + 1;
-                    steps.push({ type: 'visit', indices: [i-1], array: [...arr], line: 1, message: `i=${i}: val=${arr[i-1] || 'null'}` });
-                    steps.push({ type: 'code-line', array: [...arr], line: 2, message: `parent=${parent !== 0 ? parent : 'root'}` });
-                    steps.push({ type: 'code-line', array: [...arr], line: 3, message: `left=${left <= arr.length ? left : 'null'}, right=${right <= arr.length ? right : 'null'}` });
+                const values = arr.slice(0, 7);
+                
+                // 构建完整的树结构用于参考
+                function buildFullTree(values) {
+                    if (!values || values.length === 0) return null;
+                    const root = { val: values[0], left: null, right: null };
+                    const queue = [root];
+                    let i = 1;
+                    while (queue.length > 0 && i < values.length) {
+                        const node = queue.shift();
+                        if (i < values.length) {
+                            node.left = { val: values[i], left: null, right: null };
+                            queue.push(node.left);
+                            i++;
+                        }
+                        if (i < values.length) {
+                            node.right = { val: values[i], left: null, right: null };
+                            queue.push(node.right);
+                            i++;
+                        }
+                    }
+                    return root;
                 }
-                steps.push({ type: 'complete', array: [...arr], line: 4, message: '顺序存储完成' });
+                
+                const fullTree = buildFullTree(values);
+                steps.push({ type: 'start', tree: null, line: 1, message: '开始顺序存储' });
+                
+                // 逐层构建，每步添加一层节点
+                let currentTree = null;
+                let i = 0;
+                let level = 0;
+                let nodesInLevel = 1;
+                
+                while (i < values.length) {
+                    // 计算当前层能添加的节点数
+                    const nodesToAdd = Math.min(nodesInLevel, values.length - i);
+                    
+                    // 收集当前层的节点
+                    const levelNodes = [];
+                    for (let j = 0; j < nodesToAdd; j++) {
+                        levelNodes.push(values[i + j]);
+                    }
+                    
+                    // 创建当前层的树
+                    function buildLevelTree(values, lvl) {
+                        if (values.length === 0) return null;
+                        const root = { val: values[0], left: null, right: null };
+                        const queue = [root];
+                        let currentIdx = 1;
+                        let currentLevel = 1;
+                        
+                        while (queue.length > 0 && currentIdx < values.length) {
+                            const levelSize = queue.length;
+                            for (let k = 0; k < levelSize && currentIdx < values.length; k++) {
+                                const node = queue.shift();
+                                if (currentLevel < lvl && currentIdx < values.length) {
+                                    node.left = { val: values[currentIdx], left: null, right: null };
+                                    queue.push(node.left);
+                                    currentIdx++;
+                                }
+                                if (currentLevel < lvl && currentIdx < values.length) {
+                                    node.right = { val: values[currentIdx], left: null, right: null };
+                                    queue.push(node.right);
+                                    currentIdx++;
+                                }
+                            }
+                            currentLevel++;
+                        }
+                        return root;
+                    }
+                    
+                    currentTree = buildLevelTree(values, level + 1);
+                    steps.push({ 
+                        type: 'visit', 
+                        tree: JSON.parse(JSON.stringify(currentTree)), 
+                        indices: [i],
+                        line: 1, 
+                        message: `添加第 ${level + 1} 层: [${levelNodes.join(', ')}]` 
+                    });
+                    
+                    i += nodesToAdd;
+                    level++;
+                    nodesInLevel *= 2;
+                }
+                
+                steps.push({ type: 'complete', tree: fullTree, line: 13, message: '顺序存储完成' });
                 return steps;
             }
         },
@@ -4090,6 +4277,7 @@ function initVizControls() {
     });
 }
 
+
 function togglePlay() {
     if (!state.currentAlgorithm) return;
     if (state.steps.length === 0) generateSteps();
@@ -4419,8 +4607,12 @@ function renderStepVisualization(step) {
         renderLinkedListVisualization(step);
     } else if (algo.id && (algo.id.includes('tree') || algo.id.includes('bst'))) {
         renderTreeVisualization(step);
-    } else if (algo.id && algo.id.includes('bfs') || algo.id.includes('dfs')) {
+    } else if (algo.id && (algo.id.includes('bfs') || algo.id.includes('dfs'))) {
         renderGraphVisualization(step);
+    } else if (algo.id && (algo.id.includes('栈') || algo.id.includes('stack'))) {
+        renderStackVisualization(step);
+    } else if (algo.id && (algo.id.includes('队列') || algo.id.includes('queue'))) {
+        renderQueueVisualization(step);
     } else {
         renderArrayVisualizationWithStep(step);
     }
@@ -4434,7 +4626,8 @@ function renderArrayVisualization(arr) {
     
     arr.forEach((val, idx) => {
         const bar = document.createElement('div');
-        bar.className = 'array-bar';
+        bar.className = 'array-bar draggable';
+        bar.dataset.idx = idx;
         const height = Math.max(30, (val / max) * 200);
         bar.innerHTML = '<div class="array-bar-value">' + val + '</div>' +
             '<div class="array-bar-inner" style="height: ' + height + 'px"></div>' +
@@ -4455,7 +4648,8 @@ function renderArrayVisualizationWithStep(step) {
     
     arr.forEach((val, idx) => {
         const bar = document.createElement('div');
-        bar.className = 'array-bar';
+        bar.className = 'array-bar draggable';
+        bar.dataset.idx = idx;
         
         if (step.type === 'compare' && step.indices && step.indices.includes(idx)) {
             bar.classList.add('comparing');
@@ -4484,6 +4678,100 @@ function renderArrayVisualizationWithStep(step) {
     canvas.appendChild(container);
 }
 
+// ===== 栈可视化 =====
+function renderStackVisualization(step) {
+    const canvas = document.getElementById('vizCanvas');
+    const arr = step.array || [];
+    const container = document.createElement('div');
+    container.className = 'stack-container';
+    
+    const topIndex = step.top !== undefined ? step.top : arr.length - 1;
+    
+    arr.forEach((val, idx) => {
+        const item = document.createElement('div');
+        item.className = 'stack-item draggable';
+        item.dataset.idx = idx;
+        
+        if (idx === topIndex) {
+            item.classList.add('top');
+        }
+        if (step.type === 'visit' && step.indices && step.indices.includes(idx)) {
+            item.classList.add('current');
+        }
+        
+        item.textContent = val;
+        container.appendChild(item);
+    });
+    
+    if (arr.length > 0) {
+        const base = document.createElement('div');
+        base.className = 'stack-base';
+        container.appendChild(base);
+        
+        const pointer = document.createElement('div');
+        pointer.className = 'stack-pointer';
+        pointer.textContent = '↑top';
+        base.appendChild(pointer);
+    }
+    
+    canvas.innerHTML = '';
+    canvas.appendChild(container);
+}
+
+// ===== 队列可视化 =====
+function renderQueueVisualization(step) {
+    const canvas = document.getElementById('vizCanvas');
+    const arr = step.array || [];
+    const container = document.createElement('div');
+    container.className = 'queue-container';
+    
+    const headIndex = step.head !== undefined ? step.head : 0;
+    const tailIndex = step.tail !== undefined ? step.tail : arr.length - 1;
+    
+    arr.forEach((val, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'queue-wrapper';
+        
+        const item = document.createElement('div');
+        item.className = 'queue-item draggable';
+        item.dataset.idx = idx;
+        
+        if (idx === headIndex && arr.length > 0) {
+            item.classList.add('head');
+        }
+        if (idx === tailIndex && arr.length > 0) {
+            item.classList.add('tail');
+        }
+        if (step.type === 'visit' && step.indices && step.indices.includes(idx)) {
+            item.classList.add('current');
+        }
+        
+        item.textContent = val;
+        wrapper.appendChild(item);
+        
+        const label = document.createElement('div');
+        label.className = 'queue-label';
+        if (idx === headIndex && arr.length > 0) {
+            label.textContent = 'head';
+        } else if (idx === tailIndex && arr.length > 0) {
+            label.textContent = 'tail';
+        }
+        wrapper.appendChild(label);
+        
+        container.appendChild(wrapper);
+        
+        if (idx < arr.length - 1) {
+            const arrow = document.createElement('div');
+            arrow.className = 'queue-arrow';
+            arrow.textContent = '→';
+            container.appendChild(arrow);
+        }
+    });
+    
+    canvas.innerHTML = '';
+    canvas.appendChild(container);
+}
+
 function renderLinkedListVisualization(step) {
     const canvas = document.getElementById('vizCanvas');
     const container = document.createElement('div');
@@ -4493,7 +4781,8 @@ function renderLinkedListVisualization(step) {
     list.forEach((item, idx) => {
         const data = typeof item === 'object' ? item.data : item;
         const nodeEl = document.createElement('div');
-        nodeEl.className = 'll-node';
+        nodeEl.className = 'll-node draggable';
+        nodeEl.dataset.idx = idx;
         if (step.type === 'insert' && idx === 0) nodeEl.classList.add('inserting');
         nodeEl.innerHTML = '<div class="ll-node-box"><div class="ll-node-data">' + data + '</div><div class="ll-node-pointer">next</div></div>';
         container.appendChild(nodeEl);
@@ -4602,7 +4891,8 @@ function renderTreeVisualization(step) {
     // 第三遍：绘制节点
     nodeMap.forEach((info, val) => {
         const nodeEl = document.createElement('div');
-        nodeEl.className = 'tree-node';
+        nodeEl.className = 'tree-node draggable';
+        nodeEl.dataset.idx = val;
         
         if (info.level === 0) {
             nodeEl.classList.add('root');
@@ -4668,7 +4958,8 @@ function renderGraphVisualization(step) {
     Object.keys(nodePositions).forEach(node => {
         const pos = nodePositions[node];
         const nodeEl = document.createElement('div');
-        nodeEl.className = 'graph-node';
+        nodeEl.className = 'graph-node draggable';
+        nodeEl.dataset.idx = node;
         if (step.visited && step.visited.includes(parseInt(node))) {
             nodeEl.classList.add('visited');
         }

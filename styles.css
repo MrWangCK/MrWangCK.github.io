@@ -258,20 +258,72 @@ body {
     justify-content: center;
     padding: 20px;
     overflow: hidden;
+    position: relative;
+    cursor: grab;
+}
+
+.viz-container:active {
+    cursor: grabbing;
+}
+
+.viz-container-inner {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .viz-canvas {
-    width: 100%;
-    height: 100%;
+    transform-origin: center center;
+    transition: none;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
     gap: 4px;
+    padding: 50px;
 }
 
-.placeholder-message {
-    text-align: center;
-    color: var(--text-muted);
+/* 连线SVG层 */
+.viz-lines {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.viz-lines line, .viz-lines path {
+    stroke: #6366f1;
+    stroke-width: 2;
+    fill: none;
+    pointer-events: stroke;
+}
+
+.viz-lines .line-selected {
+    stroke: #f59e0b;
+    stroke-width: 3;
+}
+
+.viz-lines .line-temp {
+    stroke: #94a3b8;
+    stroke-dasharray: 5, 5;
+}
+
+/* 可拖拽元素 */
+.viz-canvas .draggable {
+    cursor: grab;
+    user-select: none;
+    position: relative;
+    z-index: 20;
+}
+
+.viz-canvas .draggable:active {
+    cursor: grabbing;
+    z-index: 100;
 }
 
 .placeholder-icon {
@@ -346,6 +398,159 @@ body {
 .array-bar.found .array-bar-inner {
     background: linear-gradient(180deg, #4ade80, var(--success));
     box-shadow: 0 0 10px var(--success);
+}
+
+/* ===== 栈可视化 ===== */
+.stack-container {
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+    height: 100%;
+    padding-top: 20px;
+}
+
+.stack-item {
+    width: 60px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 2px solid #b45309;
+    border-radius: 6px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    color: #92400e;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stack-item.top {
+    border-color: var(--primary);
+    box-shadow: 0 0 10px var(--primary-light);
+}
+
+.stack-item.current {
+    background: linear-gradient(135deg, #ddd6fe, #c4b5fd);
+    border-color: var(--primary);
+}
+
+.stack-label {
+    position: absolute;
+    right: -60px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.stack-base {
+    width: 80px;
+    height: 8px;
+    background: linear-gradient(180deg, #78716c, #57534e);
+    border-radius: 4px;
+    margin-top: 10px;
+    position: relative;
+}
+
+.stack-pointer {
+    position: absolute;
+    top: -20px;
+    right: 90px;
+    font-size: 0.7rem;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+@keyframes stackPush {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes stackPop {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(-20px); opacity: 0; }
+}
+
+/* ===== 队列可视化 ===== */
+.queue-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 100%;
+    padding: 0 20px;
+}
+
+.queue-item {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+    border: 2px solid #2563eb;
+    border-radius: 8px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1rem;
+    color: #1e40af;
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.queue-item.head {
+    border-color: var(--success);
+    box-shadow: 0 0 8px var(--success);
+}
+
+.queue-item.tail {
+    border-color: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+}
+
+.queue-item.enqueue {
+    animation: queueEnqueue 0.3s ease-out;
+}
+
+.queue-item.dequeue {
+    animation: queueDequeue 0.3s ease-out;
+}
+
+.queue-item.current {
+    background: linear-gradient(135deg, #ddd6fe, #c4b5fd);
+    border-color: var(--primary);
+}
+
+.queue-arrow {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    margin: 0 2px;
+}
+
+.queue-label {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-align: center;
+}
+
+.queue-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@keyframes queueEnqueue {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes queueDequeue {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(20px); opacity: 0; }
 }
 
 /* ===== 控制栏 ===== */
