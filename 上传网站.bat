@@ -1,27 +1,33 @@
 @echo off
-chcp 65001 > nul
-echo ==============================================
-echo          GitHub Pages 一键自动上传
-echo              作者：MrWangCK
-echo ==============================================
-echo.
+chcp 65001 >nul
+title GitHub Pages 一键自动上传
 
-cd /d "C:\programming\0\wcky"
+echo ========================================
+echo GitHub Pages 一键自动上传脚本
+echo ========================================
+
+:: 配置你的仓库信息
+set "REPO_NAME=MrWangCK.github.io"
+set "GIT_URL=https://github.com/MrWangCK/MrWangCK.github.io.git"
+
+:: 初始化Git（如果未初始化）
+if not exist ".git" (
+    git init
+    git remote add origin %GIT_URL%
+)
 
 echo 正在添加文件...
 git add .
 
 echo 正在提交更新...
-git commit -m "自动更新：%date% %time%"
+git commit -m "自动提交: %date% %time%"
 
 echo 正在推送到 GitHub...
-git push
+git pull origin main --rebase
+git push -u origin main
 
-echo.
-echo ==============================================
-echo              ✅ 上传完成！
-echo        等待 1-3 分钟网站自动更新
-echo ==============================================
-echo.
+echo ========================================
+echo 上传完成！
+echo ========================================
 
 pause
