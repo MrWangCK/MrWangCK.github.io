@@ -4117,6 +4117,11 @@ function selectAlgorithm(algo) {
     state.isPlaying = false;
     if (state.animationTimer) clearInterval(state.animationTimer);
     
+    // 重置所有动画状态
+    prevStackArr = [];
+    prevQueueArr = [];
+    prevBracketArr = [];
+    
     document.querySelectorAll('.algorithm-item').forEach(item => {
         item.classList.toggle('active', item.dataset.id === algo.id);
     });
@@ -4350,6 +4355,10 @@ function resetAnimation() {
     state.currentStep = 0;
     state.isPlaying = false;
     if (state.animationTimer) clearInterval(state.animationTimer);
+    // 重置动画状态
+    prevStackArr = [];
+    prevQueueArr = [];
+    prevBracketArr = [];
     const btn = document.getElementById('btnStart');
     btn.innerHTML = '<span>▶</span> 开始';
     btn.classList.remove('primary');
@@ -4365,6 +4374,10 @@ function randomize() {
     state.currentStep = 0;
     state.isPlaying = false;
     if (state.animationTimer) clearInterval(state.animationTimer);
+    // 重置动画状态
+    prevStackArr = [];
+    prevQueueArr = [];
+    prevBracketArr = [];
     const btn = document.getElementById('btnStart');
     btn.innerHTML = '<span>▶</span> 开始';
     btn.classList.remove('primary');
@@ -4385,6 +4398,10 @@ function applyCustomInput() {
         state.currentStep = 0;
         state.isPlaying = false;
         if (state.animationTimer) clearInterval(state.animationTimer);
+        // 重置动画状态
+        prevStackArr = [];
+        prevQueueArr = [];
+        prevBracketArr = [];
         const btn = document.getElementById('btnStart');
         btn.innerHTML = '<span>▶</span> 开始';
         btn.classList.remove('primary');
@@ -4609,6 +4626,8 @@ function renderStepVisualization(step) {
         renderTreeVisualization(step);
     } else if (algo.id && (algo.id.includes('bfs') || algo.id.includes('dfs'))) {
         renderGraphVisualization(step);
+    } else if (algo.id && algo.id.includes('bracket')) {
+        renderBracketMatchVisualization(step);
     } else if (algo.id && (algo.id.includes('栈') || algo.id.includes('stack'))) {
         renderStackVisualization(step);
     } else if (algo.id && (algo.id.includes('队列') || algo.id.includes('queue'))) {
@@ -4679,6 +4698,8 @@ function renderArrayVisualizationWithStep(step) {
 }
 
 // ===== 栈可视化 =====
+let prevStackArr = [];
+
 function renderStackVisualization(step) {
     const canvas = document.getElementById('vizCanvas');
     const arr = step.array || [];
@@ -4686,6 +4707,10 @@ function renderStackVisualization(step) {
     container.className = 'stack-container';
     
     const topIndex = step.top !== undefined ? step.top : arr.length - 1;
+    
+    // 检测入栈出栈
+    const isPush = arr.length > prevStackArr.length;
+    const isPop = arr.length < prevStackArr.length;
     
     arr.forEach((val, idx) => {
         const item = document.createElement('div');
@@ -4698,10 +4723,30 @@ function renderStackVisualization(step) {
         if (step.type === 'visit' && step.indices && step.indices.includes(idx)) {
             item.classList.add('current');
         }
+        // 新入栈元素添加动画
+        if (isPush && idx === arr.length - 1) {
+            item.classList.add('push');
+        }
         
         item.textContent = val;
         container.appendChild(item);
     });
+    
+    // 出栈动画 - 在栈上方显示被弹出的元素
+    if (isPop && prevStackArr.length > 0) {
+        const poppingVal = prevStackArr[prevStackArr.length - 1];
+        const poppingItem = document.createElement('div');
+        poppingItem.className = 'stack-item pop draggable';
+        poppingItem.textContent = poppingVal;
+        poppingItem.style.position = 'absolute';
+        poppingItem.style.left = '0';
+        poppingItem.style.top = '0';
+        container.insertBefore(poppingItem, container.firstChild);
+        
+        setTimeout(() => {
+            poppingItem.remove();
+        }, 300);
+    }
     
     if (arr.length > 0) {
         const base = document.createElement('div');
@@ -4716,9 +4761,99 @@ function renderStackVisualization(step) {
     
     canvas.innerHTML = '';
     canvas.appendChild(container);
+    prevStackArr = [...arr];
+}
+
+// ===== 括号匹配可视化 =====
+let prevBracketArr = [];
+
+function renderBracketMatchVisualization(step) {
+    const canvas = document.getElementById('vizCanvas');
+    const arr = step.array || [];
+    const container = document.createElement('div');
+    container.className = 'bracket-container';
+    
+    const topIndex = step.top !== undefined ? step.top : arr.length - 1;
+    
+    // 检测是入栈还是出栈
+    const isPush = arr.length > prevBracketArr.length;
+    const isPop = arr.length < prevBracketArr.length;
+    
+    arr.forEach((val, idx) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'bracket-wrapper';
+        
+        const item = document.createElement('div');
+        item.className = 'bracket-item draggable';
+        item.dataset.idx = idx;
+        
+        if (idx === topIndex) {
+            item.classList.add('top');
+        }
+        if (step.type === 'visit' && step.indices && step.indices.includes(idx)) {
+            item.classList.add('current');
+        }
+        if (step.type === 'compare') {
+            item.classList.add('comparing');
+        }
+        if (step.type === 'pop') {
+            item.classList.add('matched');
+        }
+        if (step.type === 'complete') {
+            item.classList.add(step.message && step.message.includes('失败') ? 'failed' : 'success');
+        }
+        
+        item.textContent = val;
+        wrapper.appendChild(item);
+        
+        container.appendChild(wrapper);
+        
+        if (idx < arr.length - 1) {
+            const arrow = document.createElement('div');
+            arrow.className = 'bracket-arrow';
+            arrow.textContent = '→';
+            container.appendChild(arrow);
+        }
+    });
+    
+    // 入栈动画
+    if (isPush && arr.length > 0) {
+        const lastItem = container.querySelector('.bracket-item:last-child');
+        if (lastItem) {
+            lastItem.classList.add('bracket-push');
+        }
+    }
+    
+    // 出栈动画
+    if (isPop) {
+        const firstWrapper = container.querySelector('.bracket-wrapper');
+        if (firstWrapper) {
+            const popItem = document.createElement('div');
+            popItem.className = 'bracket-item bracket-pop draggable';
+            popItem.textContent = prevBracketArr[0];
+            popItem.style.background = 'linear-gradient(135deg, #fca5a5, #f87171)';
+            popItem.style.borderColor = '#dc2626';
+            firstWrapper.insertBefore(popItem, firstWrapper.firstChild);
+            
+            setTimeout(() => {
+                const lastWrapper = container.querySelector('.bracket-wrapper:last-child');
+                if (lastWrapper) {
+                    lastWrapper.remove();
+                    const arrow = container.querySelector('.bracket-arrow:last-child');
+                    if (arrow) arrow.remove();
+                }
+            }, 300);
+        }
+    }
+    
+    canvas.innerHTML = '';
+    canvas.appendChild(container);
+    prevBracketArr = [...arr];
 }
 
 // ===== 队列可视化 =====
+let prevQueueArr = [];
+
 function renderQueueVisualization(step) {
     const canvas = document.getElementById('vizCanvas');
     const arr = step.array || [];
@@ -4727,6 +4862,10 @@ function renderQueueVisualization(step) {
     
     const headIndex = step.head !== undefined ? step.head : 0;
     const tailIndex = step.tail !== undefined ? step.tail : arr.length - 1;
+    
+    // 检测入队出队
+    const isEnqueue = arr.length > prevQueueArr.length;
+    const isDequeue = arr.length < prevQueueArr.length;
     
     arr.forEach((val, idx) => {
         const wrapper = document.createElement('div');
@@ -4744,6 +4883,10 @@ function renderQueueVisualization(step) {
         }
         if (step.type === 'visit' && step.indices && step.indices.includes(idx)) {
             item.classList.add('current');
+        }
+        // 新入队元素添加动画
+        if (isEnqueue && idx === arr.length - 1) {
+            item.classList.add('enqueue');
         }
         
         item.textContent = val;
@@ -4768,8 +4911,25 @@ function renderQueueVisualization(step) {
         }
     });
     
+    // 出队动画
+    if (isDequeue && prevQueueArr.length > 0) {
+        const dequeueVal = prevQueueArr[0];
+        const dequeueItem = document.createElement('div');
+        dequeueItem.className = 'queue-item dequeue draggable';
+        dequeueItem.textContent = dequeueVal;
+        dequeueItem.style.position = 'absolute';
+        dequeueItem.style.left = '0';
+        dequeueItem.style.top = '0';
+        container.insertBefore(dequeueItem, container.firstChild);
+        
+        setTimeout(() => {
+            dequeueItem.remove();
+        }, 300);
+    }
+    
     canvas.innerHTML = '';
     canvas.appendChild(container);
+    prevQueueArr = [...arr];
 }
 
 function renderLinkedListVisualization(step) {

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>查找算法动画演示</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 30px 0;
+        }
+        header h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        header a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        header a:hover { color: #667eea; }
+        .algo-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .algo-tab {
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .algo-tab:hover, .algo-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+        }
+        .algo-panel { display: none; }
+        .algo-panel.active { display: block; }
+        .controls {
+            background: rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+        .controls input {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: #fff;
+            font-size: 0.9rem;
+            width: 120px;
+        }
+        .controls button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4); }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+        .btn-danger { background: rgba(255,100,100,0.3); color: #fff; }
+        .btn-danger:hover { background: rgba(255,100,100,0.5); }
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+        }
+        .speed-control label { font-size: 0.9rem; color: rgba(255,255,255,0.7); }
+        .speed-control input[type="range"] { width: 100px; accent-color: #667eea; }
+        .visualization {
+            background: rgba(255,255,255,0.04);
+            border-radius: 12px;
+            padding: 30px;
+            min-height: 380px;
+            margin-bottom: 20px;
+        }
+        .info-panel { display: flex; gap: 20px; flex-wrap: wrap; }
+        .info-box {
+            flex: 1;
+            min-width: 200px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .info-box h3 { font-size: 1rem; margin-bottom: 10px; color: #667eea; }
+        .info-box p { font-size: 0.9rem; color: rgba(255,255,255,0.7); line-height: 1.6; }
+        .log-box {
+            flex: 2;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+        }
+        .log-box p { margin: 5px 0; }
+        .log-box .step { color: #667eea; }
+        .log-box .found { color: #4ade80; }
+        .log-box .not-found { color: #f87171; }
+        .log-box .compare { color: #fbbf24; }
+
+        /* BST Tree - Clean Family Tree Style */
+        .bst-container {
+            position: relative;
+            width: 100%;
+            min-height: 320px;
+            display: flex;
+            justify-content: center;
+        }
+        .bst-tree {
+            position: relative;
+        }
+        .bst-node {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.95);
+            border: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #1a1a2e;
+            transition: all 0.3s;
+            z-index: 2;
+        }
+        .bst-node.searching {
+            background: #fbbf24;
+            border-color: #fbbf24;
+            box-shadow: 0 0 15px rgba(251,191,36,0.6);
+            transform: scale(1.1);
+        }
+        .bst-node.found {
+            background: #4ade80;
+            border-color: #4ade80;
+            box-shadow: 0 0 20px rgba(74,222,128,0.6);
+            animation: pulse 0.5s ease-in-out;
+        }
+        .bst-node.not-found {
+            background: #f87171;
+            border-color: #f87171;
+        }
+        .bst-node.current {
+            background: #667eea;
+            border-color: #764ba2;
+            color: #fff;
+            box-shadow: 0 0 15px rgba(102,126,234,0.6);
+        }
+        .bst-node.visited {
+            background: rgba(102,126,234,0.4);
+            border-color: #667eea;
+            color: #fff;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* Block Search - 块头一行，块数据纵向排列 */
+        .block-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        .block-header-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .block-header {
+            background: rgba(102,126,234,0.25);
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            padding: 10px 18px;
+            min-width: 85px;
+            text-align: center;
+        }
+        .block-header .block-name { font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+        .block-header .block-max { font-size: 1.2rem; font-weight: bold; }
+        .block-header .block-count { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 4px; }
+        .block-data-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .block-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .block-item {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 8px 14px;
+            min-width: 50px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .block-item .item-value { font-size: 1.1rem; font-weight: bold; }
+        .block-item .item-index { font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+        .block-item.searching {
+            background: rgba(251,191,36,0.3);
+            border-color: #fbbf24;
+            transform: scale(1.08);
+        }
+        .block-item.found {
+            background: rgba(74,222,128,0.3);
+            border-color: #4ade80;
+            box-shadow: 0 0 15px rgba(74,222,128,0.5);
+        }
+        .block-item.not-found {
+            background: rgba(248,113,113,0.3);
+            border-color: #f87171;
+        }
+        .block-header.searching {
+            background: rgba(251,191,36,0.3);
+            border-color: #fbbf24;
+        }
+        .block-header.current {
+            background: rgba(102,126,234,0.5);
+            border-color: #667eea;
+            box-shadow: 0 0 15px rgba(102,126,234,0.5);
+        }
+        .block-header.checked {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.1);
+            opacity: 0.6;
+        }
+        .legend { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
+        .legend-color { width: 16px; height: 16px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 查找算法动画演示</h1>
+            <a href="index.html">← 返回导航首页</a>
+        </header>
+
+        <div class="algo-tabs">
+            <button class="algo-tab active" onclick="switchAlgo('bst')">🌳 二叉排序树 (BST)</button>
+            <button class="algo-tab" onclick="switchAlgo('block')">📦 分块查找</button>
+        </div>
+
+        <!-- BST Panel -->
+        <div id="bst-panel" class="algo-panel active">
+            <div class="controls">
+                <input type="number" id="bst-value" placeholder="输入数值">
+                <button class="btn-primary" onclick="bstInsert()">插入</button>
+                <button class="btn-secondary" onclick="bstSearch()">搜索</button>
+                <button class="btn-danger" onclick="bstClear()">清空</button>
+                <button class="btn-secondary" onclick="bstRandom()">随机生成</button>
+                <div class="speed-control">
+                    <label>速度:</label>
+                    <input type="range" id="bst-speed" min="100" max="1000" value="500">
+                </div>
+            </div>
+            <div class="visualization">
+                <div class="bst-container" id="bst-container">
+                    <div class="bst-tree" id="bst-tree"></div>
+                </div>
+            </div>
+            <div class="info-panel">
+                <div class="info-box">
+                    <h3>算法原理</h3>
+                    <p>二叉排序树(BST)左子树节点 < 根节点 < 右子树节点。从根开始，比较目标值，小向左、大向右递归搜索，直到找到或为空。</p>
+                </div>
+                <div class="log-box" id="bst-log"></div>
+            </div>
+        </div>
+
+        <!-- Block Search Panel -->
+        <div id="block-panel" class="algo-panel">
+            <div class="controls">
+                <input type="number" id="block-value" placeholder="输入数值">
+                <button class="btn-primary" onclick="blockInsert()">插入</button>
+                <button class="btn-secondary" onclick="blockSearch()">搜索</button>
+                <button class="btn-danger" onclick="blockClear()">清空</button>
+                <button class="btn-secondary" onclick="blockRandom()">随机生成</button>
+                <div class="speed-control">
+                    <label>速度:</label>
+                    <input type="range" id="block-speed" min="100" max="1000" value="500">
+                </div>
+            </div>
+            <div class="visualization">
+                <div class="blocks-container" id="blocks-container"></div>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-color" style="background:rgba(102,126,234,0.3);border:2px solid #667eea;"></div><span>确定块</span></div>
+                    <div class="legend-item"><div class="legend-color" style="background:rgba(251,191,36,0.3);border:2px solid #fbbf24;"></div><span>搜索中</span></div>
+                    <div class="legend-item"><div class="legend-color" style="background:rgba(74,222,128,0.3);border:2px solid #4ade80;"></div><span>找到</span></div>
+                </div>
+            </div>
+            <div class="info-panel">
+                <div class="info-box">
+                    <h3>算法原理</h3>
+                    <p>分块查找：块内无序、块间有序。先比较目标与各块最大值确定目标块，再在块内顺序查找。本演示块间按最大值升序排列。</p>
+                </div>
+                <div class="log-box" id="block-log"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =============== BST ===============
+        class BSTNode {
+            constructor(value) { this.value = value; this.left = null; this.right = null; }
+        }
+        let bstRoot = null;
+
+        function bstInsert() {
+            const v = parseInt(document.getElementById('bst-value').value);
+            if (isNaN(v)) return alert('请输入数值');
+            bstRoot = insertBST(bstRoot, v);
+            document.getElementById('bst-value').value = '';
+            renderBST(); logBST(`插入 ${v}`, 'step');
+        }
+        function insertBST(node, v) {
+            if (!node) return new BSTNode(v);
+            if (v < node.value) node.left = insertBST(node.left, v);
+            else if (v > node.value) node.right = insertBST(node.right, v);
+            return node;
+        }
+
+        async function bstSearch() {
+            const v = parseInt(document.getElementById('bst-value').value);
+            if (isNaN(v)) return alert('请输入要搜索的数值');
+            if (!bstRoot) return alert('树为空');
+            resetBSTStates();
+            const found = await searchBST(bstRoot, v);
+            document.getElementById('bst-value').value = '';
+        }
+
+        async function searchBST(node, v) {
+            if (!node) { logBST(`未找到 ${v}`, 'not-found'); return false; }
+            
+            logBST(`比较 ${v} vs ${node.value}`, 'compare');
+            node.searching = true;
+            renderBST();
+            await sleep(getSpeed('bst'));
+
+            if (v === node.value) {
+                node.found = true; node.searching = false;
+                logBST(`✓ 找到 ${v}!`, 'found');
+                renderBST(); return true;
+            }
+            
+            node.visited = true; node.searching = false;
+            if (v < node.value) {
+                logBST(`${v} < ${node.value}，向左`, 'step');
+                renderBST();
+                return await searchBST(node.left, v);
+            } else {
+                logBST(`${v} > ${node.value}，向右`, 'step');
+                renderBST();
+                return await searchBST(node.right, v);
+            }
+        }
+
+        function resetBSTStates() {
+            const reset = n => { if (!n) return; n.searching = n.found = n.current = n.visited = false; reset(n.left); reset(n.right); };
+            reset(bstRoot);
+        }
+
+        function getBSTState(node) {
+            if (node.found) return 'found';
+            if (node.searching) return 'searching';
+            if (node.visited) return 'visited';
+            return '';
+        }
+
+        function renderBST() {
+            const container = document.getElementById('bst-tree');
+            if (!bstRoot) {
+                container.innerHTML = '<p style="position:absolute;top:150px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.3);">点击插入或随机生成</p>';
+                container.style.width = '200px';
+                return;
+            }
+
+            const levelHeight = 70;
+            const nodeWidth = 60;
+            const positions = new Map();
+            
+            function calc(node, level, left, right) {
+                if (!node) return;
+                const x = (left + right) / 2;
+                const y = level * levelHeight;
+                positions.set(node, { x, y });
+                calc(node.left, level + 1, left, x);
+                calc(node.right, level + 1, x, right);
+            }
+            calc(bstRoot, 0, 0, 600);
+
+            let maxX = 0, maxY = 0;
+            positions.forEach(p => { maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y); });
+
+            container.style.width = (maxX + 100) + 'px';
+            container.style.height = (maxY + 100) + 'px';
+
+            let html = '';
+            positions.forEach((pos, node) => {
+                const isRoot = node === bstRoot;
+                const state = getBSTState(node);
+                const cls = isRoot ? 'root' : '';
+                const stateCls = state ? ' ' + state : '';
+                html += `<div class="bst-node ${cls}${stateCls}" style="left:${pos.x - 25}px;top:${pos.y}px;">${node.value}</div>`;
+                if (!isRoot) {
+                    let parent, side;
+                    if (findParent(bstRoot, node, 'left')) { parent = findParent(bstRoot, node, 'left'); side = 'left'; }
+                    else { parent = findParent(bstRoot, node, 'right'); side = 'right'; }
+                    if (parent) {
+                        const pp = positions.get(parent);
+                        const lineLen = Math.sqrt(Math.pow(pos.x - pp.x, 2) + Math.pow(pos.y - pp.y, 2)) - 25;
+                        const angle = Math.atan2(pos.y - pp.y, pos.x - pp.x) * 180 / Math.PI;
+                        html += `<div style="position:absolute;width:${lineLen}px;height:2px;background:rgba(255,255,255,0.3);left:${pp.x}px;top:${pp.y + 25}px;transform-origin:0 50%;transform:rotate(${angle}deg);"></div>`;
+                    }
+                }
+            });
+            container.innerHTML = html;
+        }
+
+        function findParent(root, child, side) {
+            if (!root) return null;
+            if (side === 'left' && root.left === child) return root;
+            if (side === 'right' && root.right === child) return root;
+            return findParent(root.left, child, 'left') || findParent(root.left, child, 'right') || findParent(root.right, child, 'left') || findParent(root.right, child, 'right');
+        }
+
+        function bstClear() { bstRoot = null; document.getElementById('bst-log').innerHTML = ''; renderBST(); }
+        function bstRandom() {
+            bstClear();
+            const count = Math.floor(Math.random() * 4) + 5;
+            const s = new Set();
+            while (s.size < count) s.add(Math.floor(Math.random() * 50) + 10);
+            s.forEach(v => bstRoot = insertBST(bstRoot, v));
+            renderBST(); logBST('随机生成树', 'step');
+        }
+        function logBST(msg, type) {
+            const log = document.getElementById('bst-log');
+            log.innerHTML += `<p class="${type}">${new Date().toLocaleTimeString()} - ${msg}</p>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // =============== Block Search ===============
+        let blockData = [];
+        let blockBlocks = [];
+
+        function blockInsert() {
+            const v = parseInt(document.getElementById('block-value').value);
+            if (isNaN(v)) return alert('请输入数值');
+            blockData.push(v);
+            document.getElementById('block-value').value = '';
+            renderBlocks();
+        }
+
+        async function blockSearch() {
+            const v = parseInt(document.getElementById('block-value').value);
+            if (isNaN(v)) return alert('请输入要搜索的数值');
+            if (blockData.length === 0) return alert('数据为空');
+            if (blockBlocks.length === 0) buildBlocks(); // 确保已分块
+            document.getElementById('block-value').value = '';
+            await searchBlock(v);
+        }
+
+        function buildBlocks() {
+            // 排序后分块，保证块间有序
+            const sorted = [...blockData].sort((a, b) => a - b);
+            const blockCount = Math.floor(Math.random() * 3) + 3;
+            const size = Math.ceil(sorted.length / blockCount);
+            
+            blockBlocks = [];
+            for (let i = 0; i < blockCount; i++) {
+                const start = i * size;
+                const end = Math.min(start + size, sorted.length);
+                if (start < sorted.length) {
+                    const slice = sorted.slice(start, end);
+                    // 打乱块内顺序（块内无序）
+                    const shuffled = [...slice].sort(() => Math.random() - 0.5);
+                    blockBlocks.push({
+                        start: start,
+                        end: end - 1,
+                        max: sorted[end - 1], // 块内最后一个是最大值
+                        data: shuffled
+                    });
+                }
+            }
+        }
+
+        async function searchBlock(target) {
+            
+            logBlock(`目标: ${target}，${blockBlocks.length}块，块间有序`, 'step');
+
+            // 1. 确定目标在哪个块（比较各块最大值）
+            let targetBlockIdx = -1;
+            for (let i = 0; i < blockBlocks.length; i++) {
+                clearBlockHighlight(i);
+                logBlock(`检查块${i + 1}: max = ${blockBlocks[i].max}`, 'compare');
+                highlightBlockHeader(i, 'searching');
+                await sleep(getSpeed('block'));
+
+                if (target <= blockBlocks[i].max) {
+                    targetBlockIdx = i;
+                    highlightBlockHeader(i, 'current');
+                    logBlock(`目标块${i + 1} (max=${blockBlocks[i].max})，块内查找`, 'step');
+                    break;
+                } else {
+                    highlightBlockHeader(i, 'checked');
+                }
+            }
+
+            if (targetBlockIdx === -1) {
+                logBlock(`未找到 ${target}`, 'not-found');
+                return;
+            }
+
+            // 2. 在目标块内顺序查找
+            const block = blockBlocks[targetBlockIdx];
+            let found = false;
+
+            for (let i = 0; i < block.data.length; i++) {
+                const value = block.data[i];
+                logBlock(`比较 ${target} vs ${value}[${block.start + i}]`, 'compare');
+                highlightBlockItem(targetBlockIdx, i, 'searching');
+                await sleep(getSpeed('block'));
+
+                if (value === target) {
+                    highlightBlockItem(targetBlockIdx, i, 'found');
+                    logBlock(`✓ 找到 ${target}!`, 'found');
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                logBlock(`未找到 ${target}`, 'not-found');
+            }
+        }
+
+        function renderBlocks() {
+            const container = document.getElementById('blocks-container');
+            if (blockData.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.3);padding:120px 0;">点击插入或随机生成数据</p>';
+                return;
+            }
+
+            if (blockBlocks.length === 0) buildBlocks();
+
+            let html = '<div class="block-container">';
+            
+            // 块头行
+            html += '<div class="block-header-row">';
+            blockBlocks.forEach((b, i) => {
+                html += `<div class="block-header" id="bh-${i}">
+                    <div class="block-name">块${i + 1}</div>
+                    <div class="block-max">${b.max}</div>
+                    <div class="block-count">[${b.start}-${b.end}]</div>
+                </div>`;
+            });
+            html += '</div>';
+
+            // 数据按行横向排列，每行包含每个块的对应位置元素
+            const maxItems = Math.max(...blockBlocks.map(b => b.data.length));
+            for (let row = 0; row < maxItems; row++) {
+                html += '<div class="block-data-wrapper">';
+                blockBlocks.forEach((b, i) => {
+                    if (row < b.data.length) {
+                        const val = b.data[row];
+                        html += `<div class="block-item" id="bi-${i}-${row}" data-val="${val}">
+                            <div class="item-value">${val}</div>
+                            <div class="item-index">[${b.start + row}]</div>
+                        </div>`;
+                    } else {
+                        html += '<div class="block-item" style="visibility:hidden;"></div>';
+                    }
+                });
+                html += '</div>';
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function highlightBlockHeader(idx, cls) {
+            const el = document.getElementById(`bh-${idx}`);
+            if (el) {
+                el.classList.remove('searching', 'current', 'checked', 'not-found');
+                if (cls) el.classList.add(cls);
+            }
+        }
+
+        function highlightBlockItem(blockIdx, itemIdx, cls) {
+            const el = document.getElementById(`bi-${blockIdx}-${itemIdx}`);
+            if (el) {
+                el.classList.remove('searching', 'found', 'current');
+                if (cls) el.classList.add(cls);
+            }
+        }
+
+        function clearBlockHighlight(idx) {
+            const header = document.getElementById(`bh-${idx}`);
+            if (header) header.classList.remove('searching', 'current', 'checked');
+            const items = document.querySelectorAll(`[id^="bi-${idx}-"]`);
+            items.forEach(el => el.classList.remove('searching', 'found', 'current'));
+        }
+
+        function blockClear() { blockData = []; blockBlocks = []; document.getElementById('block-log').innerHTML = ''; renderBlocks(); }
+        function blockRandom() {
+            blockClear();
+            const count = Math.floor(Math.random() * 8) + 8;
+            for (let i = 0; i < count; i++) blockData.push(Math.floor(Math.random() * 99) + 1);
+            renderBlocks();
+            logBlock(`随机生成 ${count} 个数据，3-5块，块间有序、块内无序`, 'step');
+        }
+        function logBlock(msg, type) {
+            const log = document.getElementById('block-log');
+            log.innerHTML += `<p class="${type}">${new Date().toLocaleTimeString()} - ${msg}</p>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // =============== Common ===============
+        function switchAlgo(name) {
+            document.querySelectorAll('.algo-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.algo-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(`${name}-panel`).classList.add('active');
+            event.target.classList.add('active');
+        }
+        function getSpeed(algo) { return 1001 - parseInt(document.getElementById(`${algo}-speed`).value); }
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        // Init
+        bstRandom();
+        blockRandom();
+    </script>
+</body>
+</html>
