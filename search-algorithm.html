@@ -323,9 +323,42 @@
             background: rgba(248,113,113,0.3);
             border-color: #f87171;
         }
+        
+        /* 查找结果提示 */
+        .search-result-toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideDown 0.3s ease-out;
+            display: none;
+        }
+        .search-result-toast.show { display: block; }
+        .search-result-toast.not-found {
+            background: linear-gradient(135deg, rgba(248,113,113,0.95), rgba(220,38,38,0.95));
+            border: 2px solid #f87171;
+            box-shadow: 0 8px 25px rgba(248,113,113,0.4);
+        }
+        .search-result-toast.found {
+            background: linear-gradient(135deg, rgba(74,222,128,0.95), rgba(34,197,94,0.95));
+            border: 2px solid #4ade80;
+            box-shadow: 0 8px 25px rgba(74,222,128,0.4);
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
     </style>
 </head>
 <body>
+    <!-- 查找结果提示 -->
+    <div class="search-result-toast" id="searchToast"></div>
+    
     <div class="container">
         <header>
             <h1>🔍 查找算法动画演示</h1>
@@ -434,6 +467,9 @@
             resetBSTStates();
             const found = await searchBST(bstRoot, v);
             document.getElementById('bst-value').value = '';
+            if (!found) {
+                showSearchResult(v, false);
+            }
         }
 
         async function searchBST(node, v) {
@@ -447,7 +483,9 @@
             if (v === node.value) {
                 node.found = true; node.searching = false;
                 logBST(`✓ 找到 ${v}!`, 'found');
-                renderBST(); return true;
+                renderBST();
+                showSearchResult(v, true);
+                return true;
             }
             
             node.visited = true; node.searching = false;
@@ -745,12 +783,14 @@
                     highlightBlockItem(targetBlockIdx, i, 'found');
                     logBlock(`✓ 找到 ${target}!`, 'found');
                     found = true;
+                    showSearchResult(target, true);
                     break;
                 }
             }
 
             if (!found) {
                 logBlock(`未找到 ${target}`, 'not-found');
+                showSearchResult(target, false);
             }
         }
 
@@ -889,6 +929,16 @@
         }
 
         // =============== Common ===============
+        function showSearchResult(value, found) {
+            const toast = document.getElementById('searchToast');
+            toast.textContent = found ? `✓ 找到 ${value} 了！` : `✗ 未找到 ${value}`;
+            toast.className = 'search-result-toast show ' + (found ? 'found' : 'not-found');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+        
         function switchAlgo(name) {
             document.querySelectorAll('.algo-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.algo-panel').forEach(p => p.classList.remove('active'));
