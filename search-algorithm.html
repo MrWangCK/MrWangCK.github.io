@@ -835,16 +835,21 @@
             this.classList.remove('drag-over');
         }
         
-        function blockRightClick(e) {
-            e.preventDefault();
-            const val = parseInt(this.dataset.val);
-            const idx = blockData.indexOf(val);
-            if (idx !== -1) {
-                blockData.splice(idx, 1);
-                renderBlocks();
-                logBlock(`删除 ${val}`, 'step');
+        // 右键删除 - 事件委托
+        document.addEventListener('contextmenu', function(e) {
+            const item = e.target.closest('.linear-item');
+            if (item) {
+                e.preventDefault();
+                const val = parseInt(item.dataset.val);
+                const idx = blockData.indexOf(val);
+                if (idx !== -1) {
+                    blockData.splice(idx, 1);
+                    blockBlocks = [];
+                    renderBlocks();
+                    logBlock(`删除 ${val}，重新分块`, 'step');
+                }
             }
-        }
+        });
         
         function renderBlocks() {
             const container = document.getElementById('blocks-container');
@@ -873,7 +878,7 @@
             let globalIndex = 0;
             blockBlocks.forEach((b, blockIdx) => {
                 b.data.forEach((val, itemIdx) => {
-                    html += `<div class="block-item linear-item" id="bi-${blockIdx}-${itemIdx}" data-val="${val}" data-block="${blockIdx}" data-global="${globalIndex}" draggable="true" ondragstart="blockDragStart(event)" ondragend="blockDragEnd(event)" ondragover="blockDragOver(event)" ondrop="blockDrop(event)" oncontextmenu="blockRightClick(event)">
+                    html += `<div class="block-item linear-item" id="bi-${blockIdx}-${itemIdx}" data-val="${val}" data-block="${blockIdx}" data-global="${globalIndex}" draggable="true" ondragstart="blockDragStart(event)" ondragend="blockDragEnd(event)" ondragover="blockDragOver(event)" ondrop="blockDrop(event)">
                         <div class="item-value">${val}</div>
                         <div class="item-index">[${globalIndex}]</div>
                     </div>`;
