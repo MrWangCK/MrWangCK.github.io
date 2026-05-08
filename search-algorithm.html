@@ -155,7 +155,9 @@
             color: #1a1a2e;
             transition: all 0.3s;
             z-index: 2;
+            cursor: grab;
         }
+        .bst-node:active { cursor: grabbing; }
         .bst-node.searching {
             background: #fbbf24;
             border-color: #fbbf24;
@@ -182,6 +184,15 @@
             background: rgba(102,126,234,0.4);
             border-color: #667eea;
             color: #fff;
+        }
+        .bst-node.dragging {
+            opacity: 0.8;
+            z-index: 100;
+            cursor: grabbing;
+        }
+        .bst-node.selected {
+            border-color: #4ade80;
+            box-shadow: 0 0 15px rgba(74,222,128,0.6);
         }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
@@ -266,6 +277,52 @@
         .legend { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 15px; justify-content: center; }
         .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; }
         .legend-color { width: 16px; height: 16px; border-radius: 4px; }
+        
+        /* 线性表样式 */
+        .block-linear-row {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 20px 10px;
+            min-height: 100px;
+        }
+        .linear-item {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 10px 16px;
+            min-width: 55px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: grab;
+            user-select: none;
+        }
+        .linear-item:active { cursor: grabbing; }
+        .linear-item.dragging { opacity: 0.5; transform: scale(1.1); }
+        .linear-item.drag-over { border-color: #fbbf24; background: rgba(251,191,36,0.2); }
+        .linear-item.selected { border-color: #4ade80; box-shadow: 0 0 10px rgba(74,222,128,0.5); }
+        .linear-item[data-block="0"] { border-color: rgba(102,126,234,0.5); }
+        .linear-item[data-block="1"] { border-color: rgba(118,75,162,0.5); }
+        .linear-item[data-block="2"] { border-color: rgba(59,130,246,0.5); }
+        .linear-item[data-block="3"] { border-color: rgba(236,72,153,0.5); }
+        .linear-item[data-block="4"] { border-color: rgba(34,197,94,0.5); }
+        .linear-item .item-value { font-size: 1.1rem; font-weight: bold; }
+        .linear-item .item-index { font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 2px; }
+        .linear-item.searching {
+            background: rgba(251,191,36,0.3);
+            border-color: #fbbf24;
+            transform: scale(1.1);
+        }
+        .linear-item.found {
+            background: rgba(74,222,128,0.3);
+            border-color: #4ade80;
+            box-shadow: 0 0 15px rgba(74,222,128,0.5);
+        }
+        .linear-item.not-found {
+            background: rgba(248,113,113,0.3);
+            border-color: #f87171;
+        }
     </style>
 </head>
 <body>
@@ -286,6 +343,7 @@
                 <input type="number" id="bst-value" placeholder="输入数值">
                 <button class="btn-primary" onclick="bstInsert()">插入</button>
                 <button class="btn-secondary" onclick="bstSearch()">搜索</button>
+                <button class="btn-secondary" onclick="bstReset()">重置</button>
                 <button class="btn-danger" onclick="bstClear()">清空</button>
                 <button class="btn-secondary" onclick="bstRandom()">随机生成</button>
                 <div class="speed-control">
@@ -313,6 +371,7 @@
                 <input type="number" id="block-value" placeholder="输入数值">
                 <button class="btn-primary" onclick="blockInsert()">插入</button>
                 <button class="btn-secondary" onclick="blockSearch()">搜索</button>
+                <button class="btn-secondary" onclick="blockReset()">重置</button>
                 <button class="btn-danger" onclick="blockClear()">清空</button>
                 <button class="btn-secondary" onclick="blockRandom()">随机生成</button>
                 <div class="speed-control">
@@ -341,7 +400,7 @@
     <script>
         // =============== BST ===============
         class BSTNode {
-            constructor(value) { this.value = value; this.left = null; this.right = null; }
+            constructor(value) { this.value = value; this.left = null; this.right = null; this.x = undefined; this.y = undefined; }
         }
         let bstRoot = null;
 
@@ -349,8 +408,17 @@
             const v = parseInt(document.getElementById('bst-value').value);
             if (isNaN(v)) return alert('请输入数值');
             bstRoot = insertBST(bstRoot, v);
+            // 插入时重置所有自定义位置
+            resetBSTPositions(bstRoot);
             document.getElementById('bst-value').value = '';
             renderBST(); logBST(`插入 ${v}`, 'step');
+        }
+        function resetBSTPositions(node) {
+            if (!node) return;
+            node.x = undefined;
+            node.y = undefined;
+            resetBSTPositions(node.left);
+            resetBSTPositions(node.right);
         }
         function insertBST(node, v) {
             if (!node) return new BSTNode(v);
@@ -411,6 +479,7 @@
             if (!bstRoot) {
                 container.innerHTML = '<p style="position:absolute;top:150px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.3);">点击插入或随机生成</p>';
                 container.style.width = '200px';
+                container.style.height = '300px';
                 return;
             }
 
@@ -418,11 +487,14 @@
             const nodeWidth = 60;
             const positions = new Map();
             
+            // 初始化位置（如果还没有自定义位置）
             function calc(node, level, left, right) {
                 if (!node) return;
                 const x = (left + right) / 2;
                 const y = level * levelHeight;
-                positions.set(node, { x, y });
+                if (node.x === undefined) node.x = x;
+                if (node.y === undefined) node.y = y;
+                positions.set(node, { x: node.x, y: node.y });
                 calc(node.left, level + 1, left, x);
                 calc(node.right, level + 1, x, right);
             }
@@ -431,7 +503,7 @@
             let maxX = 0, maxY = 0;
             positions.forEach(p => { maxX = Math.max(maxX, p.x); maxY = Math.max(maxY, p.y); });
 
-            container.style.width = (maxX + 100) + 'px';
+            container.style.width = (maxX + 150) + 'px';
             container.style.height = (maxY + 100) + 'px';
 
             let html = '';
@@ -440,11 +512,11 @@
                 const state = getBSTState(node);
                 const cls = isRoot ? 'root' : '';
                 const stateCls = state ? ' ' + state : '';
-                html += `<div class="bst-node ${cls}${stateCls}" style="left:${pos.x - 25}px;top:${pos.y}px;">${node.value}</div>`;
+                html += `<div class="bst-node ${cls}${stateCls}" style="left:${pos.x - 25}px;top:${pos.y}px;" data-value="${node.value}" oncontextmenu="bstDeleteNode(event, ${node.value})" onmousedown="bstStartDrag(event, ${node.value})">${node.value}</div>`;
                 if (!isRoot) {
-                    let parent, side;
-                    if (findParent(bstRoot, node, 'left')) { parent = findParent(bstRoot, node, 'left'); side = 'left'; }
-                    else { parent = findParent(bstRoot, node, 'right'); side = 'right'; }
+                    let parent = null, side = null;
+                    const info = getNodeParentInfo(bstRoot, node.value);
+                    if (info) { parent = info.parent; side = info.side; }
                     if (parent) {
                         const pp = positions.get(parent);
                         const lineLen = Math.sqrt(Math.pow(pos.x - pp.x, 2) + Math.pow(pos.y - pp.y, 2)) - 25;
@@ -455,6 +527,99 @@
             });
             container.innerHTML = html;
         }
+        
+        let bstDragging = null;
+        let bstDragOffsetX = 0;
+        let bstDragOffsetY = 0;
+        
+        function bstStartDrag(e, value) {
+            if (e.button !== 0) return; // 只响应左键
+            e.preventDefault();
+            bstDragging = findBSTNode(bstRoot, value);
+            if (!bstDragging) return;
+            
+            const nodeEl = e.target;
+            const rect = nodeEl.getBoundingClientRect();
+            const container = document.getElementById('bst-tree');
+            const containerRect = container.getBoundingClientRect();
+            
+            bstDragOffsetX = e.clientX - rect.left;
+            bstDragOffsetY = e.clientY - rect.top;
+            
+            nodeEl.classList.add('dragging');
+            
+            document.addEventListener('mousemove', bstDrag);
+            document.addEventListener('mouseup', bstEndDrag);
+        }
+        
+        function bstDrag(e) {
+            if (!bstDragging) return;
+            const container = document.getElementById('bst-tree');
+            const containerRect = container.getBoundingClientRect();
+            
+            let newX = e.clientX - containerRect.left - bstDragOffsetX;
+            let newY = e.clientY - containerRect.top - bstDragOffsetY;
+            
+            // 限制在容器内
+            newX = Math.max(25, Math.min(containerRect.width - 25, newX));
+            newY = Math.max(25, Math.min(containerRect.height - 25, newY));
+            
+            bstDragging.x = newX;
+            bstDragging.y = newY;
+            
+            renderBST();
+        }
+        
+        function bstEndDrag(e) {
+            if (bstDragging) {
+                const nodeEls = document.querySelectorAll('.bst-node');
+                nodeEls.forEach(el => el.classList.remove('dragging'));
+                logBST(`移动节点到 (${Math.round(bstDragging.x)}, ${Math.round(bstDragging.y)})`, 'step');
+            }
+            bstDragging = null;
+            document.removeEventListener('mousemove', bstDrag);
+            document.removeEventListener('mouseup', bstEndDrag);
+        }
+        
+        function findBSTNode(node, value) {
+            if (!node) return null;
+            if (node.value === value) return node;
+            if (value < node.value) return findBSTNode(node.left, value);
+            return findBSTNode(node.right, value);
+        }
+        
+        function getNodeParentInfo(node, value, parent = null, side = null) {
+            if (!node) return null;
+            if (node.value === value) return { parent, side, node };
+            if (value < node.value) return getNodeParentInfo(node.left, value, node, 'left');
+            return getNodeParentInfo(node.right, value, node, 'right');
+        }
+        
+        function bstDeleteNode(e, value) {
+            e.preventDefault();
+            bstRoot = deleteBST(bstRoot, value);
+            renderBST();
+            logBST(`删除 ${value}`, 'step');
+        }
+        
+        function deleteBST(node, value) {
+            if (!node) return null;
+            if (value < node.value) {
+                node.left = deleteBST(node.left, value);
+            } else if (value > node.value) {
+                node.right = deleteBST(node.right, value);
+            } else {
+                // 找到要删除的节点
+                if (!node.left) return node.right;
+                if (!node.right) return node.left;
+                // 有两个子节点，找到右子树的最小值
+                let minNode = node.right;
+                while (minNode.left) minNode = minNode.left;
+                node.value = minNode.value;
+                node.right = deleteBST(node.right, minNode.value);
+            }
+            return node;
+        }
 
         function findParent(root, child, side) {
             if (!root) return null;
@@ -463,14 +628,30 @@
             return findParent(root.left, child, 'left') || findParent(root.left, child, 'right') || findParent(root.right, child, 'left') || findParent(root.right, child, 'right');
         }
 
+        function bstReset() { resetBSTStates(); renderBST(); document.getElementById('bst-log').innerHTML = '<p style="color:#667eea;">✓ 已重置搜索状态</p>'; }
         function bstClear() { bstRoot = null; document.getElementById('bst-log').innerHTML = ''; renderBST(); }
         function bstRandom() {
             bstClear();
-            const count = Math.floor(Math.random() * 4) + 5;
-            const s = new Set();
-            while (s.size < count) s.add(Math.floor(Math.random() * 50) + 10);
-            s.forEach(v => bstRoot = insertBST(bstRoot, v));
-            renderBST(); logBST('随机生成树', 'step');
+            // 生成平衡二叉排序树
+            const count = Math.floor(Math.random() * 11) + 5; // 5-15个节点
+            const arr = [];
+            while (arr.length < count) {
+                const v = Math.floor(Math.random() * 99) + 1;
+                if (!arr.includes(v)) arr.push(v);
+            }
+            arr.sort((a, b) => a - b);
+            
+            function buildBalanced(arr, start, end) {
+                if (start > end) return null;
+                const mid = Math.floor((start + end) / 2);
+                const node = new BSTNode(arr[mid]);
+                node.left = buildBalanced(arr, start, mid - 1);
+                node.right = buildBalanced(arr, mid + 1, end);
+                return node;
+            }
+            
+            bstRoot = buildBalanced(arr, 0, arr.length - 1);
+            renderBST(); logBST(`平衡树 [${arr.join(', ')}]`, 'step');
         }
         function logBST(msg, type) {
             const log = document.getElementById('bst-log');
@@ -573,6 +754,56 @@
             }
         }
 
+        let blockDraggedEl = null;
+        
+        function blockDragStart(e) {
+            blockDraggedEl = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+        
+        function blockDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.linear-item').forEach(item => item.classList.remove('drag-over'));
+            blockDraggedEl = null;
+        }
+        
+        function blockDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            if (this !== blockDraggedEl) {
+                this.classList.add('drag-over');
+            }
+        }
+        
+        function blockDrop(e) {
+            e.preventDefault();
+            if (this !== blockDraggedEl && blockDraggedEl) {
+                const val1 = parseInt(blockDraggedEl.dataset.val);
+                const val2 = parseInt(this.dataset.val);
+                const idx1 = blockData.indexOf(val1);
+                const idx2 = blockData.indexOf(val2);
+                if (idx1 !== -1 && idx2 !== -1) {
+                    blockData[idx1] = val2;
+                    blockData[idx2] = val1;
+                    renderBlocks();
+                    logBlock(`交换 ${val1} ↔ ${val2}`, 'step');
+                }
+            }
+            this.classList.remove('drag-over');
+        }
+        
+        function blockRightClick(e) {
+            e.preventDefault();
+            const val = parseInt(this.dataset.val);
+            const idx = blockData.indexOf(val);
+            if (idx !== -1) {
+                blockData.splice(idx, 1);
+                renderBlocks();
+                logBlock(`删除 ${val}`, 'step');
+            }
+        }
+        
         function renderBlocks() {
             const container = document.getElementById('blocks-container');
             if (blockData.length === 0) {
@@ -584,7 +815,7 @@
 
             let html = '<div class="block-container">';
             
-            // 块头行
+            // 块头行（放在数据上方）
             html += '<div class="block-header-row">';
             blockBlocks.forEach((b, i) => {
                 html += `<div class="block-header" id="bh-${i}">
@@ -595,28 +826,24 @@
             });
             html += '</div>';
 
-            // 数据按行横向排列，每行包含每个块的对应位置元素
-            const maxItems = Math.max(...blockBlocks.map(b => b.data.length));
-            for (let row = 0; row < maxItems; row++) {
-                html += '<div class="block-data-wrapper">';
-                blockBlocks.forEach((b, i) => {
-                    if (row < b.data.length) {
-                        const val = b.data[row];
-                        html += `<div class="block-item" id="bi-${i}-${row}" data-val="${val}">
-                            <div class="item-value">${val}</div>
-                            <div class="item-index">[${b.start + row}]</div>
-                        </div>`;
-                    } else {
-                        html += '<div class="block-item" style="visibility:hidden;"></div>';
-                    }
+            // 线性表样式显示数据（水平排列，用颜色区分不同块）
+            html += '<div class="block-linear-row">';
+            let globalIndex = 0;
+            blockBlocks.forEach((b, blockIdx) => {
+                b.data.forEach((val, itemIdx) => {
+                    html += `<div class="block-item linear-item" id="bi-${blockIdx}-${itemIdx}" data-val="${val}" data-block="${blockIdx}" data-global="${globalIndex}" draggable="true" ondragstart="blockDragStart(event)" ondragend="blockDragEnd(event)" ondragover="blockDragOver(event)" ondrop="blockDrop(event)" oncontextmenu="blockRightClick(event)">
+                        <div class="item-value">${val}</div>
+                        <div class="item-index">[${globalIndex}]</div>
+                    </div>`;
+                    globalIndex++;
                 });
-                html += '</div>';
-            }
+            });
+            html += '</div>';
 
             html += '</div>';
             container.innerHTML = html;
         }
-
+        
         function highlightBlockHeader(idx, cls) {
             const el = document.getElementById(`bh-${idx}`);
             if (el) {
@@ -626,6 +853,7 @@
         }
 
         function highlightBlockItem(blockIdx, itemIdx, cls) {
+            // 线性模式下，所有块的数据都在同一行，itemIdx就是块内的顺序
             const el = document.getElementById(`bi-${blockIdx}-${itemIdx}`);
             if (el) {
                 el.classList.remove('searching', 'found', 'current');
@@ -636,15 +864,21 @@
         function clearBlockHighlight(idx) {
             const header = document.getElementById(`bh-${idx}`);
             if (header) header.classList.remove('searching', 'current', 'checked');
-            const items = document.querySelectorAll(`[id^="bi-${idx}-"]`);
-            items.forEach(el => el.classList.remove('searching', 'found', 'current'));
+            // 清除所有线性数据项的高亮
+            document.querySelectorAll('.linear-item').forEach(el => {
+                el.classList.remove('searching', 'found', 'current');
+            });
         }
 
+        function blockReset() { 
+            blockBlocks.forEach((_, i) => clearBlockHighlight(i)); 
+            document.getElementById('block-log').innerHTML = '<p style="color:#667eea;">✓ 已重置搜索状态</p>'; 
+        }
         function blockClear() { blockData = []; blockBlocks = []; document.getElementById('block-log').innerHTML = ''; renderBlocks(); }
         function blockRandom() {
             blockClear();
-            const count = Math.floor(Math.random() * 8) + 8;
-            for (let i = 0; i < count; i++) blockData.push(Math.floor(Math.random() * 99) + 1);
+            const count = Math.floor(Math.random() * 18) + 8; // 8-25个数据
+            for (let i = 0; i < count; i++) blockData.push(Math.floor(Math.random() * 199) + 1);
             renderBlocks();
             logBlock(`随机生成 ${count} 个数据，3-5块，块间有序、块内无序`, 'step');
         }
