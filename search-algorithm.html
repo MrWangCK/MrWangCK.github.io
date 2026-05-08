@@ -705,8 +705,10 @@
             const v = parseInt(document.getElementById('block-value').value);
             if (isNaN(v)) return alert('请输入数值');
             blockData.push(v);
+            blockBlocks = []; // 清空分块，renderBlocks会重新构建
             document.getElementById('block-value').value = '';
             renderBlocks();
+            logBlock(`插入 ${v}，重新分块`, 'step');
         }
 
         async function blockSearch() {
