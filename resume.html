@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人简历 - 软件技术专业</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        /* 头部区域 */
+        .header {
+            text-align: center;
+            padding: 50px 30px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        }
+        .avatar {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0 auto 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+            border: 4px solid rgba(255,255,255,0.2);
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 20px;
+        }
+        .header-tags {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .header-tag {
+            padding: 6px 16px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        /* 联系信息栏 */
+        .contact-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        /* 内容区块 */
+        .info-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .section-title {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .section-title .icon { font-size: 1.6rem; }
+        
+        /* 网格布局 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        .info-item:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-2px);
+        }
+        .info-item .icon { font-size: 1.8rem; }
+        .info-item .label { color: rgba(255,255,255,0.5); font-size: 0.85rem; }
+        .info-item .value { font-size: 1rem; font-weight: 500; }
+        
+        /* 自我评价 */
+        .about-text {
+            font-size: 1.05rem;
+            line-height: 1.9;
+            color: rgba(255,255,255,0.85);
+            text-indent: 2em;
+        }
+        
+        /* 技能展示 */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .skill-category {
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .skill-category h4 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #667eea;
+        }
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .skill-tag {
+            padding: 6px 14px;
+            background: linear-gradient(135deg, rgba(102,126,234,0.2) 0%, rgba(118,75,162,0.2) 100%);
+            border: 1px solid rgba(102,126,234,0.3);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+        .skill-tag:hover {
+            background: linear-gradient(135deg, rgba(102,126,234,0.4) 0%, rgba(118,75,162,0.4) 100%);
+            transform: scale(1.05);
+        }
+        
+        /* 项目经验 */
+        .project-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s;
+        }
+        .project-card:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(102,126,234,0.4);
+        }
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .project-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        .project-time {
+            padding: 4px 12px;
+            background: rgba(102,126,234,0.2);
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.7);
+        }
+        .project-desc {
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+        .project-tech {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .project-tech span {
+            padding: 4px 12px;
+            background: rgba(118,75,162,0.3);
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        
+        /* 获奖时间线 */
+        .timeline {
+            position: relative;
+            padding-left: 35px;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding: 20px 25px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s;
+        }
+        .timeline-item:hover {
+            transform: translateX(8px);
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.15);
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -29px;
+            top: 22px;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            border: 4px solid #1a1a2e;
+        }
+        .timeline-date {
+            display: inline-block;
+            padding: 5px 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+        .timeline-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+        .timeline-desc {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.6);
+        }
+        .timeline-award {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .award-first { background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%); color: #1a1a2e; }
+        .award-second { background: linear-gradient(135deg, #c0c0c0 0%, #a0a0a0 100%); color: #1a1a2e; }
+        .award-third { background: linear-gradient(135deg, #cd7f32 0%, #b8702d 100%); color: #fff; }
+        .award-excellent { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }
+        
+        /* 时间线内证书上传按钮 */
+        .timeline-cert-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 10px;
+            padding: 5px 12px;
+            background: rgba(102,126,234,0.2);
+            border: 1px solid rgba(102,126,234,0.3);
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            transition: all 0.3s;
+            vertical-align: middle;
+        }
+        .timeline-cert-btn:hover {
+            background: rgba(102,126,234,0.4);
+            transform: scale(1.05);
+        }
+        .timeline-cert-btn.has-cert {
+            background: rgba(102,126,234,0.5);
+            color: #fff;
+        }
+        .timeline-cert-btn input {
+            display: none;
+        }
+        
+        /* 时间线内证书图片 */
+        .timeline-cert-images {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+        }
+        .timeline-cert-thumb {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .timeline-cert-thumb:hover {
+            transform: scale(1.1);
+        }
+        .timeline-cert-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .timeline-cert-thumb .delete-cert {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255,0,0,0.8);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .timeline-cert-thumb:hover .delete-cert {
+            display: flex;
+        }
+        
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .stat-card {
+            text-align: center;
+            padding: 25px 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+        .stat-card .number {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-card .label { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 5px; }
+        
+        /* 证书列表 */
+        .cert-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        .cert-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .cert-item .icon { font-size: 1.5rem; }
+        .cert-item .name { font-weight: 500; }
+        .cert-item .level { font-size: 0.85rem; color: rgba(255,255,255,0.5); }
+        
+
+        
+        /* 图片查看器 */
+        .image-viewer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .image-viewer.active { display: flex; }
+        .image-viewer img {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(102, 126, 234, 0.3);
+        }
+        .image-viewer .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+        .image-viewer .close-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+        .image-viewer .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+        .image-viewer .nav-btn:hover { background: rgba(102, 126, 234, 0.8); }
+        .image-viewer .nav-btn.prev { left: 20px; }
+        .image-viewer .nav-btn.next { right: 20px; }
+        
+        /* 底部 */
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.4);
+            font-size: 0.9rem;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 25px;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .back-link:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.8rem; }
+            .contact-bar { gap: 15px; }
+            .info-section { padding: 25px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .timeline-cert-btn { margin-left: 0; margin-top: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <div class="avatar">👨‍💻</div>
+            <h1>王从康</h1>
+            <p class="subtitle">软件技术专业 · 大专大二在读</p>
+            <div class="header-tags">
+                <span class="header-tag">🎯 勤奋好学</span>
+                <span class="header-tag">💡 勇于创新</span>
+                <span class="header-tag">🚀 追求卓越</span>
+            </div>
+            <div class="contact-bar">
+                <span class="contact-item">📍 河南省</span>
+                <span class="contact-item">📧 2659306492@qq.com</span>
+                <span class="contact-item">📱 15937256976</span>
+                <span class="contact-item">💬 W218653</span>
+            </div>
+        </div>
+        
+        <!-- 基本信息 -->
+        <div class="info-section">
+            <h2 class="section-title"><span class="icon">📋</span> 基本信息</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="icon">👤</span>
+                    <div>
+                        <div class="label">姓名</div>
+                        <div class="value">王从康</div>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <span class="icon">🎂</span>
+                    <div>
+                        <div class="label">出生年月</div>
+                        <div class="value">2003年10月</div>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <span class="icon">🎓</span>
+                    <div>
+                        <div class="label">学历</div>
+                        <div class="value">大专在读</div>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <span class="icon">💻</span>
+                    <div>
+                        <div class="label">专业</div>
+                        <div class="value">软件技术</div>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <span class="icon">🏫</span>
+                    <div>
+                        <div class="label">年级</div>
+                        <div class="value">大二</div>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <span class="icon">📍</span>
+                    <div>
+                        <div class="label">所在地</div>
+                        <div class="value">河南省</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 自我评价 -->
+        <div class="info-section">
+            <h2 class="section-title"><span class="icon">👤</span> 自我评价</h2>
+            <p class="about-text">
+                我是一名软件技术专业的大专学生，对编程和人工智能技术充满热情。在校期间，我积极参与各类学科竞赛和创新挑战赛，在AIGC、数学建模、网络安全等多个领域取得了优异成绩。通过比赛，我锻炼了团队协作能力、问题分析能力和创新思维。我具备扎实的编程基础和较强的学习能力，热衷于探索新技术，能够快速适应新环境。性格开朗乐观，善于与他人沟通交流，具备良好的职业素养和团队精神。
+            </p>
+        </div>
+        
+        <!-- 专业技能 -->
+        <div class="info-section">
+            <h2 class="section-title"><span class="icon">🛠️</span> 专业技能</h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h4>💻 编程语言</h4>
+                    <div class="skill-tags">
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">Java</span>
+                        <span class="skill-tag">HTML/CSS</span>
+                        <span class="skill-tag">JavaScript</span>
+                        <span class="skill-tag">SQL</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h4>🤖 AI与数据</h4>
+                    <div class="skill-tags">
+                        <span class="skill-tag">AIGC工具</span>
+                        <span class="skill-tag">机器学习</span>
+                        <span class="skill-tag">数据分析</span>
+                        <span class="skill-tag">深度学习</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h4>🔧 开发工具</h4>
+                    <div class="skill-tags">
+                        <span class="skill-tag">Git</span>
+                        <span class="skill-tag">VS Code</span>
+                        <span class="skill-tag">PyCharm</span>
+                        <span class="skill-tag">Docker</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h4>🛡️ 安全与网络</h4>
+                    <div class="skill-tags">
+                        <span class="skill-tag">网络安全</span>
+                        <span class="skill-tag">数据安全</span>
+                        <span class="skill-tag">WPS办公</span>
+                        <span class="skill-tag">计算机维护</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 项目经验 -->
+        <div class="info-section">
+            <h2 class="section-title"><span class="icon">🚀</span> 项目经验</h2>
+            
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-title">📚 导航首页网站开发</span>
+                    <span class="project-time">2025年</span>
+                </div>
+                <p class="project-desc">独立开发了一个个人导航网站，整合常用网站资源，支持链接搜索、分类展示等功能。运用HTML、CSS、JavaScript技术实现响应式布局和交互效果。</p>
+                <div class="project-tech">
+                    <span>HTML</span>
+                    <span>CSS</span>
+                    <span>JavaScript</span>
+                </div>
+            </div>
+            
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-title">🔍 查找算法可视化演示</span>
+                    <span class="project-time">2025年</span>
+                </div>
+                <p class="project-desc">开发了一个交互式算法演示网站，展示分块查找与二叉排序树的工作原理，帮助学习者直观理解算法执行过程。</p>
+                <div class="project-tech">
+                    <span>JavaScript</span>
+                    <span>数据结构</span>
+                    <span>算法</span>
+                </div>
+            </div>
+            
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-title">🤖 AIGC创新应用项目</span>
+                    <span class="project-time">2024-2025年</span>
+                </div>
+                <p class="project-desc">参与AIGC创新挑战赛，研究人工智能生成内容(AIGC)的应用与创新，完成相关项目并获得省级和国家级奖项。</p>
+                <div class="project-tech">
+                    <span>AIGC</span>
+                    <span>AI工具</span>
+                    <span>创新设计</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 获奖经历 -->
+        <div class="info-section">
+            <h2 class="section-title"><span class="icon">🏆</span> 获奖经历</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number">12</div>
+                    <div class="label">获奖总数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">5</div>
+                    <div class="label">一等奖</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">4</div>
+                    <div class="label">二等奖</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">3</div>
+                    <div class="label">三等奖</div>
+                </div>
+            </div>
+            
+            <div class="timeline" style="margin-top: 30px;">
+                
+                <div class="timeline-item" data-award-id="award-1">
+                    <span class="timeline-date">2024年10月</span>
+                    <div class="timeline-title">2024级新生军事训练最美军训照评选</div>
+                    <p class="timeline-desc">积极参与军训活动，展现良好的精神风貌</p>
+                    <span class="timeline-award award-excellent">🏅 优秀奖</span>
+                    <label class="timeline-cert-btn" id="btn-award-1">
+                        <span>📷 上传证书</span>
+                        <input type="file" accept="image/*" onchange="handleTimelineUpload('award-1', this)">
+                    </label>
+                    <div class="timeline-cert-images" id="certs-award-1"></div>
+                </div>
+                
+                <div class="timeline-item" data-award-id="award-2">
+                    <span class="timeline-date">2024年12月</span>
+                    <div class="timeline-title">AIGC创新挑战赛初赛</div>
+                    <p class="timeline-desc">人工智能创新应用设计</p>
+                    <span class="timeline-award award-first">🥇 一等奖</span>
+                    <label class="timeline-cert-btn" id="btn-award-2">
+                        <span>📷 上传证书</span>
+                        <input type="file" accept="image/*" onchange="handleTimelineUpload('award-2', this)">
+                    </label>
+                    <div class="timeline-cert-images" id="certs-award-2"></div>
+                </div>
+                
+                <div class="timeline-item" data-award-id="award-3">
+                    <span class="timeline-date">2025年3月</span>
+                    <div class="timeline-title">AIGC创新挑战赛省赛</div>
+                    <p class="timeline-desc">省级人工智能创新应用竞赛</p>
+                    <span class="timeline-award award-third">🥉 三等奖</span>
+                    <label class="timeline-cert-btn" id="btn-award-3">
+                        <span>📷 上传证书</span>
+                        <input type="file" accept="image/*" onchange="handleTimelineUpload('award-3', this)">
+                    </label>
+                    <div class="timeline-cert-images" id="certs-award-3"></div>
+                </div>
+                
+                <div class="timeline-item" data-award-id="award-4">
+                    <span class="timeline-date">2025年5月</span>
+                    <div class="timeline-title">AIGC创新挑战赛国赛</div>
+                    <p class="timeline-desc">全国人工智能创新应用竞赛</p>
+                    <span class="timeline-award award-second">🥈 二等奖</span>
+                    <label class="timeline-cert-btn" id="btn-award-4">
+                        <span>📷 上传证书</span>
+                        <input type="file" accept="image/*" onchange="handleTimelineUpload('award-4', this)">
+                    </label>
+                    <div class="timeline-cert-images" id="certs-award-4"></div>
+                </div>
+                
+                <div class="timeline-item" data-award-id="award-5">
+                    <span class="timeline-date">2025年5月</span>
+                    <div class="timeline-title">第八届读书月"阅见新知·书香满屏"</div>
+                    <p class="timeline-desc">校园读书活动创意作品评选</p>
+                    <span class="timeline-award award-first">🥇 一等奖</span>
+                    <label class="timeline-cert-btn" id="btn-award-5">
+                        <span>📷 上传证书</span>
+                        <input type="file" accept="image/*" onchange="handleTimelineUpload('award-5', this)">
+                    </label>
+                    <div class="timeline-cert-images" id="certs-award-5"></div>
+                </div>
+                
+                <div class="timeline-item" data-award-id="award-6">
+                    <span class="timeline-date">2025年6月</span>
+                    <div class="timeline-title">计算机组装与维修比赛</div>
+                    <p class="timeline-desc">计算机硬件组装与故障维修技能竞赛</p>
+                    <span class="timeline-award award-first">🥇 一等奖</span>
+                    <label class="timeline-cert-btn" id="btn-award-6">
+                        <span>📷 上传证书</span>
+                        <input type="file" accept="image/*" onchange="handleTimelineUpload('award-6', this)">
+                    </label>
+                    <div class="timeline-cert-images" id="certs-award-6"></div>
+                </div>
+                
+                <div class="timeline-item" data-award-id="award-7">
+                    <span class="timeline-date">2025年11月</span>
+                    <div class="timeline-title">全国大学生数学建模竞赛省赛</div>
+                    <p class="timeline-desc">数学建模与应用能力竞赛</p>
+                    <span class="timeline-award award-third">🥉 三等奖</span>
+                    <label class="timeline-cert-btn" id="btn-award-7">
+                        <span>📷 上传证书</span>
+                        <input type="file" accept="image/*" onchange="handleTimelineUpload('award-7', this)">
+                    </label>
+                    <div class="timeline-cert-images" id="certs-award-7"></div>
+                </div>
+                
+                <div class="timeline-item" data-award-id="award-8">
+                    <span class="timeline-date">2025年11月</span>
+                    <div class="timeline-title">河南省信息技术应用创新大赛</div>
+                    <p class="timeline-desc">信息技术创新应用能力竞赛</p>
+                    <span class="timeline-award award-second">🥈 二等奖</span>
+                    <label class="timeline-cert-btn" id="btn-award-8">
+                        <span>📷 上传证书</span>
+                        <input type="file" accept="image/*" onchange="handleTimelineUpload('award-8', this)">
+                    </label>
+                    <div class="timeline-cert-images" id="certs-award-8"></div>
+                </div>
+                
+                <div class="timeline-item" data-award-id="award-9">
+                    <span class="timeline-date">2025年11月</span>
+                    <div class="timeline-title">第八届传智杯WPS智能办公挑战赛</div>
+                    <p class="timeline-desc">WPS办公软件应用能力竞赛</p>
+                    <span class="timeline-award award-first">🥇 一等奖</span>
+                    <label class="timeline-cert-btn" id="btn-award-9">
+                        <span>📷 上传证书</span>
+                        <input type="file" accept="image/*" onchange="handleTimelineUpload('award-9', this)">
+                    </label>
+                    <div class="timeline-cert-images" id="certs-award-9"></div>
+                </div>
+                
+                <div class="timeline-item" data-award-id="award-10">
+                    <span class="timeline-date">2025年12月</span>
+                    <div class="timeline-title">校级职业技能大赛</div>
+                    <p class="timeline-desc">专业技能综合能力展示</p>
+                    <span class="timeline-award award-first">🥇 一等奖</span>
+                    <label class="timeline-cert-btn" id="btn-award-10">
+                        <span>📷 上传证书</span>
+                        <input type="file" accept="image/*" onchange="handleTimelineUpload('award-10', this)">
+                    </label>
+                    <div class="timeline-cert-images" id="certs-award-10"></div>
+                </div>
+                
+                <div class="timeline-item" data-award-id="award-11">
+                    <span class="timeline-date">2025年12月</span>
+                    <div class="timeline-title">大学生AI+创新应用大赛</div>
+                    <p class="timeline-desc">首届AI应用创新大赛</p>
+                    <span class="timeline-award award-second">🥈 二等奖</span>
+                    <label class="timeline-cert-btn" id="btn-award-11">
+                        <span>📷 上传证书</span>
+                        <input type="file" accept="image/*" onchange="handleTimelineUpload('award-11', this)">
+                    </label>
+                    <div class="timeline-cert-images" id="certs-award-11"></div>
+                </div>
+                
+                <div class="timeline-item" data-award-id="award-12">
+                    <span class="timeline-date">2025年12月</span>
+                    <div class="timeline-title">河南省"金盾信安杯"网络与数据安全大赛</div>
+                    <p class="timeline-desc">第七届网络与数据安全竞赛</p>
+                    <span class="timeline-award award-third">🥉 三等奖</span>
+                    <label class="timeline-cert-btn" id="btn-award-12">
+                        <span>📷 上传证书</span>
+                        <input type="file" accept="image/*" onchange="handleTimelineUpload('award-12', this)">
+                    </label>
+                    <div class="timeline-cert-images" id="certs-award-12"></div>
+                </div>
+                
+            </div>
+        </div>
+        
+        <!-- 证书技能 -->
+        <div class="info-section">
+            <h2 class="section-title"><span class="icon">📜</span> 证书与技能</h2>
+            <div class="cert-grid">
+                <div class="cert-item">
+                    <span class="icon">🏅</span>
+                    <div>
+                        <div class="name">AIGC创新挑战赛国赛</div>
+                        <div class="level">二等奖</div>
+                    </div>
+                </div>
+                <div class="cert-item">
+                    <span class="icon">🏅</span>
+                    <div>
+                        <div class="name">数学建模竞赛省赛</div>
+                        <div class="level">三等奖</div>
+                    </div>
+                </div>
+                <div class="cert-item">
+                    <span class="icon">🏅</span>
+                    <div>
+                        <div class="name">网络与数据安全大赛</div>
+                        <div class="level">三等奖</div>
+                    </div>
+                </div>
+                <div class="cert-item">
+                    <span class="icon">💻</span>
+                    <div>
+                        <div class="name">计算机组装与维修</div>
+                        <div class="level">一等奖</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 图片查看器 -->
+        <div class="image-viewer" id="imageViewer">
+            <button class="close-btn" onclick="closeViewer()">×</button>
+            <button class="nav-btn prev" onclick="prevImage()">‹</button>
+            <img src="" alt="证书图片" id="viewerImage">
+            <button class="nav-btn next" onclick="nextImage()">›</button>
+        </div>
+        
+        <!-- 校园经历 -->
+        <div class="info-section">
+            <h2 class="section-title"><span class="icon">🎓</span> 校园经历</h2>
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-title">🎯 学科竞赛参与者</span>
+                    <span class="project-time">2024-2025年</span>
+                </div>
+                <p class="project-desc">积极参与学校及省级、国家级各类学科竞赛，涵盖AI创新、数学建模、网络安全、办公软件应用等多个领域，累计获得各类奖项12项。通过竞赛不断提升专业技能和综合素质。</p>
+            </div>
+            <div class="project-card">
+                <div class="project-header">
+                    <span class="project-title">💡 技术学习与实践</span>
+                    <span class="project-time">在校期间</span>
+                </div>
+                <p class="project-desc">自主学习编程技术和AI工具，独立完成个人项目（导航网站、算法演示等），持续提升技术水平。积极关注行业发展动态，学习新技术新应用。</p>
+            </div>
+        </div>
+        
+        <!-- 兴趣爱好 -->
+        <div class="info-section">
+            <h2 class="section-title"><span class="icon">🎯</span> 兴趣爱好</h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h4>💻 技术探索</h4>
+                    <div class="skill-tags">
+                        <span class="skill-tag">编程开发</span>
+                        <span class="skill-tag">AI应用</span>
+                        <span class="skill-tag">网站搭建</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h4>📚 学习提升</h4>
+                    <div class="skill-tags">
+                        <span class="skill-tag">读书</span>
+                        <span class="skill-tag">在线课程</span>
+                        <span class="skill-tag">技术博客</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h4>🎮 休闲娱乐</h4>
+                    <div class="skill-tags">
+                        <span class="skill-tag">音乐</span>
+                        <span class="skill-tag">电影</span>
+                        <span class="skill-tag">游戏</span>
+                    </div>
+                </div>
+                <div class="skill-category">
+                    <h4>🏃 健康生活</h4>
+                    <div class="skill-tags">
+                        <span class="skill-tag">运动</span>
+                        <span class="skill-tag">旅行</span>
+                        <span class="skill-tag">摄影</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>made with ❤️ | 最后更新 2025年12月</p>
+            <a href="index.html" class="back-link">← 返回首页</a>
+        </footer>
+    </div>
+    
+    <script>
+        // 证书图片管理
+        const STORAGE_KEY = 'resume_cert_images_v2';
+        let currentImageIndex = 0;
+        let allCertImages = {};
+        let viewerImages = [];
+        
+        // 从 localStorage 加载图片
+        function loadCertImages() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                allCertImages = JSON.parse(stored);
+            }
+            renderAllCertThumbnails();
+            updateButtonStates();
+        }
+        
+        // 保存图片到 localStorage
+        function saveCertImages() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(allCertImages));
+        }
+        
+        // 更新按钮状态
+        function updateButtonStates() {
+            for (let i = 1; i <= 12; i++) {
+                const awardId = 'award-' + i;
+                const btn = document.getElementById('btn-' + awardId);
+                if (btn) {
+                    const images = allCertImages[awardId] || [];
+                    const span = btn.querySelector('span');
+                    if (images.length > 0) {
+                        btn.classList.add('has-cert');
+                        span.textContent = '📷 已上传(' + images.length + ')';
+                    } else {
+                        btn.classList.remove('has-cert');
+                        span.textContent = '📷 上传证书';
+                    }
+                }
+            }
+        }
+        
+        // 渲染所有证书缩略图
+        function renderAllCertThumbnails() {
+            for (let i = 1; i <= 12; i++) {
+                const awardId = 'award-' + i;
+                const container = document.getElementById('certs-' + awardId);
+                const images = allCertImages[awardId] || [];
+                
+                if (images.length === 0) {
+                    container.innerHTML = '';
+                    continue;
+                }
+                
+                container.innerHTML = images.map((img, index) => `
+                    <div class="timeline-cert-thumb" onclick="openViewerByAward('${awardId}', ${index})">
+                        <img src="${img}" alt="证书">
+                        <button class="delete-cert" onclick="event.stopPropagation(); deleteCertByAward('${awardId}', ${index})">×</button>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // 处理时间线内的上传
+        function handleTimelineUpload(awardId, input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const maxSize = 5 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('文件太大，请上传小于 5MB 的图片！');
+                input.value = '';
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (!allCertImages[awardId]) {
+                    allCertImages[awardId] = [];
+                }
+                allCertImages[awardId].unshift(e.target.result);
+                saveCertImages();
+                renderAllCertThumbnails();
+                updateButtonStates();
+            };
+            reader.readAsDataURL(file);
+            input.value = '';
+        }
+        
+
+        
+        // 删除证书
+        function deleteCertByAward(awardId, index) {
+            if (confirm('确定要删除这张证书图片吗？')) {
+                allCertImages[awardId].splice(index, 1);
+                if (allCertImages[awardId].length === 0) {
+                    delete allCertImages[awardId];
+                }
+                saveCertImages();
+                renderAllCertThumbnails();
+                updateButtonStates();
+            }
+        }
+        
+        // 打开查看器（按奖项）
+        function openViewerByAward(awardId, index) {
+            viewerImages = allCertImages[awardId] || [];
+            currentImageIndex = index;
+            openViewer();
+        }
+        
+        // 通用打开查看器
+        function openViewer() {
+            const viewer = document.getElementById('imageViewer');
+            const viewerImage = document.getElementById('viewerImage');
+            viewerImage.src = viewerImages[currentImageIndex];
+            viewer.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // 关闭查看器
+        function closeViewer() {
+            document.getElementById('imageViewer').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        
+        // 上一张
+        function prevImage() {
+            currentImageIndex = (currentImageIndex - 1 + viewerImages.length) % viewerImages.length;
+            document.getElementById('viewerImage').src = viewerImages[currentImageIndex];
+        }
+        
+        // 下一张
+        function nextImage() {
+            currentImageIndex = (currentImageIndex + 1) % viewerImages.length;
+            document.getElementById('viewerImage').src = viewerImages[currentImageIndex];
+        }
+        
+        // 键盘导航
+        document.addEventListener('keydown', function(e) {
+            const viewer = document.getElementById('imageViewer');
+            if (!viewer.classList.contains('active')) return;
+            if (e.key === 'Escape') closeViewer();
+            if (e.key === 'ArrowLeft') prevImage();
+            if (e.key === 'ArrowRight') nextImage();
+        });
+        
+        // 点击背景关闭
+        document.getElementById('imageViewer').addEventListener('click', function(e) {
+            if (e.target === this) closeViewer();
+        });
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 加载已保存的图片
+            loadCertImages();
+        });
+    </script>
+</body>
+</html>
