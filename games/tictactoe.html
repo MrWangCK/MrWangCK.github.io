@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>井字棋</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
+.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
+.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#9b59b6,#8e44ad)}
+.btn:hover{opacity:0.85}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.board{display:grid;grid-template-columns:repeat(3,1fr);width:min(80vw,calc(80vh - 60px));aspect-ratio:1;gap:clamp(6px,1.5vmin,12px)}
+.cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:clamp(8px,1.5vmin,14px);font-size:clamp(1.8rem,8vmin,4rem);font-weight:bold;cursor:pointer;transition:all .2s}
+.cell:hover{background:rgba(255,255,255,0.1)}
+.cell.x{color:#667eea}
+.cell.o{color:#e74c3c}
+.cell.win{background:rgba(46,204,113,0.2);border-color:#2ecc71}
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="hud-info"><span id="status">X 的回合</span></div>
+  <div style="display:flex;gap:6px">
+    <button class="btn" onclick="init()">重新开始</button>
+    <button class="btn" onclick="toggleAI()" id="aiBtn">双人</button>
+  </div>
+</div>
+<div class="game-area"><div class="board" id="board"></div></div>
+<script>
+let board,turn,over,ai;
+function init(){board=Array(9).fill('');turn='X';over=false;render();document.getElementById('status').textContent='X 的回合'}
+function toggleAI(){ai=!ai;document.getElementById('aiBtn').textContent=ai?'人机':'双人';init()}
+function render(){const b=document.getElementById('board');b.innerHTML='';board.forEach((v,i)=>{const d=document.createElement('div');d.className='cell'+(v?' '+v.toLowerCase():'');d.textContent=v;d.addEventListener('click',()=>play(i));b.appendChild(d)})}
+function play(i){if(board[i]||over)return;board[i]=turn;check();if(!over){turn=turn==='X'?'O':'X';document.getElementById('status').textContent=turn+' 的回合';if(ai&&turn==='O'&&!over)setTimeout(aiMove,300)}render()}
+function aiMove(){const empty=board.map((v,i)=>v===''?i:-1).filter(i=>i>=0);if(!empty.length)return;const pick=empty[Math.floor(Math.random()*empty.length)];play(pick)}
+function check(){const w=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(const[a,b,c]of w){if(board[a]&&board[a]===board[b]&&board[a]===board[c]){over=true;document.getElementById('status').textContent=board[a]+' 赢了! 🎉';highlight([a,b,c]);return}}if(!board.includes('')){over=true;document.getElementById('status').textContent='平局! 🤝'}}
+function highlight(cells){const els=document.querySelectorAll('.cell');cells.forEach(i=>els[i].classList.add('win'))}
+ai=false;init();
+</script>
+</body>
+</html>

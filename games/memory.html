@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>记忆翻牌</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
+.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
+.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#e74c3c,#c0392b)}
+.btn:hover{opacity:0.85}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.board{display:grid;grid-template-columns:repeat(4,1fr);width:min(88vw,calc(88vh - 60px));aspect-ratio:1;gap:clamp(6px,1.5vmin,12px)}
+.card{aspect-ratio:1;cursor:pointer;perspective:600px}
+.card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .4s}
+.card.flipped .card-inner{transform:rotateY(180deg)}
+.card-front,.card-back{position:absolute;width:100%;height:100%;border-radius:clamp(6px,1.2vmin,12px);display:flex;align-items:center;justify-content:center;backface-visibility:hidden}
+.card-front{background:linear-gradient(135deg,#667eea,#764ba2);font-size:clamp(1rem,3vmin,1.8rem)}
+.card-back{background:rgba(255,255,255,0.1);transform:rotateY(180deg);font-size:clamp(1.2rem,4vmin,2.5rem);border:1px solid rgba(255,255,255,0.1)}
+.card.matched .card-back{background:rgba(46,204,113,0.2);border-color:#2ecc71}
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="hud-info"><span id="info">步数: 0 | 配对: 0/8</span></div>
+  <button class="btn" onclick="init()">重新开始</button>
+</div>
+<div class="game-area"><div class="board" id="board"></div></div>
+<script>
+const emojis=['🎮','🎯','🔥','💡','⭐','🚀','🎨','🎲'];
+let cards,flipped,moves,matches,lock;
+function init(){const e=[...emojis,...emojis].sort(()=>Math.random()-0.5);cards=[];flipped=[];moves=0;matches=0;lock=false;const b=document.getElementById('board');b.innerHTML='';e.forEach((v,i)=>{const d=document.createElement('div');d.className='card';d.innerHTML=`<div class="card-inner"><div class="card-front">?</div><div class="card-back">${v}</div></div>`;d.dataset.index=i;d.dataset.emoji=v;d.addEventListener('click',flip);b.appendChild(d);cards.push(d)});updateInfo()}
+function flip(){if(lock)return;const c=this;if(c.classList.contains('flipped')||c.classList.contains('matched'))return;c.classList.add('flipped');flipped.push(c);if(flipped.length===2){moves++;lock=true;if(flipped[0].dataset.emoji===flipped[1].dataset.emoji){flipped.forEach(f=>f.classList.add('matched'));matches++;flipped=[];lock=false;if(matches===8)setTimeout(()=>alert('恭喜通关! 步数: '+moves),500)}else{setTimeout(()=>{flipped.forEach(f=>f.classList.remove('flipped'));flipped=[];lock=false},800)}updateInfo()}}
+function updateInfo(){document.getElementById('info').textContent=`步数: ${moves} | 配对: ${matches}/8`}
+init();
+</script>
+</body>
+</html>

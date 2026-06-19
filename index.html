@@ -295,26 +295,38 @@
         }
 
         /* 响应式 */
+        /* 超宽屏 */
+        @media (min-width: 1600px) {
+            .container { max-width: 1300px; }
+            .links-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+        }
+        /* 大平板/小桌面 */
+        @media (max-width: 1024px) {
+            .sidebar { width: 180px; }
+            .container { max-width: 100%; }
+        }
+        /* 平板 */
         @media (max-width: 768px) {
             .main-content { padding: 20px 12px; }
-            .sidebar { width: 170px; }
-            .sidebar-header { padding: 0 15px 12px; font-size: 1rem; }
-            .category-nav a { font-size: 0.82rem; padding: 7px 10px; }
-            h1 { font-size: 1.8rem; }
+            .sidebar { width: 160px; }
+            .sidebar-header { padding: 0 12px 10px; font-size: 1rem; }
+            .category-nav a { font-size: 0.8rem; padding: 6px 10px; }
+            h1 { font-size: 1.6rem; }
+            .subtitle { font-size: 0.95rem; margin-bottom: 20px; }
             .links-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
                 gap: 8px;
             }
-            .link-card {
-                padding: 12px;
-                gap: 10px;
-            }
+            .link-card { padding: 12px; gap: 10px; }
             .link-card .icon { font-size: 1.5rem; }
             .link-card .info h3 { font-size: 0.85rem; }
             .link-card .info p { font-size: 0.72rem; }
             .category-title { font-size: 1.1rem; }
+            .search-section { padding: 12px 15px; }
+            .link-filter-input { padding: 8px 12px; font-size: 0.85rem; }
         }
-        @media (max-width: 480px) {
+        /* 大手机 */
+        @media (max-width: 600px) {
             body { display: block; }
             .sidebar {
                 position: static;
@@ -322,14 +334,14 @@
                 height: auto;
                 border-right: none;
                 border-bottom: 1px solid rgba(255,255,255,0.08);
-                padding: 10px 0;
+                padding: 8px 0;
             }
             .sidebar-header { display: none; }
             .category-nav {
                 flex-direction: row;
                 overflow-x: auto;
                 padding: 0 10px;
-                gap: 6px;
+                gap: 4px;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: none;
             }
@@ -341,13 +353,40 @@
                 padding: 5px 10px;
                 font-size: 0.75rem;
             }
-            .main-content { padding: 20px 12px; }
+            .main-content { padding: 16px 10px; }
+            h1 { font-size: 1.4rem; margin-bottom: 10px; }
+            .subtitle { font-size: 0.85rem; margin-bottom: 16px; }
             .links-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 6px;
             }
             .link-card { padding: 10px; gap: 8px; }
-            .back-to-top { right: 14px; bottom: 20px; width: 38px; height: 38px; }
+            .link-card .icon { font-size: 1.3rem; }
+            .link-card .info h3 { font-size: 0.8rem; }
+            .link-card .info p { font-size: 0.68rem; }
+            .category-title { font-size: 1rem; margin-bottom: 12px; }
+            .search-section { padding: 10px 12px; margin-bottom: 15px; }
+            .search-box { padding: 3px; }
+            .search-input { font-size: 0.8rem; padding: 5px 8px; }
+            .search-btn { padding: 5px 12px; font-size: 0.8rem; }
+            .link-filter { gap: 6px; }
+            .link-filter-input { padding: 7px 10px; font-size: 0.8rem; }
+            .filter-clear { padding: 6px 12px; font-size: 0.8rem; }
+            .back-to-top { right: 14px; bottom: 20px; width: 38px; height: 38px; font-size: 1rem; }
+        }
+        /* 小手机 */
+        @media (max-width: 360px) {
+            .main-content { padding: 12px 8px; }
+            h1 { font-size: 1.2rem; }
+            .subtitle { font-size: 0.8rem; }
+            .links-grid {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+            .link-card { padding: 10px; gap: 8px; }
+            .category-title { font-size: 0.95rem; }
+            .category-nav a { font-size: 0.7rem; padding: 4px 8px; }
+            .search-engine-select { font-size: 0.75rem; padding: 4px 6px; }
         }
     </style>
 </head>
@@ -358,6 +397,7 @@
             <a href="#cat-quick">🔗 快捷</a>
             <a href="#cat-ai">🤖 AI</a>
             <a href="#cat-aiapp">🛠️ AI应用</a>
+            <a href="#cat-game-mini">🎮 小游戏</a>
             <a href="#cat-dev">💻 编程</a>
             <a href="#cat-office">📋 办公</a>
             <a href="#cat-learn">📚 学习</a>
@@ -691,6 +731,153 @@
             </div>
         </div>
 
+        <!-- 小游戏 -->
+        <div class="category" id="cat-game-mini">
+            <h2 class="category-title"><span class="emoji">🎮</span> 小游戏</h2>
+            <div class="links-grid">
+                <a class="link-card" href="games/snake.html">
+                    <div class="icon">🐍</div>
+                    <div class="info">
+                        <h3>贪吃蛇</h3>
+                        <p>经典贪吃蛇游戏</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/2048.html">
+                    <div class="icon">🔥</div>
+                    <div class="info">
+                        <h3>2048</h3>
+                        <p>数字合并益智游戏</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/typing.html">
+                    <div class="icon">⌨️</div>
+                    <div class="info">
+                        <h3>打字游戏</h3>
+                        <p>练习打字速度</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/memory.html">
+                    <div class="icon">🃏</div>
+                    <div class="info">
+                        <h3>记忆翻牌</h3>
+                        <p>翻牌配对记忆</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/tictactoe.html">
+                    <div class="icon">❌</div>
+                    <div class="info">
+                        <h3>井字棋</h3>
+                        <p>双人对战/人机</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/breakout.html">
+                    <div class="icon">🧱</div>
+                    <div class="info">
+                        <h3>弹球打砖块</h3>
+                        <p>经典弹球消除</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/puzzle15.html">
+                    <div class="icon">🔢</div>
+                    <div class="info">
+                        <h3>数字华容道</h3>
+                        <p>15数字滑块拼图</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/guess.html">
+                    <div class="icon">🎯</div>
+                    <div class="info">
+                        <h3>猜数字</h3>
+                        <p>猜1~100的数字</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/tetris.html">
+                    <div class="icon">🧱</div>
+                    <div class="info">
+                        <h3>俄罗斯方块</h3>
+                        <p>经典消除方块</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/flappy.html">
+                    <div class="icon">🐦</div>
+                    <div class="info">
+                        <h3>Flappy Bird</h3>
+                        <p>像素鸟飞行闯关</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/whack.html">
+                    <div class="icon">🔨</div>
+                    <div class="info">
+                        <h3>打地鼠</h3>
+                        <p>限时30秒挑战</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/pong.html">
+                    <div class="icon">🏓</div>
+                    <div class="info">
+                        <h3>乒乓球</h3>
+                        <p>经典Pong对战</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/sokoban.html">
+                    <div class="icon">📦</div>
+                    <div class="info">
+                        <h3>推箱子</h3>
+                        <p>经典推箱子益智</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/pacman.html">
+                    <div class="icon">👾</div>
+                    <div class="info">
+                        <h3>吃豆人</h3>
+                        <p>经典吃豆人冒险</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/shooter.html">
+                    <div class="icon">🚀</div>
+                    <div class="info">
+                        <h3>太空射击</h3>
+                        <p>消灭外星飞船</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/gomoku.html">
+                    <div class="icon">⚫</div>
+                    <div class="info">
+                        <h3>五子棋</h3>
+                        <p>双人对战五子棋</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/catch.html">
+                    <div class="icon">🍎</div>
+                    <div class="info">
+                        <h3>接水果</h3>
+                        <p>篮子接水果避炸弹</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/othello.html">
+                    <div class="icon">⚪</div>
+                    <div class="info">
+                        <h3>黑白棋</h3>
+                        <p>经典翻转棋</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/minesweeper.html">
+                    <div class="icon">💣</div>
+                    <div class="info">
+                        <h3>扫雷</h3>
+                        <p>经典扫雷游戏</p>
+                    </div>
+                </a>
+                <a class="link-card" href="games/reaction.html">
+                    <div class="icon">⚡</div>
+                    <div class="info">
+                        <h3>反应速度</h3>
+                        <p>测试反应时间</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
         <!-- 编程开发 -->
         <div class="category" id="cat-dev">
             <h2 class="category-title"><span class="emoji">💻</span> 编程开发</h2>
@@ -931,13 +1118,7 @@
                         <p>设计学习教程</p>
                     </div>
                 </a>
-                  <a class="link-card" href="https://examcrafts.com/subjects" target="_blank">
-                    <div class="icon">🧪</div>
-                    <div class="info">
-                        <h3>examcrafts</h3>
-                        <p>英语四六级</p>
-                    </div>
-                </a>
+
                 <!-- 技术社区 -->
                 <a class="link-card" href="https://cloud.tencent.com/developer" target="_blank">
                     <div class="icon">☁️</div>
@@ -983,13 +1164,7 @@
                     </div>
                 </a>
                 <!-- 学校平台 -->
-                <a class="link-card" href="https://i.chaoxing.com/base" target="_blank">
-                    <div class="icon">📚</div>
-                    <div class="info">
-                        <h3>超星学习通</h3>
-                        <p>在线学习平台</p>
-                    </div>
-                </a>
+
                 <a class="link-card" href="https://sso.icve.com.cn" target="_blank">
                     <div class="icon">📚</div>
                     <div class="info">

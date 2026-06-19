@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flappy Bird</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
+.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
+.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#2ecc71,#27ae60)}
+.btn:hover{opacity:0.85}
+.hud-hint{color:rgba(255,255,255,0.4);font-size:0.75rem}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="hud-info"><span id="score">0</span><span class="hud-hint">点击/空格/触摸 跳跃</span></div>
+  <button class="btn" onclick="init()">重新开始</button>
+</div>
+<div class="game-area"><canvas id="c" width="320" height="480"></canvas></div>
+<script>
+const c=document.getElementById('c'),ctx=c.getContext('2d');
+const W=c.width,H=c.height,GAP=130,PIPE_W=50,BIRD_R=15;
+let bird,pipes,score,best=0,started,over,anim;
+function init(){bird={x:80,y:H/2,vy:0};pipes=[];score=0;started=false;over=false;cancelAnimationFrame(anim);draw()}
+function flap(){if(over){init();return}if(!started)started=true;bird.vy=-6.5}
+function addPipe(){const top=50+Math.random()*(H-GAP-100);pipes.push({x:W,top,passed:false})}
+function update(){if(!started||over)return;bird.vy+=0.35;bird.y+=bird.vy;if(bird.y+BIRD_R>H||bird.y-BIRD_R<0){gameOver();return}if(pipes.length===0||pipes[pipes.length-1].x<W-200)addPipe();pipes.forEach(p=>{p.x-=2.5;if(!p.passed&&p.x+PIPE_W<bird.x){p.passed=true;score++}if(bird.x+BIRD_R>p.x&&bird.x-BIRD_R<p.x+PIPE_W){if(bird.y-BIRD_R<p.top||bird.y+BIRD_R>p.top+GAP)gameOver()}});pipes=pipes.filter(p=>p.x>-PIPE_W)}
+function gameOver(){over=true;best=Math.max(best,score)}
+function draw(){ctx.fillStyle='#2c3e50';ctx.fillRect(0,0,W,H);pipes.forEach(p=>{ctx.fillStyle='#27ae60';ctx.fillRect(p.x,0,PIPE_W,p.top);ctx.fillRect(p.x,p.top+GAP,PIPE_W,H-p.top-GAP);ctx.fillStyle='#2ecc71';ctx.fillRect(p.x-3,p.top-15,PIPE_W+6,15);ctx.fillRect(p.x-3,p.top+GAP,PIPE_W+6,15)});ctx.fillStyle='#f1c40f';ctx.beginPath();ctx.arc(bird.x,bird.y,BIRD_R,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(bird.x+8,bird.y-3,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='20px sans-serif';if(!started)ctx.fillText('点击开始',W/2-40,H/2-40);if(over){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 28px sans-serif';ctx.fillText('游戏结束',W/2-70,H/2-20);ctx.font='18px sans-serif';ctx.fillText('得分: '+score+'  最佳: '+best,W/2-85,H/2+20)}document.getElementById('score').textContent=score}
+function loop(){update();draw();anim=requestAnimationFrame(loop)}
+c.addEventListener('click',flap);c.addEventListener('touchstart',e=>{e.preventDefault();flap()},{passive:false});
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowUp')flap()});
+init();loop();
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>打字游戏</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
+.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
+.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#2ecc71,#27ae60)}
+.btn:hover{opacity:0.85}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px;position:relative}
+#area{position:relative;width:100%;height:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden}
+.word{position:absolute;font-size:1.3rem;font-weight:bold;color:#2ecc71;transition:none}
+.word.danger{color:#e74c3c}
+.input-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10}
+#input{padding:10px 20px;width:280px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;color:#fff;font-size:1rem;text-align:center;outline:none}
+#input:focus{border-color:#2ecc71}
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="hud-info"><span id="sc">得分: 0</span><span id="lv">等级: 1</span><span id="li">生命: 5</span></div>
+  <button class="btn" onclick="startGame()">开始游戏</button>
+</div>
+<div class="game-area">
+  <div id="area"></div>
+  <div class="input-bar"><input id="input" placeholder="输入单词消除..." autocomplete="off"></div>
+</div>
+<script>
+const words=['code','game','play','type','fast','word','hello','world','speed','quick','jump','move','fire','cool','nice','best','hero','win','go','run','bug','key','dev','web','app','css','html','node','data','loop','hack','test','push','pull','git','log','api','sql','int','bool','char'];
+const area=document.getElementById('area');
+let score,level,lives,running,words_arr,timer;
+function startGame(){score=0;level=1;lives=5;running=true;words_arr=[];area.innerHTML='';updateInfo();clearInterval(timer);timer=setInterval(spawn,Math.max(600,2000-level*200));requestAnimationFrame(drop);document.getElementById('input').value='';document.getElementById('input').focus()}
+function spawn(){if(!running)return;const t=document.createElement('div');t.className='word';const w=words[Math.floor(Math.random()*words.length)];t.textContent=w;const aw=area.clientWidth;t.style.left=Math.random()*(aw-60)+'px';t.style.top='0px';t.dataset.word=w;t.dataset.y=0;t.dataset.speed=0.5+level*0.15;area.appendChild(t);words_arr.push(t)}
+function drop(){if(!running)return;const ah=area.clientHeight;words_arr.forEach(w=>{let y=parseFloat(w.dataset.y)+parseFloat(w.dataset.speed);w.dataset.y=y;w.style.top=y+'px';if(y>ah-60)w.classList.add('danger');if(y>ah-20){lives--;w.remove();words_arr=words_arr.filter(x=>x!==w);if(lives<=0){running=false;clearInterval(timer);alert('游戏结束! 得分: '+score)}}});updateInfo();if(running)requestAnimationFrame(drop)}
+document.getElementById('input').addEventListener('input',function(){if(!running)return;const v=this.value.trim().toLowerCase();words_arr.forEach(w=>{if(w.dataset.word===v){score+=10;if(score%50===0)level++;w.remove();words_arr=words_arr.filter(x=>x!==w);this.value='';updateInfo()}})});
+function updateInfo(){document.getElementById('sc').textContent='得分: '+score;document.getElementById('lv').textContent='等级: '+level;document.getElementById('li').textContent='生命: '+lives}
+</script>
+</body>
+</html>

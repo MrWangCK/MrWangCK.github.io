@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数字华容道</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
+.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
+.btn{padding:4px 14px;border:none;border-radius:14px;color:#1a1a2e;cursor:pointer;font-size:0.78rem;font-weight:bold;background:linear-gradient(135deg,#f1c40f,#f39c12)}
+.btn:hover{opacity:0.85}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.board{display:grid;grid-template-columns:repeat(4,1fr);width:min(85vw,calc(85vh - 60px));aspect-ratio:1;gap:clamp(4px,1vmin,8px);background:rgba(255,255,255,0.03);padding:clamp(6px,1.2vmin,14px);border-radius:12px}
+.tile{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(241,196,15,0.2),rgba(243,156,18,0.2));border:1px solid rgba(241,196,15,0.3);border-radius:clamp(6px,1.2vmin,12px);font-size:clamp(1rem,4vmin,2rem);font-weight:bold;cursor:pointer;transition:all .15s;color:#f1c40f}
+.tile:hover{background:linear-gradient(135deg,rgba(241,196,15,0.35),rgba(243,156,18,0.35))}
+.tile.empty{background:transparent;border:none;cursor:default}
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="hud-info"><span id="info">步数: 0</span></div>
+  <button class="btn" onclick="init()">重新开始</button>
+</div>
+<div class="game-area"><div class="board" id="board"></div></div>
+<script>
+let tiles,moves;
+function init(){tiles=[...Array(15).keys()].map(i=>i+1);tiles.push(0);for(let i=0;i<200;i++){const ei=tiles.indexOf(0);const nr=Math.floor(ei/4),nc=ei%4;const dirs=[];if(nr>0)dirs.push(ei-4);if(nr<3)dirs.push(ei+4);if(nc>0)dirs.push(ei-1);if(nc<3)dirs.push(ei+1);const si=dirs[Math.floor(Math.random()*dirs.length)];[tiles[ei],tiles[si]]=[tiles[si],tiles[ei]]}moves=0;render()}
+function render(){const b=document.getElementById('board');b.innerHTML='';tiles.forEach((v,i)=>{const d=document.createElement('div');d.className='tile'+(v===0?' empty':'');d.textContent=v||'';if(v)d.addEventListener('click',()=>move(i));b.appendChild(d)});document.getElementById('info').textContent='步数: '+moves}
+function move(i){const ei=tiles.indexOf(0);const ir=Math.floor(i/4),ic=i%4,er=Math.floor(ei/4),ec=ei%4;if((Math.abs(ir-er)+Math.abs(ic-ec))===1){[tiles[i],tiles[ei]]=[tiles[ei],tiles[i]];moves++;render();checkWin()}}
+function checkWin(){for(let i=0;i<15;i++)if(tiles[i]!==i+1)return;if(tiles[15]===0)setTimeout(()=>alert('🎉 恭喜通关! 步数: '+moves),100)}
+init();
+</script>
+</body>
+</html>

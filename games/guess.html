@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>猜数字</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);z-index:10}
+.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
+.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#e74c3c,#c0392b)}
+.btn:hover{opacity:0.85}
+.game-area{display:flex;flex-direction:column;align-items:center;gap:clamp(12px,3vmin,24px);padding-top:40px}
+#range{color:rgba(255,255,255,0.7);font-size:clamp(1rem,3vmin,1.3rem)}
+#input{padding:12px 24px;width:clamp(180px,50vw,280px);background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;color:#fff;font-size:clamp(1rem,3vmin,1.3rem);text-align:center;outline:none}
+#input:focus{border-color:#e74c3c}
+#hint{font-size:clamp(1.1rem,4vmin,1.6rem);font-weight:bold;min-height:40px;text-align:center}
+#history{color:rgba(255,255,255,0.5);font-size:clamp(0.75rem,2vmin,0.9rem);max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="hud-info"><span>🎯 猜数字</span></div>
+  <button class="btn" onclick="init()">重新开始</button>
+</div>
+<div class="game-area">
+  <div id="range">猜一个 1~100 的数字</div>
+  <input id="input" type="number" min="1" max="100" placeholder="输入数字..." autocomplete="off">
+  <div id="hint"></div>
+  <div id="history"></div>
+</div>
+<script>
+let target,attempts,history;
+function init(){target=Math.floor(Math.random()*100)+1;attempts=0;history=[];document.getElementById('hint').textContent='';document.getElementById('history').textContent='';document.getElementById('input').value='';document.getElementById('range').textContent='猜一个 1~100 的数字';document.getElementById('input').disabled=false;document.getElementById('input').focus()}
+document.getElementById('input').addEventListener('keydown',e=>{if(e.key==='Enter')guess()});
+function guess(){const v=parseInt(document.getElementById('input').value);if(isNaN(v)||v<1||v>100)return;attempts++;const d=Math.abs(v-target);let h='🔥';if(d===0)h='🎉';else if(d<=5)h='🔥 非常接近!';else if(d<=15)h='😊 有点近';else h='❄️ 差得远';if(v===target){document.getElementById('hint').innerHTML=`<span style="color:#2ecc71">恭喜! ${attempts} 次猜中!</span>`;document.getElementById('input').disabled=true}else if(v<target){document.getElementById('hint').innerHTML=`<span style="color:#f39c12">📈 太小了! ${h}</span>`}else{document.getElementById('hint').innerHTML=`<span style="color:#3498db">📉 太大了! ${h}</span>`}history.push(v);document.getElementById('history').textContent='猜测记录: '+history.join(', ');document.getElementById('input').value='';document.getElementById('range').textContent=`1~100 | 第 ${attempts+1} 次尝试`}
+init();
+</script>
+</body>
+</html>

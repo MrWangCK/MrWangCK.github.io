@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>打地鼠</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
+.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
+.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#d35400,#e67e22)}
+.btn:hover{opacity:0.85}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.field{display:grid;grid-template-columns:repeat(3,1fr);width:min(85vw,calc(85vh - 60px));aspect-ratio:1;gap:clamp(8px,2vmin,18px)}
+.hole{aspect-ratio:1;background:rgba(139,90,43,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(1.5rem,6vmin,3.5rem);cursor:pointer;transition:all .1s;border:3px solid rgba(139,90,43,0.4);user-select:none}
+.hole:active{transform:scale(0.9)}
+.hole.active{background:rgba(46,204,113,0.2);border-color:#2ecc71}
+.hole.hit{background:rgba(231,76,60,0.2);border-color:#e74c3c}
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="hud-info"><span id="sc">得分: 0</span><span id="tm">时间: 30</span></div>
+  <button class="btn" onclick="startGame()">开始游戏</button>
+</div>
+<div class="game-area"><div class="field" id="field"></div></div>
+<script>
+const field=document.getElementById('field');
+let score,timeLeft,running,timer,spawnTimer;
+function createField(){field.innerHTML='';for(let i=0;i<9;i++){const d=document.createElement('div');d.className='hole';d.dataset.index=i;d.addEventListener('click',()=>whack(i));field.appendChild(d)}}
+function startGame(){score=0;timeLeft=30;running=true;createField();clearInterval(timer);clearInterval(spawnTimer);timer=setInterval(()=>{timeLeft--;if(timeLeft<=0){running=false;clearInterval(timer);clearInterval(spawnTimer);document.querySelectorAll('.hole').forEach(h=>h.classList.remove('active'));alert('时间到! 得分: '+score)}updateInfo()},1000);spawnTimer=setInterval(spawn,Math.max(400,900-score*8));updateInfo()}
+function spawn(){if(!running)return;document.querySelectorAll('.hole').forEach(h=>h.classList.remove('active'));const holes=document.querySelectorAll('.hole');const count=Math.min(3,1+Math.floor(score/10));for(let i=0;i<count;i++){const idx=Math.floor(Math.random()*9);holes[idx].classList.add('active');holes[idx].textContent='🐹'}setTimeout(()=>{if(running)holes.forEach(h=>{if(h.classList.contains('active')){h.classList.remove('active');h.textContent=''}})},800)}
+function whack(i){if(!running)return;const h=document.querySelectorAll('.hole')[i];if(h.classList.contains('active')){h.classList.remove('active');h.classList.add('hit');h.textContent='💥';score++;setTimeout(()=>{h.classList.remove('hit');h.textContent=''},200);updateInfo()}}
+function updateInfo(){document.getElementById('sc').textContent='得分: '+score;document.getElementById('tm').textContent='时间: '+timeLeft}
+createField();
+</script>
+</body>
+</html>

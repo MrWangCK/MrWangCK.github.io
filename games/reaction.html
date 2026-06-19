@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>反应速度测试</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0;flex-shrink:0}
+.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
+.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#1abc9c,#16a085)}
+.btn:hover{opacity:0.85}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:12px;flex-direction:column;gap:12px}
+#box{width:100%;flex:1;border-radius:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:clamp(1rem,3vmin,1.5rem);transition:background .2s;user-select:none;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)}
+#box.wait{background:rgba(231,76,60,0.3);border-color:#e74c3c}
+#box.ready{background:rgba(46,204,113,0.3);border-color:#2ecc71}
+#box.early{background:rgba(241,196,15,0.3);border-color:#f1c40f}
+#result{font-size:clamp(1.2rem,4vmin,2rem);font-weight:bold;color:#1abc9c;text-align:center}
+#history{color:rgba(255,255,255,0.5);font-size:clamp(0.7rem,2vmin,0.9rem);text-align:center}
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="hud-info"><span>⚡ 反应速度测试</span></div>
+  <button class="btn" onclick="reset()">重新开始</button>
+</div>
+<div class="game-area">
+  <div id="box">点击此处开始</div>
+  <div id="result"></div>
+  <div id="history"></div>
+</div>
+<script>
+const box=document.getElementById('box');
+let state='idle',timer,startTime,results=[];
+box.addEventListener('click',()=>{
+if(state==='idle'){state='wait';box.className='wait';box.textContent='等待变绿...';timer=setTimeout(()=>{state='ready';box.className='ready';startTime=Date.now();box.textContent='快点击!'},1000+Math.random()*3000)}
+else if(state==='wait'){state='early';box.className='early';box.textContent='太早了! 点击重试';clearTimeout(timer)}
+else if(state==='ready'){const t=Date.now()-startTime;state='done';box.className='';box.textContent='点击重新开始';results.push(t);if(results.length>5)results.shift();document.getElementById('result').textContent=t+' ms';document.getElementById('history').textContent='历史: '+results.join(' / ')+' ms | 平均: '+Math.round(results.reduce((a,b)=>a+b,0)/results.length)+' ms'}
+else{state='idle';box.className='';box.textContent='点击此处开始';document.getElementById('result').textContent=''}
+});
+function reset(){state='idle';clearTimeout(timer);box.className='';box.textContent='点击此处开始';results=[];document.getElementById('result').textContent='';document.getElementById('history').textContent=''}
+</script>
+</body>
+</html>
