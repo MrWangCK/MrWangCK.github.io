@@ -7,13 +7,13 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0;z-index:10}
 .hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
 .btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#667eea,#764ba2)}
 .btn:hover{opacity:0.85}
 .hud-hint{color:rgba(255,255,255,0.4);font-size:0.75rem}
 .game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px}
+canvas{display:block;width:100%;height:100%}
 </style>
 </head>
 <body>
@@ -21,16 +21,23 @@ canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:
   <div class="hud-info"><span id="score">得分: 0</span><span class="hud-hint">方向键/WASD | 空格暂停</span></div>
   <button class="btn" onclick="init()">重新开始</button>
 </div>
-<div class="game-area"><canvas id="c" width="400" height="400"></canvas></div>
+<div class="game-area"><canvas id="c"></canvas></div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
-const G=20,W=c.width/G,H=c.height/G;
-let snake,dir,food,score,paused,timer;
-function init(){snake=[{x:10,y:10}];dir={x:1,y:0};score=0;paused=false;placeFood();clearInterval(timer);timer=setInterval(step,120);draw()}
+const G=20,LW=400,LH=400,W=LW/G,H=LH/G;
+let snake,dir,food,score,paused,timer,scaleX=1,scaleY=1;
+function resize(){
+    const r=c.parentElement.getBoundingClientRect();
+    c.width=r.clientWidth*c.devicePixelRatio|0;
+    c.height=r.clientHeight*c.devicePixelRatio|0;
+    scaleX=c.width/LW;scaleY=c.height/LH;
+}
+function init(){snake=[{x:10,y:10}];dir={x:1,y:0};score=0;paused=false;placeFood();clearInterval(timer);timer=setInterval(step,120);resize();draw()}
 function placeFood(){do{food={x:Math.floor(Math.random()*W),y:Math.floor(Math.random()*H)}}while(snake.some(s=>s.x===food.x&&s.y===food.y))}
 function step(){if(paused)return;const h={x:snake[0].x+dir.x,y:snake[0].y+dir.y};if(h.x<0||h.x>=W||h.y<0||h.y>=H||snake.some(s=>s.x===h.x&&s.y===h.y)){clearInterval(timer);return}snake.unshift(h);if(h.x===food.x&&h.y===food.y){score++;placeFood()}else snake.pop();draw()}
-function draw(){ctx.fillStyle='#0f0f23';ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle='#e74c3c';ctx.fillRect(food.x*G,food.y*G,G-1,G-1);snake.forEach((s,i)=>{ctx.fillStyle=i===0?'#667eea':'#4a69bd';ctx.fillRect(s.x*G,s.y*G,G-1,G-1)});document.getElementById('score').textContent='得分: '+score}
+function draw(){ctx.clearRect(0,0,c.width,c.height);ctx.save();ctx.scale(scaleX,scaleY);ctx.fillStyle='#0f0f23';ctx.fillRect(0,0,LW,LH);ctx.fillStyle='#e74c3c';ctx.fillRect(food.x*G,food.y*G,G-1,G-1);snake.forEach((s,i)=>{ctx.fillStyle=i===0?'#667eea':'#4a69bd';ctx.fillRect(s.x*G,s.y*G,G-1,G-1)});ctx.restore();document.getElementById('score').textContent='得分: '+score}
 document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k===' ')e.preventDefault(),paused=!paused;if((k==='arrowup'||k==='w')&&dir.y!==1)dir={x:0,y:-1};if((k==='arrowdown'||k==='s')&&dir.y!==-1)dir={x:0,y:1};if((k==='arrowleft'||k==='a')&&dir.x!==1)dir={x:-1,y:0};if((k==='arrowright'||k==='d')&&dir.x!==-1)dir={x:1,y:0}});
+window.addEventListener('resize',resize);
 init();
 </script>
 </body>

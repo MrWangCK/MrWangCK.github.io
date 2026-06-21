@@ -7,13 +7,13 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0;z-index:10}
 .hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
 .btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#9b59b6,#8e44ad)}
 .btn:hover{opacity:0.85}
 .hud-hint{color:rgba(255,255,255,0.4);font-size:0.75rem}
 .game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px}
+canvas{display:block;width:100%;height:100%}
 </style>
 </head>
 <body>
@@ -21,23 +21,30 @@ canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:
   <div class="hud-info"><span id="sc">得分: 0</span><span id="lv">等级: 1</span><span id="ln">行数: 0</span><span class="hud-hint">←→移动 ↑旋转 ↓加速 空格硬降</span></div>
   <button class="btn" onclick="init()">重新开始</button>
 </div>
-<div class="game-area"><canvas id="c" width="250" height="500"></canvas></div>
+<div class="game-area"><canvas id="c"></canvas></div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
-const COLS=10,ROWS=20,SZ=25;
+const COLS=10,ROWS=20,SZ=25,LW=COLS*SZ,LH=ROWS*SZ;
 const SHAPES=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]]];
 const COLORS=['#00bcd4','#f1c40f','#9b59b6','#e74c3c','#2ecc71','#3498db','#e67e22'];
-let board,piece,px,py,pi,score,lines,level,timer,over;
-function init(){board=Array(ROWS).fill(null).map(()=>Array(COLS).fill(0));score=0;lines=0;level=1;over=false;newPiece();clearInterval(timer);timer=setInterval(tick,800);draw()}
+let board,piece,px,py,pi,score,lines,level,timer,over,scaleX=1,scaleY=1;
+function resize(){
+    const r=c.parentElement.getBoundingClientRect();
+    c.width=r.clientWidth*c.devicePixelRatio|0;
+    c.height=r.clientHeight*c.devicePixelRatio|0;
+    scaleX=c.width/LW;scaleY=c.height/LH;
+}
+function init(){board=Array(ROWS).fill(null).map(()=>Array(COLS).fill(0));score=0;lines=0;level=1;over=false;newPiece();clearInterval(timer);timer=setInterval(tick,800);resize();draw()}
 function newPiece(){pi=Math.floor(Math.random()*SHAPES.length);piece=SHAPES[pi].map(r=>[...r]);px=Math.floor((COLS-piece[0].length)/2);py=0;if(collides(px,py,piece)){over=true;clearInterval(timer)}}
 function rotate(){const r=piece[0].map((_,i)=>piece.map(row=>row[i]).reverse());if(!collides(px,py,r))piece=r}
-function collides(cx,cy,p){for(let r=0;r<p.length;r++)for(let c=0;c<p[r].length;c++)if(p[r][c]){const nx=cx+c,ny=cy+r;if(nx<0||nx>=COLS||ny>=ROWS)return true;if(ny>=0&&board[ny][nx])return true}return false}
-function merge(){for(let r=0;r<piece.length;r++)for(let c=0;c<piece[r].length;c++)if(piece[r][c]&&py+r>=0)board[py+r][px+c]=pi+1}
+function collides(cx,cy,p){for(let r=0;r<p.length;r++)for(let cl=0;cl<p[r].length;cl++)if(p[r][cl]){const nx=cx+ccl,ny=cy+r;if(nx<0||nx>=COLS||ny>=ROWS)return true;if(ny>=0&&board[ny][nx])return true}return false}
+function merge(){for(let r=0;r<piece.length;r++)for(let cl=0;cl<piece[r].length;cl++)if(piece[r][cl]&&py+r>=0)board[py+r][px+ccl]=pi+1}
 function clearLines(){let cleared=0;for(let r=ROWS-1;r>=0;r--){if(board[r].every(v=>v)){board.splice(r,1);board.unshift(Array(COLS).fill(0));cleared++;r++}}if(cleared){lines+=cleared;score+=cleared*100*level;level=Math.floor(lines/10)+1;clearInterval(timer);timer=setInterval(tick,Math.max(100,800-level*70))}}
 function tick(){if(over)return;if(!collides(px,py+1,piece))py++;else{merge();clearLines();newPiece()}draw()}
-function draw(){ctx.fillStyle='#0f0f23';ctx.fillRect(0,0,c.width,c.height);for(let r=0;r<ROWS;r++)for(let cl=0;cl<COLS;cl++){if(board[r][cl]){ctx.fillStyle=COLORS[board[r][cl]-1];ctx.fillRect(cl*SZ+1,r*SZ+1,SZ-2,SZ-2)}else{ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.strokeRect(cl*SZ,r*SZ,SZ,SZ)}}if(!over)for(let r=0;r<piece.length;r++)for(let cl=0;cl<piece[r].length;cl++)if(piece[r][cl]){ctx.fillStyle=COLORS[pi];ctx.fillRect((px+cl)*SZ+1,(py+r)*SZ+1,SZ-2,SZ-2)}document.getElementById('sc').textContent='得分: '+score;document.getElementById('lv').textContent='等级: '+level;document.getElementById('ln').textContent='行数: '+lines}
+function draw(){ctx.clearRect(0,0,c.width,c.height);ctx.save();ctx.scale(scaleX,scaleY);ctx.fillStyle='#0f0f23';ctx.fillRect(0,0,LW,LH);for(let r=0;r<ROWS;r++)for(let cl=0;cl<COLS;cl++){if(board[r][cl]){ctx.fillStyle=COLORS[board[r][cl]-1];ctx.fillRect(cl*SZ+1,r*SZ+1,SZ-2,SZ-2)}else{ctx.strokeStyle='rgba(255,255,255,0.03)';ctx.strokeRect(cl*SZ,r*SZ,SZ,SZ)}}if(!over)for(let r=0;r<piece.length;r++)for(let cl=0;cl<piece[r].length;cl++)if(piece[r][cl]){ctx.fillStyle=COLORS[pi];ctx.fillRect((px+ccl)*SZ+1,(py+r)*SZ+1,SZ-2,SZ-2)}ctx.restore();document.getElementById('sc').textContent='得分: '+score;document.getElementById('lv').textContent='等级: '+level;document.getElementById('ln').textContent='行数: '+lines}
 function hardDrop(){while(!collides(px,py+1,piece))py++;merge();clearLines();newPiece();draw()}
 document.addEventListener('keydown',e=>{if(over)return;const k=e.key;if(k==='ArrowLeft'&&!collides(px-1,py,piece))px--;if(k==='ArrowRight'&&!collides(px+1,py,piece))px++;if(k==='ArrowDown'&&!collides(px,py+1,piece))py++;if(k==='ArrowUp')rotate();if(k===' '){e.preventDefault();hardDrop()}draw()});
+window.addEventListener('resize',resize);
 init();
 </script>
 </body>

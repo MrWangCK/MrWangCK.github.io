@@ -7,13 +7,13 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0;z-index:10}
 .hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
 .btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#3498db,#2980b9)}
 .btn:hover{opacity:0.85}
 .hud-hint{color:rgba(255,255,255,0.4);font-size:0.75rem}
 .game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px}
+canvas{display:block;width:100%;height:100%}
 </style>
 </head>
 <body>
@@ -21,17 +21,24 @@ canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:
   <div class="hud-info"><span id="sc">得分: 0</span><span id="li">生命: 3</span><span class="hud-hint">←→移动 空格发射</span></div>
   <button class="btn" onclick="init()">重新开始</button>
 </div>
-<div class="game-area"><canvas id="c" width="400" height="500"></canvas></div>
+<div class="game-area"><canvas id="c"></canvas></div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
-const W=c.width,H=c.height;
-let ship,bullets,enemies,score,lives,over,anim,enemyTimer;
-function init(){ship={x:W/2,y:H-40,w:30};bullets=[];enemies=[];score=0;lives=3;over=false;clearInterval(enemyTimer);enemyTimer=setInterval(spawnEnemy,800);cancelAnimationFrame(anim);loop()}
-function spawnEnemy(){if(over)return;enemies.push({x:20+Math.random()*(W-40),y:-20,w:25,speed:1.5+Math.random()*2,hp:1})}
-function update(){if(over)return;bullets.forEach(b=>b.y-=7);bullets=bullets.filter(b=>b.y>-10);enemies.forEach(e=>e.y+=e.speed);enemies=enemies.filter(e=>{if(e.y>H+20){lives--;if(lives<=0){over=true;setTimeout(()=>alert('💥 游戏结束! 得分: '+score),50)}return false}return true});bullets.forEach((b,bi)=>{enemies.forEach((e,ei)=>{if(Math.abs(b.x-e.x)<20&&Math.abs(b.y-e.y)<20){enemies.splice(ei,1);bullets.splice(bi,1);score+=10}})});enemies.forEach(e=>{if(Math.abs(e.x-ship.x)<25&&Math.abs(e.y-ship.y)<20){enemies.splice(enemies.indexOf(e),1);lives--;if(lives<=0){over=true;setTimeout(()=>alert('💥 游戏结束! 得分: '+score),50)}}});document.getElementById('sc').textContent='得分: '+score;document.getElementById('li').textContent='生命: '+lives}
-function draw(){ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,W,H);ctx.fillStyle='#3498db';ctx.beginPath();ctx.moveTo(ship.x,ship.y-15);ctx.lineTo(ship.x-15,ship.y+10);ctx.lineTo(ship.x+15,ship.y+10);ctx.fill();bullets.forEach(b=>{ctx.fillStyle='#f1c40f';ctx.fillRect(b.x-2,b.y,4,10)});enemies.forEach(e=>{ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.moveTo(e.x,e.y+12);ctx.lineTo(e.x-12,e.y-8);ctx.lineTo(e.x+12,e.y-8);ctx.fill()})}
+const LW=400,LH=500;
+let ship,bullets,enemies,score,lives,over,anim,enemyTimer,scaleX=1,scaleY=1;
+function resize(){
+    const r=c.parentElement.getBoundingClientRect();
+    c.width=r.clientWidth*c.devicePixelRatio|0;
+    c.height=r.clientHeight*c.devicePixelRatio|0;
+    scaleX=c.width/LW;scaleY=c.height/LH;
+}
+function init(){ship={x:LW/2,y:LH-40,w:30};bullets=[];enemies=[];score=0;lives=3;over=false;clearInterval(enemyTimer);enemyTimer=setInterval(spawnEnemy,800);cancelAnimationFrame(anim);resize();loop()}
+function spawnEnemy(){if(over)return;enemies.push({x:20+Math.random()*(LW-40),y:-20,w:25,speed:1.5+Math.random()*2,hp:1})}
+function update(){if(over)return;bullets.forEach(b=>b.y-=7);bullets=bullets.filter(b=>b.y>-10);enemies.forEach(e=>e.y+=e.speed);enemies=enemies.filter(e=>{if(e.y>LH+20){lives--;if(lives<=0){over=true;setTimeout(()=>alert('💥 游戏结束! 得分: '+score),50)}return false}return true});bullets.forEach((b,bi)=>{enemies.forEach((e,ei)=>{if(Math.abs(b.x-e.x)<20&&Math.abs(b.y-e.y)<20){enemies.splice(ei,1);bullets.splice(bi,1);score+=10}})});enemies.forEach(e=>{if(Math.abs(e.x-ship.x)<25&&Math.abs(e.y-ship.y)<20){enemies.splice(enemies.indexOf(e),1);lives--;if(lives<=0){over=true;setTimeout(()=>alert('💥 游戏结束! 得分: '+score),50)}}});document.getElementById('sc').textContent='得分: '+score;document.getElementById('li').textContent='生命: '+lives}
+function draw(){ctx.clearRect(0,0,c.width,c.height);ctx.save();ctx.scale(scaleX,scaleY);ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,LW,LH);ctx.fillStyle='#3498db';ctx.beginPath();ctx.moveTo(ship.x,ship.y-15);ctx.lineTo(ship.x-15,ship.y+10);ctx.lineTo(ship.x+15,ship.y+10);ctx.fill();bullets.forEach(b=>{ctx.fillStyle='#f1c40f';ctx.fillRect(b.x-2,b.y,4,10)});enemies.forEach(e=>{ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.moveTo(e.x,e.y+12);ctx.lineTo(e.x-12,e.y-8);ctx.lineTo(e.x+12,e.y-8);ctx.fill()});ctx.restore()}
 function loop(){if(!over){update();draw();anim=requestAnimationFrame(loop)}else draw()}
-document.addEventListener('keydown',e=>{if(over)return;if(e.key==='ArrowLeft')ship.x=Math.max(15,ship.x-20);if(e.key==='ArrowRight')ship.x=Math.min(W-15,ship.x+20);if(e.key===' '){e.preventDefault();bullets.push({x:ship.x,y:ship.y-15})}});
+document.addEventListener('keydown',e=>{if(over)return;if(e.key==='ArrowLeft')ship.x=Math.max(15,ship.x-20);if(e.key==='ArrowRight')ship.x=Math.min(LW-15,ship.x+20);if(e.key===' '){e.preventDefault();bullets.push({x:ship.x,y:ship.y-15})}});
+window.addEventListener('resize',resize);
 init();
 </script>
 </body>

@@ -7,12 +7,12 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0;z-index:10}
 .hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
 .btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#9b59b6,#8e44ad)}
 .btn:hover{opacity:0.85}
 .game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px;cursor:pointer}
+canvas{display:block;width:100%;height:100%;cursor:pointer}
 </style>
 </head>
 <body>
@@ -20,16 +20,23 @@ canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:
   <div class="hud-info"><span id="status">黑棋回合</span></div>
   <button class="btn" onclick="init()">重新开始</button>
 </div>
-<div class="game-area"><canvas id="c" width="450" height="450"></canvas></div>
+<div class="game-area"><canvas id="c"></canvas></div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
-function canvasXY(e){const r=c.getBoundingClientRect();return[(e.clientX-r.left)*c.width/r.width,(e.clientY-r.top)*c.height/r.height]}
-const N=15,SZ=30,PAD=15;
-let board,turn,over;
-function init(){board=Array(N).fill(null).map(()=>Array(N).fill(0));turn=1;over=false;draw();document.getElementById('status').textContent='黑棋回合'}
-function draw(){ctx.fillStyle='#d4a76a';ctx.fillRect(0,0,c.width,c.height);ctx.strokeStyle='#8b6914';for(let i=0;i<N;i++){ctx.beginPath();ctx.moveTo(PAD+i*SZ,PAD);ctx.lineTo(PAD+i*SZ,PAD+(N-1)*SZ);ctx.stroke();ctx.beginPath();ctx.moveTo(PAD,PAD+i*SZ);ctx.lineTo(PAD+(N-1)*SZ,PAD+i*SZ);ctx.stroke()}const stars=[3,7,11];stars.forEach(r=>stars.forEach(cl=>{ctx.fillStyle='#8b6914';ctx.beginPath();ctx.arc(PAD+cl*SZ,PAD+r*SZ,3,0,Math.PI*2);ctx.fill()}));for(let r=0;r<N;r++)for(let cl=0;cl<N;cl++)if(board[r][cl]){ctx.fillStyle=board[r][cl]===1?'#1a1a1a':'#f0f0f0';ctx.strokeStyle=board[r][cl]===1?'#000':'#ccc';ctx.beginPath();ctx.arc(PAD+cl*SZ,PAD+r*SZ,SZ/2-2,0,Math.PI*2);ctx.fill();ctx.stroke()}}
-c.addEventListener('click',e=>{if(over)return;const[mx,my]=canvasXY(e);const rect=c.getBoundingClientRect();const cl=Math.round((mx-PAD)/SZ);const r=Math.round((my-PAD)/SZ);if(r<0||r>=N||cl<0||cl>=N||board[r][cl])return;board[r][cl]=turn;draw();if(checkWin(r,cl)){over=true;document.getElementById('status').textContent=(turn===1?'黑棋':'白棋')+'获胜! 🎉';return}turn=turn===1?2:1;document.getElementById('status').textContent=(turn===1?'黑棋':'白棋')+'回合'});
+const N=15,SZ=30,PAD=15,LW=(N-1)*SZ+PAD*2,LH=LW;
+let board,turn,over,scaleX=1,scaleY=1;
+function resize(){
+    const r=c.parentElement.getBoundingClientRect();
+    c.width=r.clientWidth*c.devicePixelRatio|0;
+    c.height=r.clientHeight*c.devicePixelRatio|0;
+    scaleX=c.width/LW;scaleY=c.height/LH;
+}
+function canvasXY(e){return[(e.clientX-c.getBoundingClientRect().left)*LW/c.clientWidth,(e.clientY-c.getBoundingClientRect().top)*LH/c.clientHeight]}
+function init(){board=Array(N).fill(null).map(()=>Array(N).fill(0));turn=1;over=false;resize();draw();document.getElementById('status').textContent='黑棋回合'}
+function draw(){ctx.clearRect(0,0,c.width,c.height);ctx.save();ctx.scale(scaleX,scaleY);ctx.fillStyle='#d4a76a';ctx.fillRect(0,0,LW,LH);ctx.strokeStyle='#8b6914';for(let i=0;i<N;i++){ctx.beginPath();ctx.moveTo(PAD+i*SZ,PAD);ctx.lineTo(PAD+i*SZ,PAD+(N-1)*SZ);ctx.stroke();ctx.beginPath();ctx.moveTo(PAD,PAD+i*SZ);ctx.lineTo(PAD+(N-1)*SZ,PAD+i*SZ);ctx.stroke()}const stars=[3,7,11];stars.forEach(r2=>stars.forEach(cl=>{ctx.fillStyle='#8b6914';ctx.beginPath();ctx.arc(PAD+cl*SZ,PAD+r2*SZ,3,0,Math.PI*2);ctx.fill()}));for(let r=0;r<N;r++)for(let cl=0;cl<N;cl++)if(board[r][cl]){ctx.fillStyle=board[r][cl]===1?'#1a1a1a':'#f0f0f0';ctx.strokeStyle=board[r][cl]===1?'#000':'#ccc';ctx.beginPath();ctx.arc(PAD+cl*SZ,PAD+r*SZ,SZ/2-2,0,Math.PI*2);ctx.fill();ctx.stroke()}ctx.restore()}
+c.addEventListener('click',e=>{if(over)return;const[mx,my]=canvasXY(e);const cl=Math.round((mx-PAD)/SZ);const r=Math.round((my-PAD)/SZ);if(r<0||r>=N||cl<0||cl>=N||board[r][cl])return;board[r][cl]=turn;draw();if(checkWin(r,cl)){over=true;document.getElementById('status').textContent=(turn===1?'黑棋':'白棋')+'获胜! 🎉';return}turn=turn===1?2:1;document.getElementById('status').textContent=(turn===1?'黑棋':'白棋')+'回合'});
 function checkWin(r,cl){const dirs=[[0,1],[1,0],[1,1],[1,-1]];for(const[dr,dc]of dirs){let cnt=1;for(let i=1;i<5;i++){const nr=r+dr*i,nc=cl+dc*i;if(nr>=0&&nr<N&&nc>=0&&nc<N&&board[nr][nc]===board[r][cl])cnt++;else break}for(let i=1;i<5;i++){const nr=r-dr*i,nc=cl-dc*i;if(nr>=0&&nr<N&&nc>=0&&nc<N&&board[nr][nc]===board[r][cl])cnt++;else break}if(cnt>=5)return true}return false}
+window.addEventListener('resize',resize);
 init();
 </script>
 </body>

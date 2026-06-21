@@ -7,13 +7,13 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0;z-index:10}
 .hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
 .btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#2ecc71,#27ae60)}
 .btn:hover{opacity:0.85}
 .hud-hint{color:rgba(255,255,255,0.4);font-size:0.75rem}
 .game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px;cursor:none}
+canvas{display:block;width:100%;height:100%;cursor:none}
 </style>
 </head>
 <body>
@@ -21,21 +21,28 @@ canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:
   <div class="hud-info"><span id="sc">得分: 0</span><span id="li">生命: 3</span><span class="hud-hint">鼠标/触摸移动篮子</span></div>
   <button class="btn" onclick="init()">重新开始</button>
 </div>
-<div class="game-area"><canvas id="c" width="400" height="500"></canvas></div>
+<div class="game-area"><canvas id="c"></canvas></div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
-function canvasX(e){const r=c.getBoundingClientRect();return(e.clientX-r.left)*c.width/r.width}
-function canvasTouchX(e){const r=c.getBoundingClientRect();return(e.touches[0].clientX-r.left)*c.width/r.width}
-const W=c.width,H=c.height;
+const LW=400,LH=500;
+function canvasX(e){return(e.clientX-c.getBoundingClientRect().left)*LW/c.clientWidth}
+function canvasTouchX(e){return(e.touches[0].clientX-c.getBoundingClientRect().left)*LW/c.clientWidth}
 const FRUITS=[{e:'🍎',p:10},{e:'🍊',p:10},{e:'🍇',p:15},{e:'🍓',p:15},{e:'🌟',p:30},{e:'💣',p:-1}];
-let basket,items,score,lives,over,anim,spawnTimer;
-function init(){basket={x:W/2,w:60};items=[];score=0;lives=3;over=false;clearInterval(spawnTimer);spawnTimer=setInterval(spawn,600);cancelAnimationFrame(anim);loop()}
-function spawn(){if(over)return;const f=FRUITS[Math.random()<0.15?5:Math.floor(Math.random()*5)];items.push({x:20+Math.random()*(W-40),y:-20,e:f.e,p:f.p,speed:2+Math.random()*2+score*0.005})}
-function update(){if(over)return;items.forEach(it=>it.y+=it.speed);items=items.filter(it=>{if(it.y>H+20){if(it.p>0){lives--;if(lives<=0){over=true;setTimeout(()=>alert('游戏结束! 得分: '+score),50)}}return false}if(it.y>=H-40&&it.y<=H-10&&Math.abs(it.x-basket.x)<basket.w/2+10){if(it.p===-1){lives--;if(lives<=0){over=true;setTimeout(()=>alert('游戏结束! 得分: '+score),50)}}else score+=it.p;return false}return true});document.getElementById('sc').textContent='得分: '+score;document.getElementById('li').textContent='生命: '+lives}
-function draw(){ctx.fillStyle='#0f0f23';ctx.fillRect(0,0,W,H);items.forEach(it=>{ctx.font='24px sans-serif';ctx.fillText(it.e,it.x-12,it.y)});ctx.fillStyle='#8b4513';ctx.fillRect(basket.x-basket.w/2,H-30,basket.w,25);ctx.fillStyle='#a0522d';ctx.fillRect(basket.x-basket.w/2-5,H-35,basket.w+10,8)}
-c.addEventListener('mousemove',e=>{basket.x=Math.max(basket.w/2,Math.min(W-basket.w/2,canvasX(e)))});
-c.addEventListener('touchmove',e=>{e.preventDefault();basket.x=Math.max(basket.w/2,Math.min(W-basket.w/2,canvasTouchX(e)))},{passive:false});
+let basket,items,score,lives,over,anim,spawnTimer,scaleX=1,scaleY=1;
+function resize(){
+    const r=c.parentElement.getBoundingClientRect();
+    c.width=r.clientWidth*c.devicePixelRatio|0;
+    c.height=r.clientHeight*c.devicePixelRatio|0;
+    scaleX=c.width/LW;scaleY=c.height/LH;
+}
+function init(){basket={x:LW/2,w:60};items=[];score=0;lives=3;over=false;clearInterval(spawnTimer);spawnTimer=setInterval(spawn,600);cancelAnimationFrame(anim);resize();loop()}
+function spawn(){if(over)return;const f=FRUITS[Math.random()<0.15?5:Math.floor(Math.random()*5)];items.push({x:20+Math.random()*(LW-40),y:-20,e:f.e,p:f.p,speed:2+Math.random()*2+score*0.005})}
+function update(){if(over)return;items.forEach(it=>it.y+=it.speed);items=items.filter(it=>{if(it.y>LH+20){if(it.p>0){lives--;if(lives<=0){over=true;setTimeout(()=>alert('游戏结束! 得分: '+score),50)}}return false}if(it.y>=LH-40&&it.y<=LH-10&&Math.abs(it.x-basket.x)<basket.w/2+10){if(it.p===-1){lives--;if(lives<=0){over=true;setTimeout(()=>alert('游戏结束! 得分: '+score),50)}}else score+=it.p;return false}return true});document.getElementById('sc').textContent='得分: '+score;document.getElementById('li').textContent='生命: '+lives}
+function draw(){ctx.clearRect(0,0,c.width,c.height);ctx.save();ctx.scale(scaleX,scaleY);ctx.fillStyle='#0f0f23';ctx.fillRect(0,0,LW,LH);items.forEach(it=>{ctx.font='24px sans-serif';ctx.fillText(it.e,it.x-12,it.y)});ctx.fillStyle='#8b4513';ctx.fillRect(basket.x-basket.w/2,LH-30,basket.w,25);ctx.fillStyle='#a0522d';ctx.fillRect(basket.x-basket.w/2-5,LH-35,basket.w+10,8);ctx.restore()}
+c.addEventListener('mousemove',e=>{basket.x=Math.max(basket.w/2,Math.min(LW-basket.w/2,canvasX(e)))});
+c.addEventListener('touchmove',e=>{e.preventDefault();basket.x=Math.max(basket.w/2,Math.min(LW-basket.w/2,canvasTouchX(e)))},{passive:false});
 function loop(){if(!over){update();draw();anim=requestAnimationFrame(loop)}else draw()}
+window.addEventListener('resize',resize);
 init();
 </script>
 </body>
