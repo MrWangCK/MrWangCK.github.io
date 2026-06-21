@@ -7,13 +7,13 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0;z-index:10}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
 .hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
 .btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#2ecc71,#27ae60)}
 .btn:hover{opacity:0.85}
 .hud-hint{color:rgba(255,255,255,0.4);font-size:0.75rem}
 .game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-canvas{display:block;width:100%;height:100%}
+canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px;cursor:none}
 </style>
 </head>
 <body>
@@ -21,26 +21,19 @@ canvas{display:block;width:100%;height:100%}
   <div class="hud-info"><span id="p1">玩家: 0</span><span id="p2">电脑: 0</span><span class="hud-hint">鼠标/触摸控制 | 先到7分</span></div>
   <button class="btn" onclick="init()">重新开始</button>
 </div>
-<div class="game-area"><canvas id="c"></canvas></div>
+<div class="game-area"><canvas id="c" width="500" height="400"></canvas></div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
-const LW=500,LH=400,PW=12,PH=80;
-let ball,lPad,rPad,s1,s2,anim,scaleX=1,scaleY=1;
-function resize(){
-    const r=c.parentElement.getBoundingClientRect();
-    c.width=r.clientWidth*c.devicePixelRatio|0;
-    c.height=r.clientHeight*c.devicePixelRatio|0;
-    scaleX=c.width/LW;scaleY=c.height/LH;
-}
-function canvasY(e){const r=c.getBoundingClientRect();return((e.clientY-r.top)*LH/r.clientHeight)}
-function canvasTouchY(e){const r=c.getBoundingClientRect();return(e.touches[0].clientY-r.top)*LH/r.clientHeight}
-function init(){ball={x:LW/2,y:LH/2,r:7,dx:4,dy:3};lPad={x:15,y:LH/2-40};rPad={x:LW-15-PW,y:LH/2-40};s1=0;s2=0;cancelAnimationFrame(anim);resize();loop()}
-function resetBall(){ball.x=LW/2;ball.y=LH/2;ball.dx=-ball.dx;ball.dy=(Math.random()-0.5)*6}
-function update(){ball.x+=ball.dx;ball.y+=ball.dy;if(ball.y<=ball.r||ball.y>=LH-ball.r)ball.dy=-ball.dy;if(ball.x<=lPad.x+PW&&ball.y>=lPad.y&&ball.y<=lPad.y+PH){ball.dx=Math.abs(ball.dx);ball.dy+=(ball.y-(lPad.y+PH/2))*0.1}if(ball.x+PW>=rPad.x&&ball.y>=rPad.y&&ball.y<=rPad.y+PH){ball.dx=-Math.abs(ball.dx);ball.dy+=(ball.y-(rPad.y+PH/2))*0.1}const center=rPad.y+PH/2;const target=ball.y;if(center<target-10)rPad.y+=3.5;else if(center>target+10)rPad.y-=3.5;rPad.y=Math.max(0,Math.min(LH-PH,rPad.y));if(ball.x<0){s2++;resetBall()}if(ball.x>LW){s1++;resetBall()}if(s1>=7||s2>=7){cancelAnimationFrame(anim);setTimeout(()=>{alert((s1>=7?'玩家':'电脑')+'获胜!');init()},100);return}document.getElementById('p1').textContent='玩家: '+s1;document.getElementById('p2').textContent='电脑: '+s2}
-function draw(){ctx.clearRect(0,0,c.width,c.height);ctx.save();ctx.scale(scaleX,scaleY);ctx.fillStyle='#0f0f23';ctx.fillRect(0,0,LW,LH);ctx.setLineDash([8,8]);ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.beginPath();ctx.moveTo(LW/2,0);ctx.lineTo(LW/2,LH);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#2ecc71';ctx.fillRect(lPad.x,lPad.y,PW,PH);ctx.fillRect(rPad.x,rPad.y,PW,PH);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();ctx.restore()}
-c.addEventListener('mousemove',e=>{lPad.y=Math.max(0,Math.min(LH-PH,canvasY(e)-PH/2))});
-c.addEventListener('touchmove',e=>{e.preventDefault();lPad.y=Math.max(0,Math.min(LH-PH,canvasTouchY(e)-PH/2))},{passive:false});
-window.addEventListener('resize',resize);
+function canvasY(e){const r=c.getBoundingClientRect();return(e.clientY-r.top)*c.height/r.height}
+function canvasTouchY(e){const r=c.getBoundingClientRect();const t=e.touches[0];return(t.clientY-r.top)*c.height/r.height}
+const W=c.width,H=c.height,PW=12,PH=80;
+let ball,lPad,rPad,s1,s2,anim;
+function init(){ball={x:W/2,y:H/2,r:7,dx:4,dy:3};lPad={x:15,y:H/2-40};rPad={x:W-15-PW,y:H/2-40};s1=0;s2=0;cancelAnimationFrame(anim);loop()}
+function resetBall(){ball.x=W/2;ball.y=H/2;ball.dx=-ball.dx;ball.dy=(Math.random()-0.5)*6}
+function update(){ball.x+=ball.dx;ball.y+=ball.dy;if(ball.y<=ball.r||ball.y>=H-ball.r)ball.dy=-ball.dy;if(ball.x<=lPad.x+PW&&ball.y>=lPad.y&&ball.y<=lPad.y+PH){ball.dx=Math.abs(ball.dx);ball.dy+=(ball.y-(lPad.y+PH/2))*0.1}if(ball.x+PW>=rPad.x&&ball.y>=rPad.y&&ball.y<=rPad.y+PH){ball.dx=-Math.abs(ball.dx);ball.dy+=(ball.y-(rPad.y+PH/2))*0.1}const center=rPad.y+PH/2;const target=ball.y;if(center<target-10)rPad.y+=3.5;else if(center>target+10)rPad.y-=3.5;rPad.y=Math.max(0,Math.min(H-PH,rPad.y));if(ball.x<0){s2++;resetBall()}if(ball.x>W){s1++;resetBall()}if(s1>=7||s2>=7){cancelAnimationFrame(anim);setTimeout(()=>{alert((s1>=7?'玩家':'电脑')+'获胜!');init()},100);return}document.getElementById('p1').textContent='玩家: '+s1;document.getElementById('p2').textContent='电脑: '+s2}
+function draw(){ctx.fillStyle='#0f0f23';ctx.fillRect(0,0,W,H);ctx.setLineDash([8,8]);ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#2ecc71';ctx.fillRect(lPad.x,lPad.y,PW,PH);ctx.fillRect(rPad.x,rPad.y,PW,PH);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill()}
+c.addEventListener('mousemove',e=>{lPad.y=Math.max(0,Math.min(H-PH,canvasY(e)-PH/2))});
+c.addEventListener('touchmove',e=>{e.preventDefault();lPad.y=Math.max(0,Math.min(H-PH,canvasTouchY(e)-PH/2))},{passive:false});
 function loop(){update();draw();anim=requestAnimationFrame(loop)}
 init();
 </script>

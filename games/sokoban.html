@@ -7,11 +7,11 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0;z-index:10}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
 .hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
 .btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#e67e22,#f39c12)}
 .btn:hover{opacity:0.85}
-.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:12px}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
 .board{display:inline-grid;gap:2px;background:rgba(255,255,255,0.03);padding:8px;border-radius:8px}
 .cell{display:flex;align-items:center;justify-content:center;border-radius:4px;user-select:none}
 .cell.wall{background:rgba(100,100,120,0.5)}
@@ -27,7 +27,7 @@ body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:
   <div class="hud-info"><span id="info">关卡: 1 | 步数: 0</span></div>
   <div style="display:flex;gap:6px">
     <button class="btn" onclick="loadLevel(lv)">重置</button>
-    <button class="btn" onclick="loadLevel(lv>0?lv-1:lv)">上一关</button>
+    <button class="btn" onclick="loadLevel(lv>0?lv-1:0)">上一关</button>
     <button class="btn" onclick="loadLevel(lv<levels.length-1?lv+1:lv)">下一关</button>
   </div>
 </div>
@@ -44,10 +44,9 @@ function loadLevel(n){lv=n;const l=levels[n];grid=l.map.map(r=>[...r]);moves=0;r
 function findPlayer(){for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++)if(grid[r][c]===P||grid[r][c]===PT)return[r,c]}
 function render(){
   const b=document.getElementById('board');
-  const ga=b.parentElement.getBoundingClientRect();
-  const maxCellW=Math.floor((ga.width-48)/grid[0].length);
-  const maxCellH=Math.floor((ga.height-60)/grid.length);
-  const sz=Math.min(maxCellW,maxCellH,70);
+  const maxCellW=Math.floor((window.innerWidth-40)/grid[0].length);
+  const maxCellH=Math.floor((window.innerHeight-60)/grid.length);
+  const sz=Math.min(maxCellW,maxCellH,60);
   b.style.gridTemplateColumns=`repeat(${grid[0].length},${sz}px)`;
   b.innerHTML='';
   for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++){
@@ -61,9 +60,10 @@ function render(){
     else if(v===PT)d.className+=' player',d.textContent='😀';
     b.appendChild(d)}
   document.getElementById('info').textContent=`关卡: ${lv+1} ${levels[lv].name} | 步数: ${moves}`}
-function move(dr,dc){const[pr,pc]=findPlayer();const nr=pr+dr,nc=pc+dc;if(grid[nr][nc]===W)return;if(grid[nr][nc]===B||grid[nr][nc]===BT){const br=nr+dr,bc=nc+dc;if(grid[br][bc]===W||grid[br][bc]===B||grid[br][bc]===BT)return;grid[br][bc]=grid[br][bc]===T?BT:B}else if(grid[nr][nc]!==F&&grid[nr][nc]!==T)return;grid[pr][pc]=grid[pr][pc]===PT?T:F;grid[nr][nc]=grid[nr][cn]===T?PT:P;moves++;render();checkWin()}
+function move(dr,dc){const[pr,pc]=findPlayer();const nr=pr+dr,nc=pc+dc;if(grid[nr][nc]===W)return;if(grid[nr][nc]===B||grid[nr][nc]===BT){const br=nr+dr,bc=nc+dc;if(grid[br][bc]===W||grid[br][bc]===B||grid[br][bc]===BT)return;grid[br][bc]=grid[br][bc]===T?BT:B;grid[nr][nc]=grid[nr][nc]===BT?T:F}else if(grid[nr][nc]!==F&&grid[nr][nc]!==T)return;grid[pr][pc]=grid[pr][pc]===PT?T:F;grid[nr][nc]=grid[nr][nc]===T?PT:P;moves++;render();checkWin()}
 function checkWin(){for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++)if(grid[r][c]===B)return;if(grid.flat().every(v=>v!==T))setTimeout(()=>alert('🎉 通关! 步数: '+moves),100)}
 document.addEventListener('keydown',e=>{if(e.key==='ArrowUp')move(-1,0);if(e.key==='ArrowDown')move(1,0);if(e.key==='ArrowLeft')move(0,-1);if(e.key==='ArrowRight')move(0,1)});
+window.addEventListener('resize',()=>render());
 loadLevel(0);
 </script>
 </body>

@@ -7,13 +7,13 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0;z-index:10}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
 .hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
 .btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#e67e22,#d35400)}
 .btn:hover{opacity:0.85}
 .hud-hint{color:rgba(255,255,255,0.4);font-size:0.75rem}
 .game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-canvas{display:block;width:100%;height:100%}
+canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px}
 </style>
 </head>
 <body>
@@ -21,27 +21,20 @@ canvas{display:block;width:100%;height:100%}
   <div class="hud-info"><span id="info">得分: 0</span><span class="hud-hint">鼠标/触摸移动挡板 | 点击发球</span></div>
   <button class="btn" onclick="init()">重新开始</button>
 </div>
-<div class="game-area"><canvas id="c"></canvas></div>
+<div class="game-area"><canvas id="c" width="480" height="400"></canvas></div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
-const LW=480,LH=400,ROWS=5,COLS=8,BW=55,BH=18,BPAD=4,BTOP=40;
-let pad,ball,bricks,score,started,anim,scaleX=1,scaleY=1;
-function resize(){
-    const r=c.parentElement.getBoundingClientRect();
-    c.width=r.clientWidth*c.devicePixelRatio|0;
-    c.height=r.clientHeight*c.devicePixelRatio|0;
-    scaleX=c.width/LW;scaleY=c.height/LH;
-}
-function canvasX(e){return(e.clientX-c.getBoundingClientRect().left)*LW/c.clientWidth}
-function canvasTouchX(e){return(e.touches[0].clientX-c.getBoundingClientRect().left)*LW/c.clientWidth}
-function init(){pad={w:80,h:12,x:200,y:375};ball={x:240,y:360,r:6,dx:3.5,dy:-3.5};bricks=[];score=0;started=false;for(let r=0;r<ROWS;r++)for(let cc=0;cc<COLS;cc++)bricks.push({x:cc*(BW+BPAD)+20,y:r*(BH+BPAD)+BTOP,w:BW,h:BH,alive:true,color:`hsl(${r*40+cc*10},70%,55%)`});cancelAnimationFrame(anim);resize();draw()}
-function draw(){ctx.clearRect(0,0,c.width,c.height);ctx.save();ctx.scale(scaleX,scaleY);ctx.fillStyle='#0f0f23';ctx.fillRect(0,0,LW,LH);bricks.forEach(b=>{if(!b.alive)return;ctx.fillStyle=b.color;ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,4);ctx.fill()});ctx.fillStyle='#667eea';ctx.beginPath();ctx.roundRect(pad.x,pad.y,pad.w,pad.h,6);ctx.fill();ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();ctx.restore();document.getElementById('info').textContent='得分: '+score}
-function update(){if(!started)return;ball.x+=ball.dx;ball.y+=ball.dy;if(ball.x<=ball.r||ball.x>=LW-ball.r)ball.dx=-ball.dx;if(ball.y<=ball.r)ball.dy=-ball.dy;if(ball.y>=LH+20){started=false;ball.x=pad.x+pad.w/2;ball.y=pad.y-10;return}if(ball.y+ball.r>=pad.y&&ball.x>=pad.x&&ball.x<=pad.x+pad.w&&ball.dy>0){ball.dy=-Math.abs(ball.dy);ball.dx=((ball.x-(pad.x+pad.w/2))/(pad.w/2))*4}bricks.forEach(b=>{if(!b.alive)return;if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h){b.alive=false;ball.dy=-ball.dy;score+=10}});draw();anim=requestAnimationFrame(update)}
-c.addEventListener('mousemove',e=>{const[x]=canvasX(e);pad.x=Math.max(0,Math.min(LW-pad.w,x-pad.w/2));if(!started){ball.x=pad.x+pad.w/2;ball.y=pad.y-10}draw()});
+function canvasXY(e){const r=c.getBoundingClientRect();return[(e.clientX-r.left)*c.width/r.width,(e.clientY-r.top)*c.height/r.height]}
+function canvasTouchXY(e){const r=c.getBoundingClientRect();const t=e.touches[0]||e.changedTouches[0];return[(t.clientX-r.left)*c.width/r.width,(t.clientY-r.top)*c.height/r.height]}
+const ROWS=5,COLS=8,BW=55,BH=18,BPAD=4,BTOP=40;
+let pad,ball,bricks,score,started,anim;
+function init(){pad={w:80,h:12,x:200,y:375};ball={x:240,y:360,r:6,dx:3.5,dy:-3.5};bricks=[];score=0;started=false;for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)bricks.push({x:c*(BW+BPAD)+20,y:r*(BH+BPAD)+BTOP,w:BW,h:BH,alive:true,color:`hsl(${r*40+c*10},70%,55%)`});cancelAnimationFrame(anim);draw()}
+function draw(){ctx.fillStyle='#0f0f23';ctx.fillRect(0,0,c.width,c.height);bricks.forEach(b=>{if(!b.alive)return;ctx.fillStyle=b.color;ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,4);ctx.fill()});ctx.fillStyle='#667eea';ctx.beginPath();ctx.roundRect(pad.x,pad.y,pad.w,pad.h,6);ctx.fill();ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();document.getElementById('info').textContent='得分: '+score}
+function update(){if(!started)return;ball.x+=ball.dx;ball.y+=ball.dy;if(ball.x<=ball.r||ball.x>=c.width-ball.r)ball.dx=-ball.dx;if(ball.y<=ball.r)ball.dy=-ball.dy;if(ball.y>=c.height+20){started=false;ball.x=pad.x+pad.w/2;ball.y=pad.y-10;return}if(ball.y+ball.r>=pad.y&&ball.x>=pad.x&&ball.x<=pad.x+pad.w&&ball.dy>0){ball.dy=-Math.abs(ball.dy);ball.dx=((ball.x-(pad.x+pad.w/2))/(pad.w/2))*4}bricks.forEach(b=>{if(!b.alive)return;if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h){b.alive=false;ball.dy=-ball.dy;score+=10}});draw();anim=requestAnimationFrame(update)}
+c.addEventListener('mousemove',e=>{const[x]=canvasXY(e);pad.x=Math.max(0,Math.min(c.width-pad.w,x-pad.w/2));if(!started){ball.x=pad.x+pad.w/2;ball.y=pad.y-10}draw()});
 c.addEventListener('click',()=>{if(!started){started=true;ball.dx=(Math.random()-0.5)*6;ball.dy=-4;update()}});
-c.addEventListener('touchmove',e=>{e.preventDefault();const[x]=canvasTouchX(e);pad.x=Math.max(0,Math.min(LW-pad.w,x-pad.w/2));if(!started){ball.x=pad.x+pad.w/2;ball.y=pad.y-10}draw()},{passive:false});
+c.addEventListener('touchmove',e=>{e.preventDefault();const[x]=canvasTouchXY(e);pad.x=Math.max(0,Math.min(c.width-pad.w,x-pad.w/2));if(!started){ball.x=pad.x+pad.w/2;ball.y=pad.y-10}draw()},{passive:false});
 c.addEventListener('touchstart',()=>{if(!started){started=true;ball.dx=(Math.random()-0.5)*6;ball.dy=-4;update()}});
-window.addEventListener('resize',resize);
 init();
 </script>
 </body>
