@@ -2,26 +2,27 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>吃豆人</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
-.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
-.btn{padding:4px 14px;border:none;border-radius:14px;color:#1a1a2e;cursor:pointer;font-size:0.78rem;font-weight:bold;background:linear-gradient(135deg,#f1c40f,#f39c12)}
-.btn:hover{opacity:0.85}
-.hud-hint{color:rgba(255,255,255,0.4);font-size:0.75rem}
-.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px}
+body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;touch-action:manipulation}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(255,255,255,0.04);flex-shrink:0;gap:8px}
+.hud-item{font-size:0.85rem;color:rgba(255,255,255,0.8)}.hud-item span{font-weight:700;color:#facc15}
+.btn{padding:5px 14px;border:none;border-radius:16px;color:#0a0a1a;cursor:pointer;font-size:0.75rem;font-weight:700;background:linear-gradient(135deg,#facc15,#f59e0b);transition:.2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(250,204,21,0.3)}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px}
+canvas{border-radius:8px;touch-action:none}
 </style>
 </head>
 <body>
 <div class="hud">
-  <div class="hud-info"><span id="sc">得分: 0</span><span id="dt">豆子: 0</span><span class="hud-hint">方向键/WASD</span></div>
-  <button class="btn" onclick="init()">重新开始</button>
+  <div class="hud-item">得分: <span id="sc">0</span></div>
+  <div class="hud-item">豆子: <span id="dt">0</span></div>
+  <span style="font-size:0.68rem;color:rgba(255,255,255,0.3);margin-left:auto">方向键/WASD</span>
+  <button class="btn" id="restart">重新开始</button>
 </div>
-<div class="game-area"><canvas id="c" width="380" height="380"></canvas></div>
+<div class="game-area"><canvas id="c"></canvas></div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const MAP=[
@@ -47,13 +48,15 @@ const MAP=[
 [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
 [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 ];
-const SZ=18;const COLS=19,ROWS=21;
-let grid,pac,ghosts,score,dots,dir,nextDir,timer;
-function init(){grid=MAP.map(r=>r.map(v=>v));pac={x:9,y:15,dx:0,dy:0,mouth:0};dir={x:0,y:0};nextDir={x:0,y:0};ghosts=[{x:9,y:9,color:'#e74c3c'},{x:8,y:9,color:'#ff69b4'},{x:10,y:9,color:'#00bcd4'},{x:9,y:8,color:'#f39c12'}];score=0;dots=0;grid.forEach(r=>r.forEach(v=>{if(v===0)dots++}));clearInterval(timer);timer=setInterval(tick,150);draw()}
+const COLS=19,ROWS=21;let SZ,grid,pac,ghosts,score,dots,dir,nextDir,timer,powerMode=0;
+function resize(){const area=document.querySelector('.game-area');const s=Math.min(area.clientWidth-16,area.clientHeight-16,540);c.width=c.height=s;SZ=Math.floor(s/COLS)}
+function init(){resize();grid=MAP.map(r=>r.map(v=>v));pac={x:9,y:15,dx:0,dy:0,mouth:0};dir={x:0,y:0};nextDir={x:0,y:0};ghosts=[{x:9,y:9,color:'#ef4444',dir:{x:0,y:-1}},{x:8,y:9,color:'#ec4899',dir:{x:-1,y:0}},{x:10,y:9,color:'#06b6d4',dir:{x:1,y:0}},{x:9,y:8,color:'#f97316',dir:{x:0,y:1}}];score=0;dots=0;powerMode=0;grid.forEach(r=>r.forEach(v=>{if(v===0)dots++}));clearInterval(timer);timer=setInterval(tick,140);draw()}
 function canMove(x,y){const c2=Math.floor(x),r2=Math.floor(y);if(c2<0||c2>=COLS||r2<0||r2>=ROWS)return false;return grid[r2][c2]!==1}
-function tick(){if(nextDir.x||nextDir.y){const nx=pac.x+nextDir.x,ny=pac.y+nextDir.y;if(canMove(nx,ny)){dir={...nextDir}}}if(dir.x||dir.y){const nx=pac.x+dir.x,ny=pac.y+dir.y;if(canMove(nx,ny)){pac.x=nx;pac.y=ny}}pac.mouth=(pac.mouth+1)%4;if(grid[Math.round(pac.y)]&&grid[Math.round(pac.y)][Math.round(pac.x)]===0){grid[Math.round(pac.y)][Math.round(pac.x)]=2;score+=10;dots--}ghosts.forEach(g=>{const dirs=[{x:0,y:-1},{x:0,y:1},{x:-1,y:0},{x:1,y:0}].filter(d=>canMove(g.x+d.x,g.y+d.y));if(dirs.length){const d=dirs[Math.floor(Math.random()*dirs.length)];g.x+=d.x;g.y+=d.y}if(Math.round(g.x)===Math.round(pac.x)&&Math.round(g.y)===Math.round(pac.y)){clearInterval(timer);setTimeout(()=>alert('👻 被抓到了! 得分: '+score),50)}});if(dots<=0){clearInterval(timer);setTimeout(()=>alert('🎉 恭喜通关!'),50)}draw()}
-function draw(){ctx.fillStyle='#0f0f23';ctx.fillRect(0,0,c.width,c.height);for(let r=0;r<ROWS;r++)for(let cl=0;cl<COLS;cl++){const v=grid[r][cl];if(v===1){ctx.fillStyle='#1a3a8a';ctx.fillRect(cl*SZ,r*SZ,SZ,SZ)}else if(v===0){ctx.fillStyle='#f1c40f';ctx.beginPath();ctx.arc(cl*SZ+SZ/2,r*SZ+SZ/2,2,0,Math.PI*2);ctx.fill()}}ghosts.forEach(g=>{ctx.fillStyle=g.color;ctx.beginPath();ctx.arc(g.x*SZ+SZ/2,g.y*SZ+SZ/2,SZ/2-1,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(g.x*SZ+SZ/2-3,g.y*SZ+SZ/2-2,2.5,0,Math.PI*2);ctx.arc(g.x*SZ+SZ/2+3,g.y*SZ+SZ/2-2,2.5,0,Math.PI*2);ctx.fill()});ctx.fillStyle='#f1c40f';const mo=pac.mouth<2?0.2+pac.mouth*0.15:0.5-(pac.mouth-2)*0.15;const angle=dir.x===1?0:dir.x===-1?Math.PI:dir.y===1?Math.PI/2:-Math.PI/2;ctx.beginPath();ctx.arc(pac.x*SZ+SZ/2,pac.y*SZ+SZ/2,SZ/2-1,angle+mo,angle+Math.PI*2-mo);ctx.lineTo(pac.x*SZ+SZ/2,pac.y*SZ+SZ/2);ctx.fill();document.getElementById('sc').textContent='得分: '+score;document.getElementById('dt').textContent='豆子: '+dots}
+function tick(){tryDir();if(dir.x||dir.y){const nx=pac.x+dir.x*0.8,ny=pac.y+dir.y*0.8;if(canMove(nx,ny)){pac.x=Math.round(nx*10)/10;pac.y=Math.round(ny*10)/10}}pac.mouth=(pac.mouth+1)%4;const pc=Math.round(pac.x),pr=Math.round(pac.y);if(grid[pr]&&grid[pr][pc]===0){grid[pr][pc]=2;score+=10;dots--}if(grid[pr]&&grid[pr][pc]===3){grid[pr][pc]=2;score+=50;powerMode=200;ghosts.forEach(g=>{g.dir.x=-g.dir.x;g.dir.y=-g.dir.y})}if(powerMode>0)powerMode--;ghosts.forEach(g=>{const dirs=[{x:0,y:-1},{x:0,y:1},{x:-1,y:0},{x:1,y:0}].filter(d=>canMove(g.x+d.x,g.y+d.y)&&!(d.x===-g.dir.x&&d.y===-g.dir.y));if(dirs.length){let d=dirs.find(d2=>d2.x===g.dir.x&&d2.y===g.dir.y);if(!d||Math.random()<0.02*dots||powerMode>0&&Math.random()<0.3)d=dirs[Math.floor(Math.random()*dirs.length)];g.x+=d.x;g.y+=d.y;g.dir=d}});if(ghosts.some(g=>Math.abs(g.x-pac.x)<0.7&&Math.abs(g.y-pac.y)<0.7)){if(powerMode>0){powerMode=0;ghosts.forEach(g=>ghosts.splice(ghosts.indexOf(g),1));score+=100}else{clearInterval(timer);setTimeout(()=>alert('👻 被抓到了! 得分: '+score),100);return}}if(dots<=0||score>=1900){clearInterval(timer);setTimeout(()=>alert('🎉 恭喜通关! 得分: '+score),100)}draw()}
+function tryDir(){if(!nextDir.x&&!nextDir.y)return;if(canMove(pac.x+nextDir.x,pac.y+nextDir.y)||(dir.x===0&&dir.y===0)){dir={...nextDir}}}
+function draw(){const s=c.width;ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,s,s);for(let r=0;r<ROWS;r++)for(let cl=0;cl<COLS;cl++){const v=grid[r][cl];if(v===1){ctx.fillStyle='#1e3a8a';ctx.fillRect(cl*SZ,r*SZ,SZ,SZ);ctx.strokeStyle='#1e40af';ctx.lineWidth=0.5;ctx.strokeRect(cl*SZ,r*SZ,SZ,SZ)}else if(v===0){ctx.fillStyle='#facc15';ctx.beginPath();ctx.arc(cl*SZ+SZ/2,r*SZ+SZ/2,SZ/6,0,Math.PI*2);ctx.fill()}else if(v===3){ctx.fillStyle='#fbbf24';ctx.beginPath();ctx.arc(cl*SZ+SZ/2,r*SZ+SZ/2,SZ/3.5,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(cl*SZ+SZ/2,r*SZ+SZ/2,SZ/8,0,Math.PI*2);ctx.fill()}}ghosts.forEach(g=>{if(powerMode>0){ctx.fillStyle=powerMode<60&&powerMode%10<5?'#fff':'#1e40af'}else ctx.fillStyle=g.color;ctx.beginPath();ctx.arc((g.x+0.5)*SZ,(g.y+0.5)*SZ,SZ*0.42,Math.PI,0);ctx.fillRect((g.x+0.5)*SZ-SZ*0.42,(g.y+0.5)*SZ-SZ*0.2,SZ*0.85,SZ*0.3);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc((g.x+0.5)*SZ-SZ*0.2,(g.y+0.5)*SZ-SZ*0.15,SZ*0.14,0,Math.PI*2);ctx.arc((g.x+0.5)*SZ+SZ*0.2,(g.y+0.5)*SZ-SZ*0.15,SZ*0.14,0,Math.PI*2);ctx.fill()});ctx.fillStyle='#facc15';const mo=pac.mouth<2?0.2+pac.mouth*0.15:0.5-(pac.mouth-2)*0.15;const angle=dir.x===1?0:dir.x===-1?Math.PI:dir.y===1?Math.PI/2:dir.y===-1?-Math.PI/2:0;ctx.beginPath();ctx.arc((pac.x+0.5)*SZ,(pac.y+0.5)*SZ,SZ*0.42,angle+mo,angle+Math.PI*2-mo);ctx.lineTo((pac.x+0.5)*SZ,(pac.y+0.5)*SZ);ctx.fill();document.getElementById('sc').textContent=score;document.getElementById('dt').textContent=dots;document.getElementById('sc').style.color=dots<=20?'#fbbf24':'#facc15'}
 document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k==='arrowup'||k==='w')nextDir={x:0,y:-1};if(k==='arrowdown'||k==='s')nextDir={x:0,y:1};if(k==='arrowleft'||k==='a')nextDir={x:-1,y:0};if(k==='arrowright'||k==='d')nextDir={x:1,y:0}});
+document.getElementById('restart').addEventListener('click',init);window.addEventListener('resize',()=>{resize();draw()});
 init();
 </script>
 </body>

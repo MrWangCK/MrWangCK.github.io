@@ -2,35 +2,61 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>贪吃蛇</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
-.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
-.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#667eea,#764ba2)}
-.btn:hover{opacity:0.85}
-.hud-hint{color:rgba(255,255,255,0.4);font-size:0.75rem}
-.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px}
+body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;touch-action:manipulation}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(255,255,255,0.04);flex-shrink:0;gap:8px}
+.hud-score{font-size:1.1rem;font-weight:700;color:#4ade80}
+.hud-best{font-size:0.78rem;color:rgba(255,255,255,0.4)}
+.hud-hint{font-size:0.7rem;color:rgba(255,255,255,0.3);margin-left:auto}
+.btn{padding:5px 14px;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;background:linear-gradient(135deg,#667eea,#764ba2);transition:.2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(102,126,234,0.3)}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px}
+canvas{border-radius:8px;box-shadow:0 0 30px rgba(102,126,234,0.08)}
+/* 移动端方向键 */
+.mobile-ctrl{display:none;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;gap:4px;width:min(150px,35vw);padding:8px}
+.mobile-ctrl button{aspect-ratio:1;border:none;border-radius:8px;background:rgba(255,255,255,0.08);color:#fff;font-size:1.3rem;cursor:pointer;transition:.15s}
+.mobile-ctrl button:active{background:rgba(102,126,234,0.4)}
+@media(hover:none){
+.mobile-ctrl{display:grid}
+.game-area{flex-direction:column}
+}
 </style>
 </head>
 <body>
 <div class="hud">
-  <div class="hud-info"><span id="score">得分: 0</span><span class="hud-hint">方向键/WASD | 空格暂停</span></div>
-  <button class="btn" onclick="init()">重新开始</button>
+  <span class="hud-score" id="sc">得分: 0</span>
+  <span class="hud-best" id="best">最佳: 0</span>
+  <span class="hud-hint">方向键/WASD</span>
+  <button class="btn" id="restart">重新开始</button>
 </div>
-<div class="game-area"><canvas id="c" width="400" height="400"></canvas></div>
+<div class="game-area" id="gameArea">
+  <canvas id="c"></canvas>
+  <div class="mobile-ctrl">
+    <button></button><button id="up">▲</button><button></button>
+    <button id="left">◀</button><button></button><button id="right">▶</button>
+    <button></button><button id="down">▼</button><button></button>
+  </div>
+</div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
-const G=20,W=c.width/G,H=c.height/G;
-let snake,dir,food,score,paused,timer;
-function init(){snake=[{x:10,y:10}];dir={x:1,y:0};score=0;paused=false;placeFood();clearInterval(timer);timer=setInterval(step,120);draw()}
-function placeFood(){do{food={x:Math.floor(Math.random()*W),y:Math.floor(Math.random()*H)}}while(snake.some(s=>s.x===food.x&&s.y===food.y))}
-function step(){if(paused)return;const h={x:snake[0].x+dir.x,y:snake[0].y+dir.y};if(h.x<0||h.x>=W||h.y<0||h.y>=H||snake.some(s=>s.x===h.x&&s.y===h.y)){clearInterval(timer);return}snake.unshift(h);if(h.x===food.x&&h.y===food.y){score++;placeFood()}else snake.pop();draw()}
-function draw(){ctx.fillStyle='#0f0f23';ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle='#e74c3c';ctx.fillRect(food.x*G,food.y*G,G-1,G-1);snake.forEach((s,i)=>{ctx.fillStyle=i===0?'#667eea':'#4a69bd';ctx.fillRect(s.x*G,s.y*G,G-1,G-1)});document.getElementById('score').textContent='得分: '+score}
-document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k===' ')e.preventDefault(),paused=!paused;if((k==='arrowup'||k==='w')&&dir.y!==1)dir={x:0,y:-1};if((k==='arrowdown'||k==='s')&&dir.y!==-1)dir={x:0,y:1};if((k==='arrowleft'||k==='a')&&dir.x!==1)dir={x:-1,y:0};if((k==='arrowright'||k==='d')&&dir.x!==-1)dir={x:1,y:0}});
+let G=20,W,H,snake,dir,food,score,best=0,paused,over,timer,particles=[],specialFood=null,specialTimer=0;
+function resize(){const area=document.getElementById('gameArea');const w=area.clientWidth-16,h=area.clientHeight-(window.matchMedia('(hover:none)').matches?180:16);const s=Math.min(Math.floor(Math.min(w,h)/G)*G,28*G);c.width=c.height=s;W=s/G;H=s/G}
+function init(){resize();snake=[{x:Math.floor(W/2),y:Math.floor(H/2)}];dir={x:1,y:0};score=0;paused=false;over=false;particles=[];specialFood=null;specialTimer=0;placeFood();clearInterval(timer);timer=setInterval(step,110);draw()}
+function placeFood(){do{food={x:Math.floor(Math.random()*W),y:Math.floor(Math.random()*H),special:false}}while(snake.some(s=>s.x===food.x&&s.y===food.y))}
+function spawnSpecial(){if(specialFood||over)return;specialFood={x:Math.floor(Math.random()*W),y:Math.floor(Math.random()*H),timer:80};while(snake.some(s=>s.x===specialFood.x&&s.y===specialFood.y)){specialFood.x=Math.floor(Math.random()*W);specialFood.y=Math.floor(Math.random()*H)}}
+function step(){if(paused||over)return;const h={x:snake[0].x+dir.x,y:snake[0].y+dir.y};if(h.x<0||h.x>=W||h.y<0||h.y>=H||snake.some(s=>s.x===h.x&&s.y===h.y)){gameOver();return}snake.unshift(h);let ate=false;if(h.x===food.x&&h.y===food.y){score+=food.special?20:10;ate=true;if(food.special){for(let i=0;i<10;i++)particles.push({x:h.x*G+G/2,y:h.y*G+G/2,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*4,life:20,color:'#fbbf24'})}placeFood();if(score%50===0)spawnSpecial()}else if(specialFood&&h.x===specialFood.x&&h.y===specialFood.y){score+=30;ate=true;specialFood=null;for(let i=0;i<15;i++)particles.push({x:h.x*G+G/2,y:h.y*G+G/2,vx:(Math.random()-0.5)*5,vy:(Math.random()-0.5)*5,life:25,color:'#f472b6'})}else snake.pop();if(!ate&&specialFood){specialFood.timer--;if(specialFood.timer<=0)specialFood=null}particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});window.addEventListener('resize',()=>{resize();draw()});draw()}
+function gameOver(){over=true;clearInterval(timer);best=Math.max(best,score);document.getElementById('best').textContent='最佳: '+best}
+function draw(){const s=c.width;ctx.fillStyle='#0d0d2b';ctx.fillRect(0,0,s,s);for(let i=0;i<W;i++)for(let j=0;j<H;j++){ctx.fillStyle=(i+j)%2?'rgba(255,255,255,0.015)':'rgba(255,255,255,0.02)';ctx.fillRect(i*G,j*G,G,G)}snake.forEach((seg,i)=>{const t=i/snake.length;const r=G/2-1;ctx.fillStyle=i===0?`hsl(${260+t*30},80%,${60+t*15}%)`:`hsl(${260+t*30},70%,${45+t*20}%)`;const x=seg.x*G+r,y=seg.y*G+r;ctx.beginPath();ctx.arc(x+r,y+r,r,0,Math.PI*2);ctx.fill();if(i===0){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x+r-2,y+r-3,2,0,Math.PI*2);ctx.arc(x+r+2,y+r-3,2,0,Math.PI*2);ctx.fill()}});ctx.fillStyle='#4ade80';ctx.beginPath();ctx.arc(food.x*G+G/2,food.y*G+G/2,G/2-2,0,Math.PI*2);ctx.fill();if(specialFood){const a=specialFood.timer<15?0.4+(specialFood.timer/15)*0.6:1;ctx.globalAlpha=a;ctx.fillStyle='#f472b6';ctx.beginPath();ctx.arc(specialFood.x*G+G/2,specialFood.y*G+G/2,G/2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText('⭐',specialFood.x*G+G/2,specialFood.y*G+G/2+3);ctx.globalAlpha=1}particles.forEach(p=>{ctx.globalAlpha=p.life/25;ctx.fillStyle=p.color;ctx.fillRect(p.x-2,p.y-2,4,4);ctx.globalAlpha=1});document.getElementById('sc').textContent='得分: '+score;document.getElementById('best').textContent='最佳: '+best;if(over){ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,s,s);ctx.fillStyle='#fff';ctx.font='bold 22px system-ui';ctx.textAlign='center';ctx.fillText('游戏结束',s/2,s/2-10);ctx.font='14px system-ui';ctx.fillText('得分: '+score+' | 最佳: '+best,s/2,s/2+15)}}
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(k===' '){e.preventDefault();paused=!paused;!paused&&draw();return}if(over||paused)return;if((k==='arrowup'||k==='w')&&dir.y!==1)dir={x:0,y:-1};if((k==='arrowdown'||k==='s')&&dir.y!==-1)dir={x:0,y:1};if((k==='arrowleft'||k==='a')&&dir.x!==1)dir={x:-1,y:0};if((k==='arrowright'||k==='d')&&dir.x!==-1)dir={x:1,y:0}});
+document.getElementById('up').addEventListener('click',()=>{if(dir.y!==1)dir={x:0,y:-1}});
+document.getElementById('down').addEventListener('click',()=>{if(dir.y!==-1)dir={x:0,y:1}});
+document.getElementById('left').addEventListener('click',()=>{if(dir.x!==1)dir={x:-1,y:0}});
+document.getElementById('right').addEventListener('click',()=>{if(dir.x!==-1)dir={x:1,y:0}});
+document.getElementById('restart').addEventListener('click',init);
+window.addEventListener('resize',()=>{resize();draw()});
 init();
 </script>
 </body>

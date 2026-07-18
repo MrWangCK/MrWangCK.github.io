@@ -2,33 +2,34 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>推箱子</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
-.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
-.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#e67e22,#f39c12)}
-.btn:hover{opacity:0.85}
-.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.board{display:inline-grid;gap:2px;background:rgba(255,255,255,0.03);padding:8px;border-radius:8px}
-.cell{display:flex;align-items:center;justify-content:center;border-radius:4px;user-select:none}
-.cell.wall{background:rgba(100,100,120,0.5)}
-.cell.floor{background:rgba(255,255,255,0.03)}
-.cell.target{background:rgba(46,204,113,0.15)}
-.cell.box{background:rgba(230,126,34,0.2)}
-.cell.boxOnTarget{background:rgba(46,204,113,0.3)}
-.cell.player{background:rgba(102,126,234,0.2)}
+body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;touch-action:manipulation}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(255,255,255,0.04);flex-shrink:0;gap:6px;flex-wrap:wrap}
+.hud-item{font-size:0.82rem;color:rgba(255,255,255,0.8)}.hud-item span{font-weight:700;color:#f97316}
+.btn{padding:4px 10px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.7rem;font-weight:600;transition:.2s}
+.btn-reset{background:linear-gradient(135deg,#f97316,#ea580c)}.btn-nav{background:rgba(255,255,255,0.08)}
+.btn:hover{transform:translateY(-1px)}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px}
+.board{display:inline-grid;gap:3px;background:rgba(255,255,255,0.02);padding:8px;border-radius:10px;user-select:none}
+.cell{display:flex;align-items:center;justify-content:center;border-radius:5px;transition:.1s;font-size:clamp(0.8rem,3vmin,1.4rem)}
+.cell.wall{background:rgba(80,80,100,0.4);border:1px solid rgba(100,100,120,0.3)}
+.cell.floor{background:rgba(255,255,255,0.02)}
+.cell.target{background:rgba(251,191,36,0.08);border:1px dashed rgba(251,191,36,0.2)}
+.cell.box{background:rgba(249,115,22,0.15);border:1px solid rgba(249,115,22,0.25)}
+.cell.boxOnTarget{background:rgba(34,197,94,0.15);border:1px solid rgba(34,197,94,0.3)}
+.cell.player{background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.2)}
 </style>
 </head>
 <body>
 <div class="hud">
-  <div class="hud-info"><span id="info">关卡: 1 | 步数: 0</span></div>
-  <div style="display:flex;gap:6px">
-    <button class="btn" onclick="loadLevel(lv)">重置</button>
-    <button class="btn" onclick="loadLevel(lv>0?lv-1:0)">上一关</button>
-    <button class="btn" onclick="loadLevel(lv<levels.length-1?lv+1:lv)">下一关</button>
+  <div class="hud-item"><span id="lvi">关卡: 1</span> | <span id="lvn">入门</span> | 步数: <span id="stp">0</span></div>
+  <div style="display:flex;gap:4px">
+    <button class="btn btn-nav" id="prev">◀ 上一关</button>
+    <button class="btn btn-reset" id="reset">重置</button>
+    <button class="btn btn-nav" id="next">下一关 ▶</button>
   </div>
 </div>
 <div class="game-area"><div class="board" id="board"></div></div>
@@ -37,33 +38,18 @@ const W=1,F=0,T=2,B=3,P=4,BT=5,PT=6;
 const levels=[
 {map:[[W,W,W,W,W,W,W],[W,F,F,F,W,F,W],[W,F,B,F,W,F,W],[W,F,F,F,T,F,W],[W,W,W,F,F,F,W],[W,F,F,F,B,F,W],[W,F,T,F,F,P,W],[W,W,W,W,W,W,W]],name:'入门'},
 {map:[[W,W,W,W,W,W],[W,F,F,T,F,W],[W,F,B,F,F,W],[W,F,F,B,F,W],[W,T,F,F,P,W],[W,W,W,W,W,W]],name:'简单'},
-{map:[[W,W,W,W,W,W,W],[W,F,F,T,F,F,W],[W,F,W,F,W,B,W],[W,F,F,B,F,F,W],[W,T,W,F,W,F,W],[W,F,F,P,F,F,W],[W,W,W,W,W,W,W]],name:'中等'}
+{map:[[W,W,W,W,W,W,W],[W,F,F,T,F,F,W],[W,F,W,F,W,B,W],[W,F,F,B,F,F,W],[W,T,W,F,W,F,W],[W,F,F,P,F,F,W],[W,W,W,W,W,W,W]],name:'中等'},
+{map:[[W,W,W,W,W,W,W,W],[W,F,F,F,F,F,F,W],[W,F,W,W,F,W,W,W],[W,F,F,B,F,F,F,W],[W,F,W,F,W,B,F,W],[W,T,W,F,W,F,T,W],[W,F,F,F,P,F,F,W],[W,W,W,W,W,W,W,W]],name:'进阶'},
+{map:[[W,W,W,W,W],[W,F,P,W,W],[W,F,B,W,W],[W,F,F,B,W],[W,B,F,T,W],[W,T,F,F,W],[W,W,W,W,W]],name:'挑战'}
 ];
-let lv=0,grid,moves;
-function loadLevel(n){lv=n;const l=levels[n];grid=l.map.map(r=>[...r]);moves=0;render()}
+let lv=0,grid,moves,originalGrid;
+function loadLevel(n){lv=n;const l=levels[n];grid=l.map.map(r=>[...r]);originalGrid=l.map.map(r=>[...r]);moves=0;render()}
 function findPlayer(){for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++)if(grid[r][c]===P||grid[r][c]===PT)return[r,c]}
-function render(){
-  const b=document.getElementById('board');
-  const maxCellW=Math.floor((window.innerWidth-40)/grid[0].length);
-  const maxCellH=Math.floor((window.innerHeight-60)/grid.length);
-  const sz=Math.min(maxCellW,maxCellH,60);
-  b.style.gridTemplateColumns=`repeat(${grid[0].length},${sz}px)`;
-  b.innerHTML='';
-  for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++){
-    const d=document.createElement('div');const v=grid[r][c];
-    d.className='cell';d.style.width=sz+'px';d.style.height=sz+'px';d.style.fontSize=(sz*0.55)+'px';
-    if(v===W)d.className+=' wall',d.textContent='';
-    else if(v===T)d.className+=' target',d.textContent='🎯';
-    else if(v===B)d.className+=' box',d.textContent='📦';
-    else if(v===BT)d.className+=' boxOnTarget',d.textContent='✅';
-    else if(v===P)d.className+=' player',d.textContent='😀';
-    else if(v===PT)d.className+=' player',d.textContent='😀';
-    b.appendChild(d)}
-  document.getElementById('info').textContent=`关卡: ${lv+1} ${levels[lv].name} | 步数: ${moves}`}
+function render(){const b=document.getElementById('board');const maxW=Math.floor((window.innerWidth-40)/grid[0].length);const maxH=Math.floor((window.innerHeight-100)/grid.length);const sz=Math.min(maxW,maxH,64);b.style.gridTemplateColumns=`repeat(${grid[0].length},${sz}px)`;b.innerHTML='';const symbols={[W]:{cls:' wall',e:''},[F]:{cls:' floor',e:''},[T]:{cls:' target',e:'🎯'},[B]:{cls:' box',e:'📦'},[BT]:{cls:' boxOnTarget',e:'✅'},[P]:{cls:' player',e:'🧑'},[PT]:{cls:' player',e:'🧑'}};for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++){const d=document.createElement('div');const v=grid[r][c];d.className='cell'+(symbols[v]?.cls||'');d.style.width=sz+'px';d.style.height=sz+'px';d.style.fontSize=Math.round(sz*0.55)+'px';d.textContent=symbols[v]?.e;b.appendChild(d)}document.getElementById('lvi').textContent='关卡: '+(lv+1);document.getElementById('lvn').textContent=levels[lv].name;document.getElementById('stp').textContent=moves}
 function move(dr,dc){const[pr,pc]=findPlayer();const nr=pr+dr,nc=pc+dc;if(grid[nr][nc]===W)return;if(grid[nr][nc]===B||grid[nr][nc]===BT){const br=nr+dr,bc=nc+dc;if(grid[br][bc]===W||grid[br][bc]===B||grid[br][bc]===BT)return;grid[br][bc]=grid[br][bc]===T?BT:B;grid[nr][nc]=grid[nr][nc]===BT?T:F}else if(grid[nr][nc]!==F&&grid[nr][nc]!==T)return;grid[pr][pc]=grid[pr][pc]===PT?T:F;grid[nr][nc]=grid[nr][nc]===T?PT:P;moves++;render();checkWin()}
-function checkWin(){for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++)if(grid[r][c]===B)return;if(grid.flat().every(v=>v!==T))setTimeout(()=>alert('🎉 通关! 步数: '+moves),100)}
-document.addEventListener('keydown',e=>{if(e.key==='ArrowUp')move(-1,0);if(e.key==='ArrowDown')move(1,0);if(e.key==='ArrowLeft')move(0,-1);if(e.key==='ArrowRight')move(0,1)});
-window.addEventListener('resize',()=>render());
+function checkWin(){for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++)if(grid[r][c]===B)return;if(grid.flat().every(v=>v!==T))setTimeout(()=>alert('🎉 通关! 步数: '+moves),150)}
+document.addEventListener('keydown',e=>{const k=e.key;if(k==='ArrowUp'||k==='ArrowDown'||k==='ArrowLeft'||k==='ArrowRight')e.preventDefault();if(k==='ArrowUp')move(-1,0);if(k==='ArrowDown')move(1,0);if(k==='ArrowLeft')move(0,-1);if(k==='ArrowRight')move(0,1)});
+document.getElementById('prev').addEventListener('click',()=>loadLevel(lv>0?lv-1:0));document.getElementById('next').addEventListener('click',()=>loadLevel(lv<levels.length-1?lv+1:lv));document.getElementById('reset').addEventListener('click',()=>loadLevel(lv));window.addEventListener('resize',render);
 loadLevel(0);
 </script>
 </body>

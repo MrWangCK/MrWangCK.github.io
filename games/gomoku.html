@@ -2,34 +2,38 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>五子棋</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
-.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
-.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#9b59b6,#8e44ad)}
-.btn:hover{opacity:0.85}
-.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px;cursor:pointer}
+body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;touch-action:manipulation}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(255,255,255,0.04);flex-shrink:0;gap:8px}
+.hud-status{font-size:0.95rem;font-weight:700}.black{color:#1a1a1a;background:#f0f0f0;padding:2px 10px;border-radius:10px;font-size:0.85rem}.white{color:#f0f0f0;padding:2px 10px;border-radius:10px;font-size:0.85rem}
+.btn{padding:5px 14px;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;background:linear-gradient(135deg,#8b5cf6,#7c3aed);transition:.2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(139,92,246,0.3)}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px}
+canvas{border-radius:8px;box-shadow:0 0 30px rgba(139,92,246,0.06);touch-action:none}
 </style>
 </head>
 <body>
 <div class="hud">
-  <div class="hud-info"><span id="status">黑棋回合</span></div>
-  <button class="btn" onclick="init()">重新开始</button>
+  <span class="hud-status" id="st">⚫ 黑棋回合</span>
+  <span style="font-size:0.68rem;color:rgba(255,255,255,0.3);margin-left:auto">点击落子 | 五子连珠获胜</span>
+  <button class="btn" id="restart">重新开始</button>
 </div>
-<div class="game-area"><canvas id="c" width="450" height="450"></canvas></div>
+<div class="game-area"><canvas id="c"></canvas></div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
-function canvasXY(e){const r=c.getBoundingClientRect();return[(e.clientX-r.left)*c.width/r.width,(e.clientY-r.top)*c.height/r.height]}
-const N=15,SZ=30,PAD=15;
-let board,turn,over;
-function init(){board=Array(N).fill(null).map(()=>Array(N).fill(0));turn=1;over=false;draw();document.getElementById('status').textContent='黑棋回合'}
-function draw(){ctx.fillStyle='#d4a76a';ctx.fillRect(0,0,c.width,c.height);ctx.strokeStyle='#8b6914';for(let i=0;i<N;i++){ctx.beginPath();ctx.moveTo(PAD+i*SZ,PAD);ctx.lineTo(PAD+i*SZ,PAD+(N-1)*SZ);ctx.stroke();ctx.beginPath();ctx.moveTo(PAD,PAD+i*SZ);ctx.lineTo(PAD+(N-1)*SZ,PAD+i*SZ);ctx.stroke()}const stars=[3,7,11];stars.forEach(r=>stars.forEach(cl=>{ctx.fillStyle='#8b6914';ctx.beginPath();ctx.arc(PAD+cl*SZ,PAD+r*SZ,3,0,Math.PI*2);ctx.fill()}));for(let r=0;r<N;r++)for(let cl=0;cl<N;cl++)if(board[r][cl]){ctx.fillStyle=board[r][cl]===1?'#1a1a1a':'#f0f0f0';ctx.strokeStyle=board[r][cl]===1?'#000':'#ccc';ctx.beginPath();ctx.arc(PAD+cl*SZ,PAD+r*SZ,SZ/2-2,0,Math.PI*2);ctx.fill();ctx.stroke()}}
-c.addEventListener('click',e=>{if(over)return;const[mx,my]=canvasXY(e);const rect=c.getBoundingClientRect();const cl=Math.round((mx-PAD)/SZ);const r=Math.round((my-PAD)/SZ);if(r<0||r>=N||cl<0||cl>=N||board[r][cl])return;board[r][cl]=turn;draw();if(checkWin(r,cl)){over=true;document.getElementById('status').textContent=(turn===1?'黑棋':'白棋')+'获胜! 🎉';return}turn=turn===1?2:1;document.getElementById('status').textContent=(turn===1?'黑棋':'白棋')+'回合'});
+const N=15;
+let S,P,board,turn,over,lastMove=null;
+function resize(){const area=document.querySelector('.game-area');const s=Math.min(area.clientWidth-16,area.clientHeight-16,500);c.width=c.height=s;S=(s-60)/14;P=30}
+function init(){resize();board=Array(N).fill(null).map(()=>Array(N).fill(0));turn=1;over=false;lastMove=null;draw();document.getElementById('st').textContent='⚫ 黑棋回合';document.getElementById('st').style.color='#fff'}
+function getPos(e){const r=c.getBoundingClientRect();const mx=(e.clientX||(e.touches&&e.touches[0].clientX)||0)-r.left;const my=(e.clientY||(e.touches&&e.touches[0].clientY)||0)-r.top;const cl=Math.round((mx-P)*c.width/r.width/S),row=Math.round((my-P)*c.height/r.height/S);return{cl,row}}
+function draw(){const s=c.width;ctx.fillStyle='#dcb67a';ctx.fillRect(0,0,s,s);ctx.strokeStyle='#8b6914';ctx.lineWidth=1;for(let i=0;i<N;i++){ctx.beginPath();ctx.moveTo(P+i*S,P);ctx.lineTo(P+i*S,P+(N-1)*S);ctx.stroke();ctx.beginPath();ctx.moveTo(P,P+i*S);ctx.lineTo(P+(N-1)*S,P+i*S);ctx.stroke()}[3,7,11].forEach(r=>[3,7,11].forEach(cl=>{ctx.fillStyle='#8b6914';ctx.beginPath();ctx.arc(P+cl*S,P+r*S,3,0,Math.PI*2);ctx.fill()}));for(let r=0;r<N;r++)for(let cl=0;cl<N;cl++)if(board[r][cl]){const grad=ctx.createRadialGradient(P+cl*S-2,P+r*S-4,1,P+cl*S,P+r*S,S/2-1);if(board[r][cl]===1){grad.addColorStop(0,'#555');grad.addColorStop(1,'#111')}else{grad.addColorStop(0,'#fff');grad.addColorStop(1,'#ccc')}ctx.fillStyle=grad;ctx.beginPath();ctx.arc(P+cl*S,P+r*S,S/2-1.5,0,Math.PI*2);ctx.fill();ctx.strokeStyle=board[r][cl]===1?'#000':'#999';ctx.lineWidth=1;ctx.stroke()}if(lastMove){ctx.strokeStyle='#fbbf24';ctx.lineWidth=2;ctx.beginPath();ctx.arc(P+lastMove.c*S,P+lastMove.r*S,S/2+2,0,Math.PI*2);ctx.stroke()}}
+c.addEventListener('click',e=>{if(over)return;const{cl,row}=getPos(e);if(row<0||row>=N||cl<0||cl>=N||board[row][cl])return;board[row][cl]=turn;lastMove={r:row,c:cl};draw();if(checkWin(row,cl)){over=true;document.getElementById('st').textContent=(turn===1?'⚫ 黑棋':'⚪ 白棋')+'获胜! 🎉';return}turn=turn===1?2:1;document.getElementById('st').textContent=(turn===1?'⚫ 黑棋回合':'⚪ 白棋回合')});
+c.addEventListener('touchstart',e=>{e.preventDefault();const t=e.touches[0];const r=c.getBoundingClientRect();const mx=t.clientX-r.left,my=t.clientY-r.top;const cl=Math.round((mx*N/r.width-P/S)),row=Math.round((my*N/r.height-P/S));if(row<0||row>=N||cl<0||cl>=N||over||board[row][cl])return;board[row][cl]=turn;lastMove={r:row,c:cl};draw();if(checkWin(row,cl)){over=true;document.getElementById('st').textContent=(turn===1?'⚫ 黑棋':'⚪ 白棋')+'获胜! 🎉';return}turn=turn===1?2:1;document.getElementById('st').textContent=(turn===1?'⚫ 黑棋回合':'⚪ 白棋回合')},{passive:false});
 function checkWin(r,cl){const dirs=[[0,1],[1,0],[1,1],[1,-1]];for(const[dr,dc]of dirs){let cnt=1;for(let i=1;i<5;i++){const nr=r+dr*i,nc=cl+dc*i;if(nr>=0&&nr<N&&nc>=0&&nc<N&&board[nr][nc]===board[r][cl])cnt++;else break}for(let i=1;i<5;i++){const nr=r-dr*i,nc=cl-dc*i;if(nr>=0&&nr<N&&nc>=0&&nc<N&&board[nr][nc]===board[r][cl])cnt++;else break}if(cnt>=5)return true}return false}
+document.getElementById('restart').addEventListener('click',init);window.addEventListener('resize',()=>{resize();draw()});
 init();
 </script>
 </body>

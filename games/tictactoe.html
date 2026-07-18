@@ -2,42 +2,48 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>井字棋</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
-.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
-.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#9b59b6,#8e44ad)}
-.btn:hover{opacity:0.85}
-.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.board{display:grid;grid-template-columns:repeat(3,1fr);width:min(80vw,calc(80vh - 60px));aspect-ratio:1;gap:clamp(6px,1.5vmin,12px)}
-.cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:clamp(8px,1.5vmin,14px);font-size:clamp(1.8rem,8vmin,4rem);font-weight:bold;cursor:pointer;transition:all .2s}
-.cell:hover{background:rgba(255,255,255,0.1)}
-.cell.x{color:#667eea}
-.cell.o{color:#e74c3c}
-.cell.win{background:rgba(46,204,113,0.2);border-color:#2ecc71}
+body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;touch-action:manipulation}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(255,255,255,0.04);flex-shrink:0;gap:8px}
+.hud-status{font-size:0.95rem;font-weight:700}
+.btn{padding:5px 14px;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;transition:.2s}
+.btn-rst{background:linear-gradient(135deg,#8b5cf6,#7c3aed)}.btn-rst:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(139,92,246,0.3)}
+.btn-ai{background:rgba(255,255,255,0.08);padding:5px 10px;font-size:0.7rem}
+.btn-ai.active{background:rgba(139,92,246,0.4)}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px}
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(78vw,calc(78vh - 50px));aspect-ratio:1}
+.cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;font-size:clamp(2rem,8vmin,4rem);font-weight:800;cursor:pointer;transition:.15s}
+.cell:hover{background:rgba(255,255,255,0.08)}
+.cell.X{color:#818cf8;background:rgba(99,102,241,0.1)}
+.cell.O{color:#f87171;background:rgba(239,68,68,0.1)}
+.cell.win{animation:win .5s ease-in-out infinite alternate}
+@keyframes win{from{transform:scale(1)}to{transform:scale(1.06)}}
+.score-bar{display:flex;gap:12px;align-items:center}
+.score{font-size:0.78rem;color:rgba(255,255,255,0.5)}.score span{font-weight:700}
 </style>
 </head>
 <body>
 <div class="hud">
-  <div class="hud-info"><span id="status">X 的回合</span></div>
-  <div style="display:flex;gap:6px">
-    <button class="btn" onclick="init()">重新开始</button>
-    <button class="btn" onclick="toggleAI()" id="aiBtn">双人</button>
-  </div>
+  <span class="hud-status" id="st">X 的回合</span>
+  <div class="score-bar"><span class="score">X: <span id="sx" style="color:#818cf8">0</span></span><span class="score">O: <span id="so" style="color:#f87171">0</span></span><span class="score">平: <span id="sd">0</span></span></div>
+  <button class="btn btn-ai" id="aiBtn">双人</button>
+  <button class="btn btn-rst" id="restart">重新开始</button>
 </div>
 <div class="game-area"><div class="board" id="board"></div></div>
 <script>
-let board,turn,over,ai;
-function init(){board=Array(9).fill('');turn='X';over=false;render();document.getElementById('status').textContent='X 的回合'}
-function toggleAI(){ai=!ai;document.getElementById('aiBtn').textContent=ai?'人机':'双人';init()}
-function render(){const b=document.getElementById('board');b.innerHTML='';board.forEach((v,i)=>{const d=document.createElement('div');d.className='cell'+(v?' '+v.toLowerCase():'');d.textContent=v;d.addEventListener('click',()=>play(i));b.appendChild(d)})}
-function play(i){if(board[i]||over)return;board[i]=turn;check();if(!over){turn=turn==='X'?'O':'X';document.getElementById('status').textContent=turn+' 的回合';if(ai&&turn==='O'&&!over)setTimeout(aiMove,300)}render()}
-function aiMove(){const empty=board.map((v,i)=>v===''?i:-1).filter(i=>i>=0);if(!empty.length)return;const pick=empty[Math.floor(Math.random()*empty.length)];play(pick)}
-function check(){const w=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(const[a,b,c]of w){if(board[a]&&board[a]===board[b]&&board[a]===board[c]){over=true;document.getElementById('status').textContent=board[a]+' 赢了! 🎉';highlight([a,b,c]);return}}if(!board.includes('')){over=true;document.getElementById('status').textContent='平局! 🤝'}}
-function highlight(cells){const els=document.querySelectorAll('.cell');cells.forEach(i=>els[i].classList.add('win'))}
+let board,turn,over,ai,sx=0,so=0,sd=0;
+function init(){board=Array(9).fill('');turn='X';over=false;render();document.getElementById('st').textContent='X 的回合';document.getElementById('st').style.color='#818cf8'}
+function toggleAI(){ai=!ai;document.getElementById('aiBtn').textContent=ai?'人机':'双人';document.getElementById('aiBtn').classList.toggle('active',ai);init()}
+function render(){const b=document.getElementById('board');b.innerHTML='';board.forEach((v,i)=>{const d=document.createElement('div');d.className='cell'+(v?' '+v:'');d.textContent=v;d.addEventListener('click',()=>play(i));b.appendChild(d)})}
+function play(i){if(board[i]||over)return;board[i]=turn;if(check())return;turn=turn==='X'?'O':'X';document.getElementById('st').textContent=turn+' 的回合';document.getElementById('st').style.color=turn==='X'?'#818cf8':'#f87171';render();if(ai&&turn==='O'&&!over)setTimeout(aiMove,250)}
+function aiMove(){const e=board.map((v,i)=>v===''?i:-1).filter(i=>i>=0);if(!e.length)return;const pick=e[Math.floor(Math.random()*e.length)];play(pick)}
+function check(){const w=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(const[a,b,c]of w){if(board[a]&&board[a]===board[b]&&board[a]===board[c]){over=true;board[a]==='X'?sx++:so++;document.getElementById('st').textContent=board[a]+' 赢了! 🎉';document.getElementById('st').style.color=board[a]==='X'?'#818cf8':'#f87171';highlight([a,b,c]);updateScores();render();return true}}if(!board.includes('')){over=true;sd++;document.getElementById('st').textContent='平局! 🤝';document.getElementById('st').style.color='#fbbf24';updateScores();render();return true}return false}
+function highlight(cells){setTimeout(()=>{document.querySelectorAll('.cell').forEach((el,i)=>{if(cells.includes(i))el.classList.add('win')})},50)}
+function updateScores(){document.getElementById('sx').textContent=sx;document.getElementById('so').textContent=so;document.getElementById('sd').textContent=sd}
+document.getElementById('restart').addEventListener('click',init);document.getElementById('aiBtn').addEventListener('click',toggleAI);
 ai=false;init();
 </script>
 </body>

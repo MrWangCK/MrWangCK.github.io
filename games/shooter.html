@@ -2,36 +2,48 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>太空射击</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
-.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
-.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#3498db,#2980b9)}
-.btn:hover{opacity:0.85}
-.hud-hint{color:rgba(255,255,255,0.4);font-size:0.75rem}
-.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px}
+body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;touch-action:manipulation}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(255,255,255,0.04);flex-shrink:0;gap:8px}
+.hud-item{font-size:0.85rem;color:rgba(255,255,255,0.8)}.hud-item span{font-weight:700;color:#38bdf8}
+.btn{padding:5px 14px;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;background:linear-gradient(135deg,#0ea5e9,#0284c7);transition:.2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(14,165,233,0.3)}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px}
+canvas{border-radius:8px;box-shadow:0 0 30px rgba(14,165,233,0.06);touch-action:none}
+/* mobile controls */
+.mctrl{display:none;position:fixed;bottom:10px;left:50%;transform:translateX(-50%);gap:8px;z-index:10}
+.mctrl button{width:50px;height:50px;border:none;border-radius:50%;background:rgba(255,255,255,0.12);color:#fff;font-size:1.3rem;cursor:pointer}
+.mctrl button:active{background:rgba(56,189,248,0.3)}
+@media(hover:none){.mctrl{display:flex}}
 </style>
 </head>
 <body>
 <div class="hud">
-  <div class="hud-info"><span id="sc">得分: 0</span><span id="li">生命: 3</span><span class="hud-hint">←→移动 空格发射</span></div>
-  <button class="btn" onclick="init()">重新开始</button>
+  <div class="hud-item">得分: <span id="sc">0</span></div>
+  <div class="hud-item">生命: <span id="li">3</span></div>
+  <div class="hud-item">波次: <span id="wv">1</span></div>
+  <span style="font-size:0.68rem;color:rgba(255,255,255,0.3);margin-left:auto">←→移动 空格/点击发射</span>
+  <button class="btn" id="restart">重新开始</button>
 </div>
-<div class="game-area"><canvas id="c" width="400" height="500"></canvas></div>
+<div class="game-area"><canvas id="c"></canvas></div>
+<div class="mctrl"><button id="ml">◀</button><button id="mf">🔥</button><button id="mr">▶</button></div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
-const W=c.width,H=c.height;
-let ship,bullets,enemies,score,lives,over,anim,enemyTimer;
-function init(){ship={x:W/2,y:H-40,w:30};bullets=[];enemies=[];score=0;lives=3;over=false;clearInterval(enemyTimer);enemyTimer=setInterval(spawnEnemy,800);cancelAnimationFrame(anim);loop()}
-function spawnEnemy(){if(over)return;enemies.push({x:20+Math.random()*(W-40),y:-20,w:25,speed:1.5+Math.random()*2,hp:1})}
-function update(){if(over)return;bullets.forEach(b=>b.y-=7);bullets=bullets.filter(b=>b.y>-10);enemies.forEach(e=>e.y+=e.speed);enemies=enemies.filter(e=>{if(e.y>H+20){lives--;if(lives<=0){over=true;setTimeout(()=>alert('💥 游戏结束! 得分: '+score),50)}return false}return true});bullets.forEach((b,bi)=>{enemies.forEach((e,ei)=>{if(Math.abs(b.x-e.x)<20&&Math.abs(b.y-e.y)<20){enemies.splice(ei,1);bullets.splice(bi,1);score+=10}})});enemies.forEach(e=>{if(Math.abs(e.x-ship.x)<25&&Math.abs(e.y-ship.y)<20){enemies.splice(enemies.indexOf(e),1);lives--;if(lives<=0){over=true;setTimeout(()=>alert('💥 游戏结束! 得分: '+score),50)}}});document.getElementById('sc').textContent='得分: '+score;document.getElementById('li').textContent='生命: '+lives}
-function draw(){ctx.fillStyle='#0a0a1a';ctx.fillRect(0,0,W,H);ctx.fillStyle='#3498db';ctx.beginPath();ctx.moveTo(ship.x,ship.y-15);ctx.lineTo(ship.x-15,ship.y+10);ctx.lineTo(ship.x+15,ship.y+10);ctx.fill();bullets.forEach(b=>{ctx.fillStyle='#f1c40f';ctx.fillRect(b.x-2,b.y,4,10)});enemies.forEach(e=>{ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.moveTo(e.x,e.y+12);ctx.lineTo(e.x-12,e.y-8);ctx.lineTo(e.x+12,e.y-8);ctx.fill()})}
+let W,H,ship,bullets,enemies,stars,score,lives,wave,over,anim,enemyTimer,particles=[];
+function resize(){const area=document.querySelector('.game-area');W=c.width=Math.min(area.clientWidth-16,380);H=c.height=Math.min(area.clientHeight-16,Math.round(W*1.5));W=Math.max(W,260);H=Math.max(H,380)}
+function init(){resize();ship={x:W/2,y:H-50,w:28};bullets=[];enemies=[];stars=[];particles=[];score=0;lives=3;wave=1;over=false;for(let i=0;i<60;i++)stars.push({x:Math.random()*W,y:Math.random()*H,speed:0.3+Math.random()*1.5,s:0.5+Math.random()*1.5});clearInterval(enemyTimer);enemyTimer=setInterval(spawnEnemy,Math.max(300,900-wave*60));cancelAnimationFrame(anim);anim=requestAnimationFrame(loop)}
+function spawnEnemy(){if(over)return;const types=[{w:22,hp:1,speed:1.2+wave*0.2,color:'#ef4444',pts:10},{w:28,hp:2,speed:0.8+wave*0.15,color:'#f97316',pts:25},{w:18,hp:1,speed:1.8+wave*0.3,color:'#ec4899',pts:15}];const t=types[Math.min(wave-1,2)||Math.floor(Math.random()*types.length)];enemies.push({x:15+Math.random()*(W-30),y:-20,w:t.w,hp:t.hp,speed:t.speed,color:t.color,pts:t.pts})}
+function update(){if(over)return;stars.forEach(s=>{s.y+=s.speed;if(s.y>H){s.y=0;s.x=Math.random()*W}});bullets.forEach(b=>b.y-=8);bullets=bullets.filter(b=>b.y>-10);enemies.forEach(e=>e.y+=e.speed);const hitB=new Set(),hitE=new Set();bullets.forEach((b,bi)=>{enemies.forEach((e,ei)=>{if(hitB.has(bi)||hitE.has(ei))return;if(Math.abs(b.x-e.x)<e.w/2+4&&Math.abs(b.y-e.y)<e.w/2+6){e.hp--;hitB.add(bi);if(e.hp<=0){hitE.add(ei);score+=e.pts;for(let i=0;i<6;i++)particles.push({x:e.x,y:e.y,vx:(Math.random()-0.5)*4,vy:(Math.random()-0.5)*4,life:20,color:e.color})}}}})});bullets=bullets.filter((b,i)=>!hitB.has(i));enemies=enemies.filter(e=>{if(e.y>H+30){if(e.hp>0){lives--;if(lives<=0)gameOver()}return false}return!hitE.has(enemies.indexOf(e))||false});enemies=enemies.filter((e,i)=>!hitE.has(i));for(let i=enemies.length-1;i>=0;i--){const e=enemies[i];if(Math.abs(e.x-ship.x)<ship.w/2+e.w/2&&Math.abs(e.y-ship.y)<30){enemies.splice(i,1);lives--;for(let j=0;j<8;j++)particles.push({x:ship.x,y:ship.y,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,life:25,color:'#38bdf8'});if(lives<=0)gameOver()}}if(score>=wave*200){wave++;clearInterval(enemyTimer);enemyTimer=setInterval(spawnEnemy,Math.max(200,900-wave*60))}particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});document.getElementById('sc').textContent=score;document.getElementById('li').textContent=lives;document.getElementById('wv').textContent=wave}
+function gameOver(){over=true;clearInterval(enemyTimer);cancelAnimationFrame(anim);setTimeout(()=>{alert('💥 游戏结束!\n得分: '+score+' | 波次: '+wave)},100);draw()}
+function draw(){ctx.fillStyle='#050520';ctx.fillRect(0,0,W,H);stars.forEach(s=>{ctx.fillStyle='rgba(255,255,255,0.6)';ctx.fillRect(s.x,s.y,s.s,s.s)});ctx.fillStyle='#38bdf8';ctx.beginPath();ctx.moveTo(ship.x,ship.y-18);ctx.lineTo(ship.x-15,ship.y+10);ctx.lineTo(ship.x+15,ship.y+10);ctx.closePath();ctx.fill();ctx.fillStyle='#0ea5e9';ctx.beginPath();ctx.moveTo(ship.x,ship.y-10);ctx.lineTo(ship.x-10,ship.y+6);ctx.lineTo(ship.x+10,ship.y+6);ctx.closePath();ctx.fill();bullets.forEach(b=>{ctx.fillStyle='#fbbf24';ctx.shadowColor='#fbbf24';ctx.shadowBlur=4;ctx.fillRect(b.x-2,b.y,4,12);ctx.shadowBlur=0});enemies.forEach(e=>{ctx.fillStyle=e.color;ctx.beginPath();ctx.moveTo(e.x,e.y+e.w/2);ctx.lineTo(e.x-e.w/2,e.y-e.w/2);ctx.lineTo(e.x+e.w/2,e.y-e.w/2);ctx.closePath();ctx.fill();if(e.hp===2){ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1.5;ctx.stroke()}});particles.forEach(p=>{ctx.globalAlpha=p.life/25;ctx.fillStyle=p.color;ctx.fillRect(p.x-2,p.y-2,4,4);ctx.globalAlpha=1});if(over){ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 22px system-ui';ctx.textAlign='center';ctx.fillText('游戏结束',W/2,H/2-10);ctx.font='14px system-ui';ctx.fillText('得分: '+score,W/2,H/2+15);ctx.textAlign='start'}}
 function loop(){if(!over){update();draw();anim=requestAnimationFrame(loop)}else draw()}
-document.addEventListener('keydown',e=>{if(over)return;if(e.key==='ArrowLeft')ship.x=Math.max(15,ship.x-20);if(e.key==='ArrowRight')ship.x=Math.min(W-15,ship.x+20);if(e.key===' '){e.preventDefault();bullets.push({x:ship.x,y:ship.y-15})}});
+function fire(){if(over)return;bullets.push({x:ship.x-4,y:ship.y-20});bullets.push({x:ship.x+4,y:ship.y-20})}
+let leftHeld=false,rightHeld=false;document.addEventListener('keydown',e=>{if(over)return;if(e.key==='ArrowLeft'){leftHeld=true;ship.x=Math.max(15,ship.x-15)}if(e.key==='ArrowRight'){rightHeld=true;ship.x=Math.min(W-15,ship.x+15)}if(e.key===' '){e.preventDefault();fire()}});document.addEventListener('keyup',e=>{if(e.key==='ArrowLeft')leftHeld=false;if(e.key==='ArrowRight')rightHeld=false});setInterval(()=>{if(leftHeld)ship.x=Math.max(15,ship.x-12);if(rightHeld)ship.x=Math.min(W-15,ship.x+12)},30);
+document.getElementById('ml').addEventListener('touchstart',e=>{e.preventDefault();leftHeld=true});document.getElementById('ml').addEventListener('touchend',()=>leftHeld=false);document.getElementById('mr').addEventListener('touchstart',e=>{e.preventDefault();rightHeld=true});document.getElementById('mr').addEventListener('touchend',()=>rightHeld=false);document.getElementById('mf').addEventListener('touchstart',e=>{e.preventDefault();fire()});document.getElementById('restart').addEventListener('click',init);
+window.addEventListener('resize',()=>{resize();draw()});
 init();
 </script>
 </body>

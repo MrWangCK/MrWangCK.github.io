@@ -2,44 +2,43 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>反应速度测试</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0;flex-shrink:0}
-.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
-.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#1abc9c,#16a085)}
-.btn:hover{opacity:0.85}
-.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:12px;flex-direction:column;gap:12px}
-#box{width:100%;flex:1;border-radius:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:clamp(1rem,3vmin,1.5rem);transition:background .2s;user-select:none;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1)}
-#box.wait{background:rgba(231,76,60,0.3);border-color:#e74c3c}
-#box.ready{background:rgba(46,204,113,0.3);border-color:#2ecc71}
-#box.early{background:rgba(241,196,15,0.3);border-color:#f1c40f}
-#result{font-size:clamp(1.2rem,4vmin,2rem);font-weight:bold;color:#1abc9c;text-align:center}
-#history{color:rgba(255,255,255,0.5);font-size:clamp(0.7rem,2vmin,0.9rem);text-align:center}
+body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:manipulation}
+.hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(255,255,255,0.04);gap:8px}
+.btn{padding:5px 14px;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;background:linear-gradient(135deg,#14b8a6,#0d9488);transition:.2s}
+.btn:hover{transform:translateY(-1px)}
+#box{width:min(85vw,380px);height:min(55vh,320px);border-radius:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.3rem;transition:background .2s;user-select:none;border:2px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);flex-direction:column;gap:8px}
+#box.wait{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.3)}
+#box.ready{background:rgba(34,197,94,0.2);border-color:rgba(34,197,94,0.3)}
+#box.early{background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.3)}
+#box.done{background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.2)}
+#result{font-size:2rem;font-weight:700;color:#14b8a6;min-height:48px}
+#sub{font-size:0.85rem;color:rgba(255,255,255,0.4)}
+.history-wrap{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px;max-width:90vw}
+.hist-dot{padding:3px 8px;border-radius:6px;font-size:0.72rem;font-family:monospace;background:rgba(255,255,255,0.06)}.hist-dot.fast{background:rgba(52,211,153,0.15);color:#34d399}
+.hist-dot.medium{background:rgba(251,191,36,0.15);color:#fbbf24}.hist-dot.slow{background:rgba(239,68,68,0.15);color:#f87171}
 </style>
 </head>
 <body>
-<div class="hud">
-  <div class="hud-info"><span>⚡ 反应速度测试</span></div>
-  <button class="btn" onclick="reset()">重新开始</button>
-</div>
-<div class="game-area">
-  <div id="box">点击此处开始</div>
-  <div id="result"></div>
-  <div id="history"></div>
-</div>
+<div class="hud"><span style="color:rgba(255,255,255,0.5);font-size:0.8rem">⚡ 反应速度测试</span><button class="btn" id="restart">重新开始</button></div>
+<div id="box"><span>点击此处开始</span><span style="font-size:0.75rem;color:rgba(255,255,255,0.3)">测试你的反应速度</span></div>
+<div id="result"></div>
+<div id="sub"></div>
+<div class="history-wrap" id="hist"></div>
 <script>
-const box=document.getElementById('box');
-let state='idle',timer,startTime,results=[];
+const box=document.getElementById('box');let state='idle',timer,startTime,results=[];
+function reset(){state='idle';clearTimeout(timer);box.className='';box.innerHTML='<span>点击此处开始</span><span style="font-size:0.75rem;color:rgba(255,255,255,0.3)">测试你的反应速度</span>';results=[];document.getElementById('result').textContent='';document.getElementById('sub').textContent='';document.getElementById('hist').innerHTML=''}
 box.addEventListener('click',()=>{
-if(state==='idle'){state='wait';box.className='wait';box.textContent='等待变绿...';timer=setTimeout(()=>{state='ready';box.className='ready';startTime=Date.now();box.textContent='快点击!'},1000+Math.random()*3000)}
-else if(state==='wait'){state='early';box.className='early';box.textContent='太早了! 点击重试';clearTimeout(timer)}
-else if(state==='ready'){const t=Date.now()-startTime;state='done';box.className='';box.textContent='点击重新开始';results.push(t);if(results.length>5)results.shift();document.getElementById('result').textContent=t+' ms';document.getElementById('history').textContent='历史: '+results.join(' / ')+' ms | 平均: '+Math.round(results.reduce((a,b)=>a+b,0)/results.length)+' ms'}
-else{state='idle';box.className='';box.textContent='点击此处开始';document.getElementById('result').textContent=''}
+if(state==='idle'){state='wait';box.className='wait';box.innerHTML='<span>等待变绿...</span><span style="font-size:0.75rem;color:rgba(255,255,255,0.3)">别提前点!</span>';timer=setTimeout(()=>{state='ready';box.className='ready';startTime=Date.now();box.innerHTML='<span>快点击!</span><span style="font-size:0.75rem;color:rgba(34,197,94,0.5)">现在!</span>'},800+Math.random()*2500)}
+else if(state==='wait'){state='early';box.className='early';clearTimeout(timer);box.innerHTML='<span>太早了!</span><span style="font-size:0.75rem;color:rgba(255,255,255,0.3)">点击重试</span>'}
+else if(state==='ready'){const t=Date.now()-startTime;state='done';box.className='done';results.push(t);if(results.length>8)results.shift();const avg=Math.round(results.reduce((a,b)=>a+b,0)/results.length);box.innerHTML='<span>点击重新开始</span><span style="font-size:0.75rem;color:rgba(255,255,255,0.3)">平均: '+avg+'ms</span>';document.getElementById('result').textContent=t+'ms';const cls=t<200?'fast':t<350?'medium':'slow';document.getElementById('sub').textContent=t<200?'⚡ 极快!':t<300?'👍 不错':t<400?'🙂 还行':'🐌 继续练习';renderHistory()}
+else{state='idle';box.className='';box.innerHTML='<span>点击此处开始</span><span style="font-size:0.75rem;color:rgba(255,255,255,0.3)">测试你的反应速度</span>';document.getElementById('result').textContent='';document.getElementById('sub').textContent=''}
 });
-function reset(){state='idle';clearTimeout(timer);box.className='';box.textContent='点击此处开始';results=[];document.getElementById('result').textContent='';document.getElementById('history').textContent=''}
+function renderHistory(){const hist=document.getElementById('hist');const avg=Math.round(results.reduce((a,b)=>a+b,0)/results.length);hist.innerHTML=results.map(t=>{const c=t<200?'fast':t<350?'medium':'slow';return'<span class="hist-dot '+c+'">'+t+'ms</span>'}).join('')+'<span style="font-size:0.72rem;color:rgba(255,255,255,0.4)"> | 平均: '+avg+'ms</span>'}
+document.getElementById('restart').addEventListener('click',reset);
 </script>
 </body>
 </html>

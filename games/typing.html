@@ -2,42 +2,46 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>打字游戏</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
-.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
-.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#2ecc71,#27ae60)}
-.btn:hover{opacity:0.85}
+body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;touch-action:manipulation}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(255,255,255,0.04);flex-shrink:0;gap:8px;flex-wrap:wrap}
+.hud-item{font-size:0.82rem;color:rgba(255,255,255,0.8)}.hud-item span{font-weight:700;color:#34d399}
+.btn{padding:5px 14px;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;background:linear-gradient(135deg,#22c55e,#16a34a);transition:.2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(34,197,94,0.3)}
 .game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px;position:relative}
-#area{position:relative;width:100%;height:100%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden}
-.word{position:absolute;font-size:1.3rem;font-weight:bold;color:#2ecc71;transition:none}
-.word.danger{color:#e74c3c}
-.input-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:10}
-#input{padding:10px 20px;width:280px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;color:#fff;font-size:1rem;text-align:center;outline:none}
-#input:focus{border-color:#2ecc71}
+#area{position:relative;width:100%;height:100%;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:14px;overflow:hidden}
+.word{position:absolute;font-size:1.3rem;font-weight:700;color:#34d399;text-shadow:0 0 8px rgba(52,211,153,0.3);transition:none}
+.word.danger{color:#f87171;text-shadow:0 0 8px rgba(248,113,113,0.3)}
+.pop-effect{position:absolute;font-size:1.1rem;font-weight:700;color:#fbbf24;pointer-events:none;animation:popUp .6s ease-out forwards}
+@keyframes popUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-40px)}}
+.input-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:10}
+#input{padding:10px 20px;width:260px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:20px;color:#fff;font-size:0.95rem;text-align:center;outline:none}
+#input:focus{border-color:#34d399}
 </style>
 </head>
 <body>
 <div class="hud">
-  <div class="hud-info"><span id="sc">得分: 0</span><span id="lv">等级: 1</span><span id="li">生命: 5</span></div>
-  <button class="btn" onclick="startGame()">开始游戏</button>
+  <div class="hud-item">得分: <span id="sc">0</span></div>
+  <div class="hud-item">等级: <span id="lv">1</span></div>
+  <div class="hud-item">HP: <span id="hp">5</span></div>
+  <button class="btn" id="restart">开始游戏</button>
 </div>
-<div class="game-area">
-  <div id="area"></div>
-  <div class="input-bar"><input id="input" placeholder="输入单词消除..." autocomplete="off"></div>
-</div>
+<div class="game-area"><div id="area"></div><div class="input-bar"><input id="input" placeholder="输入单词消除..." autocomplete="off"></div></div>
 <script>
-const words=['code','game','play','type','fast','word','hello','world','speed','quick','jump','move','fire','cool','nice','best','hero','win','go','run','bug','key','dev','web','app','css','html','node','data','loop','hack','test','push','pull','git','log','api','sql','int','bool','char'];
-const area=document.getElementById('area');
-let score,level,lives,running,words_arr,timer;
-function startGame(){score=0;level=1;lives=5;running=true;words_arr=[];area.innerHTML='';updateInfo();clearInterval(timer);timer=setInterval(spawn,Math.max(600,2000-level*200));requestAnimationFrame(drop);document.getElementById('input').value='';document.getElementById('input').focus()}
-function spawn(){if(!running)return;const t=document.createElement('div');t.className='word';const w=words[Math.floor(Math.random()*words.length)];t.textContent=w;const aw=area.clientWidth;t.style.left=Math.random()*(aw-60)+'px';t.style.top='0px';t.dataset.word=w;t.dataset.y=0;t.dataset.speed=0.5+level*0.15;area.appendChild(t);words_arr.push(t)}
-function drop(){if(!running)return;const ah=area.clientHeight;words_arr.forEach(w=>{let y=parseFloat(w.dataset.y)+parseFloat(w.dataset.speed);w.dataset.y=y;w.style.top=y+'px';if(y>ah-60)w.classList.add('danger');if(y>ah-20){lives--;w.remove();words_arr=words_arr.filter(x=>x!==w);if(lives<=0){running=false;clearInterval(timer);alert('游戏结束! 得分: '+score)}}});updateInfo();if(running)requestAnimationFrame(drop)}
-document.getElementById('input').addEventListener('input',function(){if(!running)return;const v=this.value.trim().toLowerCase();words_arr.forEach(w=>{if(w.dataset.word===v){score+=10;if(score%50===0)level++;w.remove();words_arr=words_arr.filter(x=>x!==w);this.value='';updateInfo()}})});
-function updateInfo(){document.getElementById('sc').textContent='得分: '+score;document.getElementById('lv').textContent='等级: '+level;document.getElementById('li').textContent='生命: '+lives}
+const words=['code','game','play','fast','type','word','hello','world','speed','quick','jump','move','fire','cool','nice','best','hero','win','run','bug','key','dev','web','app','css','html','node','loop','hack','test','push','pull','git','api','sql','bool','char','link','text','null','true','void','main','sort','find','each'];
+const area=document.getElementById('area');const input=document.getElementById('input');
+let score,level,lives,running,wordsArr,dropAnim;
+function startGame(){score=0;level=1;lives=5;running=true;wordsArr=[];area.innerHTML='';clearInterval(dropAnim);updateInfo();spawnLoop();dropLoop();input.value='';input.focus()}
+function spawnLoop(){if(!running)return;spawn();setTimeout(spawnLoop,Math.max(500,2200-level*200))}
+function spawn(){if(!running)return;const t=document.createElement('div');t.className='word';const w=words[Math.floor(Math.random()*words.length)];t.textContent=w;const aw=area.clientWidth;t.style.left=Math.random()*(aw-80)+'px';t.style.top='0px';t.dataset.word=w;t.dataset.y=0;t.dataset.speed=0.4+level*0.15;area.appendChild(t);wordsArr.push(t)}
+function dropLoop(){dropAnim=requestAnimationFrame(()=>{if(!running)return;const ah=area.clientHeight;wordsArr.forEach(w=>{let y=parseFloat(w.dataset.y)+parseFloat(w.dataset.speed);w.dataset.y=y;w.style.top=y+'px';if(y>ah-70)w.classList.add('danger');if(y>ah-20){lives--;w.remove();wordsArr=wordsArr.filter(x=>x!==w);if(lives<=0){running=false;setTimeout(()=>alert('💥 游戏结束!\n得分: '+score+' | 等级: '+level),100)}}});updateInfo();if(running)dropLoop()})}
+function spawnPop(x,y,pts){const p=document.createElement('div');p.className='pop-effect';p.textContent='+'+pts;p.style.left=x+'px';p.style.top=y+'px';area.appendChild(p);setTimeout(()=>p.remove(),600)}
+input.addEventListener('input',function(){if(!running)return;const v=this.value.trim().toLowerCase();let found=false;wordsArr.forEach(w=>{if(w.dataset.word===v){found=true;const pts=10+level*2;score+=pts;if(score%60===0)level++;const rect=w.getBoundingClientRect();const ar=area.getBoundingClientRect();spawnPop(w.style.left,rect.top-ar.top,pts);w.remove();wordsArr=wordsArr.filter(x=>x!==w);this.value='';updateInfo()}});if(!found&&v.length>=Math.max(3,wordsArr[0]?.dataset.word?.length||4)){this.value=''}});
+function updateInfo(){document.getElementById('sc').textContent=score;document.getElementById('lv').textContent=level;document.getElementById('hp').textContent=lives;document.getElementById('hp').style.color=lives<=2?'#f87171':lives<=3?'#fbbf24':'#34d399'}
+document.getElementById('restart').addEventListener('click',startGame);input.focus();
 </script>
 </body>
 </html>

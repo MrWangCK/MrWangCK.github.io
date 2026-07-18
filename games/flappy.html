@@ -2,40 +2,45 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Flappy Bird</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
-.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
-.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#2ecc71,#27ae60)}
-.btn:hover{opacity:0.85}
-.hud-hint{color:rgba(255,255,255,0.4);font-size:0.75rem}
-.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-canvas{max-width:calc(100vw - 16px);max-height:calc(100vh - 44px);border-radius:6px;cursor:pointer}
+body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;touch-action:manipulation}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(255,255,255,0.04);flex-shrink:0;gap:8px}
+.hud-score{font-size:1.1rem;font-weight:700;color:#facc15}.hud-best{font-size:0.78rem;color:rgba(255,255,255,0.4)}
+.btn{padding:5px 14px;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;background:linear-gradient(135deg,#facc15,#eab308);transition:.2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(250,204,21,0.3)}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px}
+canvas{border-radius:8px;box-shadow:0 0 30px rgba(250,204,21,0.06);touch-action:none}
 </style>
 </head>
 <body>
 <div class="hud">
-  <div class="hud-info"><span id="score">0</span><span class="hud-hint">点击/空格/触摸 跳跃</span></div>
-  <button class="btn" onclick="init()">重新开始</button>
+  <span class="hud-score" id="sc">0</span>
+  <span class="hud-best" id="best">最佳: 0</span>
+  <span style="font-size:0.68rem;color:rgba(255,255,255,0.3);margin-left:auto">点击/空格跳跃</span>
+  <button class="btn" id="restart">重新开始</button>
 </div>
-<div class="game-area"><canvas id="c" width="320" height="480"></canvas></div>
+<div class="game-area" id="area"><canvas id="c"></canvas></div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
-const W=c.width,H=c.height,GAP=130,PIPE_W=50,BIRD_R=15;
-let bird,pipes,score,best=0,started,over,anim;
-function init(){bird={x:80,y:H/2,vy:0};pipes=[];score=0;started=false;over=false;cancelAnimationFrame(anim);draw()}
-function flap(){if(over){init();return}if(!started)started=true;bird.vy=-6.5}
-function addPipe(){const top=50+Math.random()*(H-GAP-100);pipes.push({x:W,top,passed:false})}
-function update(){if(!started||over)return;bird.vy+=0.35;bird.y+=bird.vy;if(bird.y+BIRD_R>H||bird.y-BIRD_R<0){gameOver();return}if(pipes.length===0||pipes[pipes.length-1].x<W-200)addPipe();pipes.forEach(p=>{p.x-=2.5;if(!p.passed&&p.x+PIPE_W<bird.x){p.passed=true;score++}if(bird.x+BIRD_R>p.x&&bird.x-BIRD_R<p.x+PIPE_W){if(bird.y-BIRD_R<p.top||bird.y+BIRD_R>p.top+GAP)gameOver()}});pipes=pipes.filter(p=>p.x>-PIPE_W)}
-function gameOver(){over=true;best=Math.max(best,score)}
-function draw(){ctx.fillStyle='#2c3e50';ctx.fillRect(0,0,W,H);pipes.forEach(p=>{ctx.fillStyle='#27ae60';ctx.fillRect(p.x,0,PIPE_W,p.top);ctx.fillRect(p.x,p.top+GAP,PIPE_W,H-p.top-GAP);ctx.fillStyle='#2ecc71';ctx.fillRect(p.x-3,p.top-15,PIPE_W+6,15);ctx.fillRect(p.x-3,p.top+GAP,PIPE_W+6,15)});ctx.fillStyle='#f1c40f';ctx.beginPath();ctx.arc(bird.x,bird.y,BIRD_R,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e74c3c';ctx.beginPath();ctx.arc(bird.x+8,bird.y-3,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='20px sans-serif';if(!started)ctx.fillText('点击开始',W/2-40,H/2-40);if(over){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 28px sans-serif';ctx.fillText('游戏结束',W/2-70,H/2-20);ctx.font='18px sans-serif';ctx.fillText('得分: '+score+'  最佳: '+best,W/2-85,H/2+20)}document.getElementById('score').textContent=score}
+const GAP=110,PIPE_W=45,BIRD_R=13,G=0.5,JUMP=-7;
+let W,H,bird,pipes,score,best=0,started,over,anim,frame=0;
+function resize(){const area=document.getElementById('area');W=c.width=320;H=c.height=Math.min(area.clientHeight-16,520);H=Math.max(H,400)}
+let bgX=0;
+function init(){resize();bird={x:70,y:H/2,vy:0};pipes=[];score=0;started=false;over=false;frame=0;bgX=0;cancelAnimationFrame(anim);draw();anim=requestAnimationFrame(loop)}
+function flap(){if(over){init();return}if(!started)started=true;bird.vy=JUMP}
+function addPipe(){const minH=40,maxH=H-GAP-60;const top=minH+Math.random()*(maxH-minH);pipes.push({x:W,top,passed:false})}
+function update(){if(!started||over)return;frame++;bird.vy+=G;bird.y+=bird.vy;if(bird.y+BIRD_R>H||bird.y-BIRD_R<0){gameOver();return}if(pipes.length===0||pipes[pipes.length-1].x<W-180)addPipe();pipes.forEach(p=>{p.x-=2.2;if(!p.passed&&p.x+PIPE_W<bird.x){p.passed=true;score++;spark(bird.x,bird.y)}if(bird.x+BIRD_R>p.x&&bird.x-BIRD_R<p.x+PIPE_W){if(bird.y-BIRD_R<p.top||bird.y+BIRD_R>p.top+GAP)gameOver()}});pipes=pipes.filter(p=>p.x>-PIPE_W);bgX=(bgX+1)%800}
+function spark(x,y){for(let i=0;i<5;i++){const a=Math.random()*Math.PI*2;const s=2+Math.random()*3;setTimeout(()=>{},0)}}
+function gameOver(){over=true;best=Math.max(best,score);document.getElementById('best').textContent='最佳: '+best}
+function draw(){const skyGrad=ctx.createLinearGradient(0,0,0,H);skyGrad.addColorStop(0,'#1a365d');skyGrad.addColorStop(0.6,'#2b6cb0');skyGrad.addColorStop(1,'#48bb78');ctx.fillStyle=skyGrad;ctx.fillRect(0,0,W,H);for(let i=0;i<6;i++){const bx=(i*120-bgX)%(W+240)-120;ctx.fillStyle='rgba(255,255,255,0.5)';ctx.beginPath();ctx.arc(bx+60,30+Math.sin(frame*0.02+i)*15,15,0,Math.PI*2);ctx.fill()}pipes.forEach(p=>{const lipW=PIPE_W+8,lipH=18;ctx.fillStyle='#37b24d';ctx.fillRect(p.x,0,PIPE_W,p.top);ctx.fillRect(p.x,p.top+GAP,PIPE_W,H-p.top-GAP);ctx.fillStyle='#2f9e44';ctx.fillRect(p.x-4,p.top-lipH,lipW,lipH);ctx.fillRect(p.x-4,p.top+GAP,lipW,lipH);ctx.strokeStyle='#1b7a30';ctx.lineWidth=1;ctx.strokeRect(p.x-4,p.top-lipH,lipW,lipH);ctx.strokeRect(p.x-4,p.top+GAP,lipW,lipH)});ctx.fillStyle='#facc15';ctx.beginPath();ctx.arc(bird.x,bird.y,BIRD_R,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f97316';ctx.beginPath();ctx.arc(bird.x+7,bird.y-4,4.5,0,Math.PI*2);ctx.fill();const wingY=bird.y+Math.sin(frame*0.3)*3;ctx.fillStyle='#eab308';ctx.beginPath();ctx.ellipse(bird.x-6,wingY+2,7,4,0.3,0,Math.PI*2);ctx.fill();document.getElementById('sc').textContent=score;if(!started){ctx.fillStyle='rgba(0,0,0,0.4)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 20px system-ui';ctx.textAlign='center';ctx.fillText('点击开始',W/2,H/2-20);ctx.font='12px system-ui';ctx.fillText('或按空格键',W/2,H/2+10);ctx.textAlign='start'}if(over){ctx.fillStyle='rgba(0,0,0,0.55)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 22px system-ui';ctx.textAlign='center';ctx.fillText('游戏结束',W/2,H/2-15);ctx.font='14px system-ui';ctx.fillText('得分: '+score+'  最佳: '+best,W/2,H/2+15);ctx.textAlign='start'}}
 function loop(){update();draw();anim=requestAnimationFrame(loop)}
 c.addEventListener('click',flap);c.addEventListener('touchstart',e=>{e.preventDefault();flap()},{passive:false});
-document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowUp')flap()});
-init();loop();
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();flap()}});
+document.getElementById('restart').addEventListener('click',init);window.addEventListener('resize',resize);
+init();
 </script>
 </body>
 </html>

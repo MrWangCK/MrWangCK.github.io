@@ -2,38 +2,50 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>扫雷</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#1a1a2e;color:#fff;font-family:sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 16px;background:rgba(0,0,0,0.4);flex-shrink:0}
-.hud-info{display:flex;gap:16px;font-size:0.9rem;color:rgba(255,255,255,0.8)}
-.btn{padding:4px 14px;border:none;border-radius:14px;color:#fff;cursor:pointer;font-size:0.78rem;background:linear-gradient(135deg,#3498db,#2980b9)}
-.btn:hover{opacity:0.85}
-.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.board{display:inline-grid;grid-template-columns:repeat(10,1fr);width:min(92vw,calc(92vh - 60px));aspect-ratio:1;gap:2px;background:rgba(255,255,255,0.1);padding:4px;border-radius:8px}
-.cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;background:rgba(102,126,234,0.3);cursor:pointer;font-size:clamp(0.6rem,2vmin,0.95rem);font-weight:bold;border-radius:3px;user-select:none}
-.cell.revealed{background:rgba(255,255,255,0.05);cursor:default}
-.cell.mine{background:rgba(231,76,60,0.3)}
-.cell.flag{background:rgba(241,196,15,0.2)}
+body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;touch-action:manipulation}
+.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(255,255,255,0.04);flex-shrink:0;gap:8px;flex-wrap:wrap}
+.hud-item{font-size:0.85rem;color:rgba(255,255,255,0.8)}.hud-item span{font-weight:700;color:#60a5fa}
+.sel{padding:4px 8px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#fff;cursor:pointer;font-size:0.72rem}
+.btn{padding:5px 14px;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;background:linear-gradient(135deg,#3b82f6,#2563eb);transition:.2s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(59,130,246,0.3)}
+.game-area{flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px}
+.board{display:inline-grid;gap:2px;background:rgba(255,255,255,0.03);padding:4px;border-radius:10px;user-select:none}
+.cell{display:flex;align-items:center;justify-content:center;background:rgba(96,165,250,0.25);cursor:pointer;font-weight:700;border-radius:3px;transition:.1s;font-size:clamp(0.6rem,2.5vmin,0.9rem)}
+.cell:hover{background:rgba(96,165,250,0.35)}
+.cell.revealed{background:rgba(255,255,255,0.04);cursor:default}
+.cell.mine{background:rgba(239,68,68,0.3)}
+.cell.flag{background:rgba(251,191,36,0.2)}
 </style>
 </head>
 <body>
 <div class="hud">
-  <div class="hud-info"><span id="info">💣 剩余: 15 | 左键翻开 | 右键标记</span></div>
-  <button class="btn" onclick="init()">重新开始</button>
+  <div class="hud-item">💣 剩余: <span id="mc">15</span></div>
+  <div class="hud-item">⏱ <span id="tm">0</span>s</div>
+  <select class="sel" id="diff">
+    <option value="8x8x10">简单 8×8</option>
+    <option value="10x10x15" selected>中等 10×10</option>
+    <option value="12x12x25">困难 12×12</option>
+  </select>
+  <span style="font-size:0.65rem;color:rgba(255,255,255,0.3)">左键翻开 | 右键标记</span>
+  <button class="btn" id="restart">重新开始</button>
 </div>
 <div class="game-area"><div class="board" id="board"></div></div>
 <script>
-const R=10,C=10,M=15;const numC=['','#3498db','#2ecc71','#e74c3c','#8e44ad','#f39c12','#1abc9c','#fff','#95a5a6'];
-let grid,revealed,flagged,mines,over;
-function init(){grid=Array(R).fill(null).map(()=>Array(C).fill(0));revealed=Array(R).fill(null).map(()=>Array(C).fill(false));flagged=Array(R).fill(null).map(()=>Array(C).fill(false));mines=[];over=false;let p=0;while(p<M){const r=Math.floor(Math.random()*R),c=Math.floor(Math.random()*C);if(!grid[r][c]){grid[r][c]=-1;mines.push([r,c]);p++}}for(let r=0;r<R;r++)for(let c=0;c<C;c++)if(grid[r][c]!==-1){let n=0;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const nr=r+dr,nc=c+dc;if(nr>=0&&nr<R&&nc>=0&&nc<C&&grid[nr][nc]===-1)n++}grid[r][c]=n}render()}
-function render(){const b=document.getElementById('board');b.innerHTML='';let fc=0;for(let r=0;r<R;r++)for(let c=0;c<C;c++){const d=document.createElement('div');d.className='cell';if(revealed[r][c]){d.classList.add('revealed');if(grid[r][c]===-1)d.classList.add('mine'),d.textContent='💣';else if(grid[r][c]>0)d.textContent=grid[r][c],d.style.color=numC[grid[r][c]]}else if(flagged[r][c]){d.classList.add('flag');d.textContent='🚩';fc++}d.addEventListener('click',()=>reveal(r,c));d.addEventListener('contextmenu',e=>{e.preventDefault();flag(r,c)});b.appendChild(d)}document.getElementById('info').textContent='💣 剩余: '+(M-fc)+' | 左键翻开 | 右键标记'}
-function reveal(r,c){if(over||revealed[r][c]||flagged[r][c])return;revealed[r][c]=true;if(grid[r][c]===-1){over=true;mines.forEach(([mr,mc])=>revealed[mr][mc]=true);render();setTimeout(()=>alert('💥 踩雷了!'),100);return}if(grid[r][c]===0)flood(r,c);render();checkWin()}
-function flood(r,c){for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const nr=r+dr,nc=c+dc;if(nr>=0&&nr<R&&nc>=0&&nc<C&&!revealed[nr][nc]&&!flagged[nr][nc]){revealed[nr][nc]=true;if(grid[nr][nc]===0)flood(nr,nc)}}}
+const numC=['','#3b82f6','#22c55e','#ef4444','#8b5cf6','#f59e0b','#06b6d4','#fff','#94a3b8'];
+let R,C,M,grid,revealed,flagged,over,startTime,timer;
+function parseDiff(){const v=document.getElementById('diff').value.split('x');R=+v[0];C=+v[1];M=+v[2]}
+function init(){parseDiff();grid=Array(R).fill(null).map(()=>Array(C).fill(0));revealed=Array(R).fill(null).map(()=>Array(C).fill(false));flagged=Array(R).fill(null).map(()=>Array(C).fill(false));over=false;startTime=Date.now();clearInterval(timer);timer=setInterval(()=>{if(!over)document.getElementById('tm').textContent=Math.floor((Date.now()-startTime)/1000)},500);let p=0;while(p<M){const r=Math.floor(Math.random()*R),c=Math.floor(Math.random()*C);if(!grid[r][c]){grid[r][c]=-1;p++}}for(let r=0;r<R;r++)for(let c=0;c<C;c++)if(grid[r][c]!==-1){let n=0;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const nr=r+dr,nc=c+dc;if(nr>=0&&nr<R&&nc>=0&&nc<C&&grid[nr][nc]===-1)n++}grid[r][c]=n}render()}
+function render(){const sz=Math.min(52,Math.floor((window.innerWidth-40)/C),Math.floor((window.innerHeight-120)/R));const b=document.getElementById('board');b.style.gridTemplateColumns=`repeat(${C},${sz}px)`;b.innerHTML='';let fc=0;for(let r=0;r<R;r++)for(let c=0;c<C;c++){const d=document.createElement('div');d.className='cell';d.style.width=sz+'px';d.style.height=sz+'px';d.style.fontSize=(sz*0.5)+'px';if(revealed[r][c]){d.classList.add('revealed');if(grid[r][c]===-1){d.classList.add('mine');d.textContent='💣'}else if(grid[r][c]>0){d.textContent=grid[r][c];d.style.color=numC[grid[r][c]]}}else if(flagged[r][c]){d.classList.add('flag');d.textContent='🚩';fc++}d.addEventListener('click',()=>reveal(r,c));d.addEventListener('contextmenu',e=>{e.preventDefault();flag(r,c)});b.appendChild(d)}document.getElementById('mc').textContent=M-fc}
+function reveal(r,c){if(over||revealed[r][c]||flagged[r][c])return;revealed[r][c]=true;if(grid[r][c]===-1){over=true;clearInterval(timer);revealAllMines();render();setTimeout(()=>alert('💥 踩雷了!'),200);return}if(grid[r][c]===0)flood(r,c);render();checkWin()}
+function fload(r,c){for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const nr=r+dr,nc=c+dc;if(nr>=0&&nr<R&&nc>=0&&nc<C&&!revealed[nr][nc]&&!flagged[nr][nc]){revealed[nr][nc]=true;if(grid[nr][nc]===0)flood(nr,nc)}}}
 function flag(r,c){if(over||revealed[r][c])return;flagged[r][c]=!flagged[r][c];render()}
-function checkWin(){let cnt=0;for(let r=0;r<R;r++)for(let c=0;c<C;c++)if(revealed[r][c])cnt++;if(cnt===R*C-M){over=true;setTimeout(()=>alert('🎉 恭喜通关!'),100)}}
+function revealAllMines(){for(let r=0;r<R;r++)for(let c=0;c<C;c++)if(grid[r][c]===-1)revealed[r][c]=true}
+function checkWin(){let cnt=0;for(let r=0;r<R;r++)for(let c=0;c<C;c++)if(revealed[r][c])cnt++;if(cnt===R*C-M){over=true;clearInterval(timer);const t=Math.floor((Date.now()-startTime)/1000);setTimeout(()=>alert('🎉 恭喜通关! 用时: '+t+'秒'),200)}}
+document.getElementById('restart').addEventListener('click',init);document.getElementById('diff').addEventListener('change',init);
 init();
 </script>
 </body>
