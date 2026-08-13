@@ -1,0 +1,2947 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from __future__ import annotations
+
+import secrets
+import subprocess
+import threading
+import time
+from pathlib import Path
+
+from fastapi import (
+    FastAPI,
+    HTTPException,
+    Request,
+    Response,
+)
+
+from fastapi.responses import (
+    HTMLResponse,
+    StreamingResponse,
+    FileResponse,
+)
+
+from pydantic import BaseModel
+
+from core.robot_core import RobotCore
+from database.database import UserDatabase
+from camera.camera import CameraManager
+from voice.audio import AudioManager
+
+
+# =============================================================
+# FastAPI
+# =============================================================
+
+app = FastAPI(
+    title="HengGui Robot",
+    version="1.2",
+)
+
+
+# =============================================================
+# 系统模块
+# =============================================================
+
+db = UserDatabase()
+
+robot = RobotCore()
+
+camera = CameraManager(
+    device="/dev/video0",
+    width=2560,
+    height=1440,
+    fps=30,
+)
+
+audio = AudioManager(
+    card="seeed2micvoicec",
+)
+
+
+# =============================================================
+# 测试音乐
+# =============================================================
+
+TEST_AUDIO_DIR = Path(
+    "/home/henggui/robot/voice/test_audio"
+)
+
+TEST_MUSIC_MP3 = (
+    TEST_AUDIO_DIR
+    / "wake.mp3"
+)
+
+TEST_MUSIC_WAV = (
+    TEST_AUDIO_DIR
+    / "wake.wav"
+)
+
+# 不使用 card 3。
+# 使用声卡名称，避免重启后声卡编号改变。
+TEST_AUDIO_DEVICE = (
+    "plughw:CARD=seeed2micvoicec,DEV=0"
+)
+
+test_music_lock = threading.RLock()
+
+test_music_process = None
+
+
+def test_music_is_playing():
+    global test_music_process
+
+    with test_music_lock:
+
+        if test_music_process is None:
+            return False
+
+        if test_music_process.poll() is None:
+            return True
+
+        test_music_process = None
+
+        return False
+
+
+def stop_test_music_process():
+    global test_music_process
+
+    with test_music_lock:
+
+        process = test_music_process
+
+        if process is None:
+            return True
+
+        if process.poll() is None:
+
+            try:
+                process.terminate()
+
+                process.wait(
+                    timeout=1.5
+                )
+
+            except subprocess.TimeoutExpired:
+
+                try:
+                    process.kill()
+
+                    process.wait(
+                        timeout=1.0
+                    )
+
+                except Exception:
+                    pass
+
+            except Exception:
+                pass
+
+        test_music_process = None
+
+        return True
+
+
+def ensure_test_music_wav():
+    """
+    如果 wake.wav 已存在，直接使用。
+
+    如果只有 wake.mp3，则第一次播放时自动转换：
+        MP3 -> 48 kHz / Stereo WAV
+    """
+
+    TEST_AUDIO_DIR.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
+
+    if TEST_MUSIC_WAV.exists():
+
+        return TEST_MUSIC_WAV
+
+    if not TEST_MUSIC_MP3.exists():
+
+        raise FileNotFoundError(
+            "测试音乐不存在："
+            + str(TEST_MUSIC_MP3)
+        )
+
+    print(
+        "[AUDIO] Converting:",
+        TEST_MUSIC_MP3,
+        "->",
+        TEST_MUSIC_WAV,
+    )
+
+    try:
+
+        result = subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-loglevel",
+                "error",
+                "-i",
+                str(TEST_MUSIC_MP3),
+                "-ar",
+                "48000",
+                "-ac",
+                "2",
+                str(TEST_MUSIC_WAV),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+
+    except FileNotFoundError:
+
+        raise RuntimeError(
+            "系统未安装 ffmpeg，"
+            "无法将 wake.mp3 转换为 WAV"
+        )
+
+    except subprocess.TimeoutExpired:
+
+        raise RuntimeError(
+            "wake.mp3 转换超时"
+        )
+
+    if result.returncode != 0:
+
+        raise RuntimeError(
+            "音频转换失败："
+            + (
+                result.stderr.strip()
+                or "ffmpeg error"
+            )
+        )
+
+    if not TEST_MUSIC_WAV.exists():
+
+        raise RuntimeError(
+            "转换完成后未找到 wake.wav"
+        )
+
+    return TEST_MUSIC_WAV
+
+
+def play_test_music_process():
+    global test_music_process
+
+    # ---------------------------------------------------------
+    # 确保测试音频存在
+    # ---------------------------------------------------------
+
+    path = ensure_test_music_wav()
+
+    # ---------------------------------------------------------
+    # 先停止已有测试音乐
+    # ---------------------------------------------------------
+
+    stop_test_music_process()
+
+    # ---------------------------------------------------------
+    # 再停止 AudioManager 当前播放
+    #
+    # 避免两个 aplay 同时占用同一块 ALSA 声卡
+    # ---------------------------------------------------------
+
+    try:
+        audio.stop_playback()
+
+    except Exception:
+        pass
+
+    # ---------------------------------------------------------
+    # 直接指定 Seeed 声卡播放
+    # ---------------------------------------------------------
+
+    with test_music_lock:
+
+        try:
+
+            test_music_process = subprocess.Popen(
+                [
+                    "aplay",
+                    "-D",
+                    TEST_AUDIO_DEVICE,
+                    str(path),
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+
+        except FileNotFoundError:
+
+            test_music_process = None
+
+            raise RuntimeError(
+                "系统没有找到 aplay"
+            )
+
+        except Exception as exc:
+
+            test_music_process = None
+
+            raise RuntimeError(
+                "启动测试音乐失败："
+                + str(exc)
+            )
+
+    # ---------------------------------------------------------
+    # 给 aplay 一点时间。
+    # 如果立即退出，通常说明声卡打开失败。
+    # ---------------------------------------------------------
+
+    time.sleep(0.15)
+
+    with test_music_lock:
+
+        if (
+            test_music_process is None
+            or
+            test_music_process.poll()
+            is not None
+        ):
+
+            test_music_process = None
+
+            raise RuntimeError(
+                "aplay 启动后立即退出。"
+                "请检查 seeed2micvoicec "
+                "声卡、喇叭或 ALSA 配置。"
+            )
+
+    return {
+        "ok": True,
+        "playing": True,
+        "filename": path.name,
+        "device": TEST_AUDIO_DEVICE,
+    }
+
+
+# =============================================================
+# Session
+# =============================================================
+
+sessions = {}
+
+session_lock = threading.RLock()
+
+
+# =============================================================
+# API 数据模型
+# =============================================================
+
+class LoginBody(BaseModel):
+    username: str
+    password: str
+
+
+class SpeedBody(BaseModel):
+    speed: int = 80
+
+
+class HeadBody(BaseModel):
+    angle: int
+
+
+class ArmBody(BaseModel):
+    joint: int
+    angle: int
+
+
+class GripperBody(BaseModel):
+    angle: int
+
+
+class AutoBody(BaseModel):
+    enabled: bool
+
+
+class RawBody(BaseModel):
+    command: str
+
+
+class RecordBody(BaseModel):
+    seconds: int = 5
+
+
+class VolumeBody(BaseModel):
+    volume: int = 50
+
+
+# =============================================================
+# 登录 / 权限
+# =============================================================
+
+def get_session(
+    request: Request
+):
+    token = request.cookies.get(
+        "robot_session"
+    )
+
+    if not token:
+        return None
+
+    with session_lock:
+        return sessions.get(token)
+
+
+def require_user(
+    request: Request
+):
+    user = get_session(request)
+
+    if not user:
+        raise HTTPException(
+            status_code=401,
+            detail="请先登录",
+        )
+
+    return user
+
+
+def require_developer(
+    request: Request
+):
+    user = require_user(request)
+
+    if user["role"] != "developer":
+        raise HTTPException(
+            status_code=403,
+            detail="需要开发人员权限",
+        )
+
+    return user
+
+
+def control_source(user):
+
+    if user["role"] == "developer":
+        return "developer"
+
+    return "web"
+
+
+# =============================================================
+# 启动 / 关闭
+# =============================================================
+
+@app.on_event("startup")
+def startup_media():
+
+    print(
+        "[WEB] Starting camera..."
+    )
+
+    camera.start()
+
+    print(
+        "[WEB] Camera manager started."
+    )
+
+    print(
+        "[WEB] Audio device:",
+        audio.status(),
+    )
+
+    print(
+        "[WEB] Test audio device:",
+        TEST_AUDIO_DEVICE,
+    )
+
+    print(
+        "[WEB] Test MP3:",
+        TEST_MUSIC_MP3,
+        "exists=",
+        TEST_MUSIC_MP3.exists(),
+    )
+
+    print(
+        "[WEB] Test WAV:",
+        TEST_MUSIC_WAV,
+        "exists=",
+        TEST_MUSIC_WAV.exists(),
+    )
+
+
+@app.on_event("shutdown")
+def shutdown_media():
+
+    print(
+        "[WEB] Shutting down media..."
+    )
+
+    stop_test_music_process()
+
+    camera.stop()
+
+    audio.close()
+
+
+# =============================================================
+# 首页
+# =============================================================
+
+@app.get(
+    "/",
+    response_class=HTMLResponse,
+)
+def index():
+
+    return HTML_PAGE
+
+
+# =============================================================
+# 登录
+# =============================================================
+
+@app.post("/api/login")
+def login(
+    body: LoginBody,
+    response: Response,
+):
+
+    user = db.authenticate(
+        body.username,
+        body.password,
+    )
+
+    if not user:
+
+        raise HTTPException(
+            status_code=401,
+            detail="用户名或密码错误",
+        )
+
+    token = secrets.token_urlsafe(32)
+
+    with session_lock:
+
+        sessions[token] = user
+
+    response.set_cookie(
+        key="robot_session",
+        value=token,
+        httponly=True,
+        samesite="strict",
+    )
+
+    return {
+        "ok": True,
+        "username": user["username"],
+        "role": user["role"],
+    }
+
+
+@app.post("/api/logout")
+def logout(
+    request: Request,
+    response: Response,
+):
+
+    token = request.cookies.get(
+        "robot_session"
+    )
+
+    if token:
+
+        with session_lock:
+
+            sessions.pop(
+                token,
+                None,
+            )
+
+    response.delete_cookie(
+        "robot_session"
+    )
+
+    return {
+        "ok": True,
+    }
+
+
+@app.get("/api/me")
+def me(
+    request: Request
+):
+
+    user = require_user(
+        request
+    )
+
+    return {
+        "username": user["username"],
+        "role": user["role"],
+    }
+
+
+# =============================================================
+# 控制权
+# =============================================================
+
+@app.post(
+    "/api/control/release"
+)
+def release_control(
+    request: Request
+):
+
+    user = require_user(
+        request
+    )
+
+    if user["role"] == "developer":
+
+        ok = robot.developer_release()
+
+    else:
+
+        ok = robot.web_release()
+
+    return {
+        "ok": ok,
+    }
+
+
+@app.post(
+    "/api/control/developer/takeover"
+)
+def developer_takeover(
+    request: Request
+):
+
+    require_developer(
+        request
+    )
+
+    return {
+        "ok":
+            robot.developer_takeover()
+    }
+
+
+@app.post(
+    "/api/control/developer/release"
+)
+def developer_release(
+    request: Request
+):
+
+    require_developer(
+        request
+    )
+
+    return {
+        "ok":
+            robot.developer_release()
+    }
+
+
+# =============================================================
+# 底盘
+# =============================================================
+
+@app.post(
+    "/api/chassis/enable"
+)
+def chassis_enable(
+    request: Request
+):
+
+    user = require_user(
+        request
+    )
+
+    return {
+        "ok":
+            robot.enable_chassis(
+                control_source(user)
+            )
+    }
+
+
+@app.post(
+    "/api/chassis/disable"
+)
+def chassis_disable(
+    request: Request
+):
+
+    user = require_user(
+        request
+    )
+
+    return {
+        "ok":
+            robot.disable_chassis(
+                control_source(user)
+            )
+    }
+
+
+@app.post(
+    "/api/move/forward"
+)
+def forward(
+    body: SpeedBody,
+    request: Request,
+):
+
+    user = require_user(
+        request
+    )
+
+    speed = max(
+        0,
+        min(
+            255,
+            int(body.speed),
+        ),
+    )
+
+    return {
+        "ok":
+            robot.forward(
+                speed,
+                control_source(user),
+            )
+    }
+
+
+@app.post(
+    "/api/move/backward"
+)
+def backward(
+    body: SpeedBody,
+    request: Request,
+):
+
+    user = require_user(
+        request
+    )
+
+    speed = max(
+        0,
+        min(
+            255,
+            int(body.speed),
+        ),
+    )
+
+    return {
+        "ok":
+            robot.backward(
+                speed,
+                control_source(user),
+            )
+    }
+
+
+@app.post(
+    "/api/move/left"
+)
+def left(
+    body: SpeedBody,
+    request: Request,
+):
+
+    user = require_user(
+        request
+    )
+
+    speed = max(
+        0,
+        min(
+            255,
+            int(body.speed),
+        ),
+    )
+
+    return {
+        "ok":
+            robot.left(
+                speed,
+                control_source(user),
+            )
+    }
+
+
+@app.post(
+    "/api/move/right"
+)
+def right(
+    body: SpeedBody,
+    request: Request,
+):
+
+    user = require_user(
+        request
+    )
+
+    speed = max(
+        0,
+        min(
+            255,
+            int(body.speed),
+        ),
+    )
+
+    return {
+        "ok":
+            robot.right(
+                speed,
+                control_source(user),
+            )
+    }
+
+
+@app.post(
+    "/api/move/stop"
+)
+def stop(
+    request: Request
+):
+
+    user = require_user(
+        request
+    )
+
+    return {
+        "ok":
+            robot.stop(
+                control_source(user)
+            )
+    }
+
+
+# =============================================================
+# 头部
+# =============================================================
+
+@app.post("/api/head")
+def head(
+    body: HeadBody,
+    request: Request,
+):
+
+    user = require_user(
+        request
+    )
+
+    angle = max(
+        0,
+        min(
+            270,
+            int(body.angle),
+        ),
+    )
+
+    return {
+        "ok":
+            robot.head(
+                angle,
+                control_source(user),
+            )
+    }
+
+
+@app.post(
+    "/api/head/home"
+)
+def head_home(
+    request: Request
+):
+
+    user = require_user(
+        request
+    )
+
+    return {
+        "ok":
+            robot.head_home(
+                control_source(user)
+            )
+    }
+
+
+# =============================================================
+# 左右机械臂
+# =============================================================
+
+@app.post(
+    "/api/arm/left"
+)
+def left_arm(
+    body: ArmBody,
+    request: Request,
+):
+
+    user = require_user(
+        request
+    )
+
+    joint = max(
+        0,
+        min(
+            5,
+            int(body.joint),
+        ),
+    )
+
+    angle = max(
+        0,
+        min(
+            180,
+            int(body.angle),
+        ),
+    )
+
+    return {
+        "ok":
+            robot.left_arm(
+                joint,
+                angle,
+                control_source(user),
+            )
+    }
+
+
+@app.post(
+    "/api/arm/right"
+)
+def right_arm(
+    body: ArmBody,
+    request: Request,
+):
+
+    user = require_user(
+        request
+    )
+
+    joint = max(
+        0,
+        min(
+            5,
+            int(body.joint),
+        ),
+    )
+
+    angle = max(
+        0,
+        min(
+            180,
+            int(body.angle),
+        ),
+    )
+
+    return {
+        "ok":
+            robot.right_arm(
+                joint,
+                angle,
+                control_source(user),
+            )
+    }
+
+
+@app.post(
+    "/api/gripper/left"
+)
+def left_gripper(
+    body: GripperBody,
+    request: Request,
+):
+
+    user = require_user(
+        request
+    )
+
+    angle = max(
+        20,
+        min(
+            90,
+            int(body.angle),
+        ),
+    )
+
+    return {
+        "ok":
+            robot.left_gripper(
+                angle,
+                control_source(user),
+            )
+    }
+
+
+@app.post(
+    "/api/gripper/right"
+)
+def right_gripper(
+    body: GripperBody,
+    request: Request,
+):
+
+    user = require_user(
+        request
+    )
+
+    angle = max(
+        20,
+        min(
+            90,
+            int(body.angle),
+        ),
+    )
+
+    return {
+        "ok":
+            robot.right_gripper(
+                angle,
+                control_source(user),
+            )
+    }
+
+
+# =============================================================
+# AI 自主模式
+# =============================================================
+
+@app.post("/api/autonomous")
+def autonomous(
+    body: AutoBody,
+    request: Request,
+):
+
+    user = require_user(
+        request
+    )
+
+    return {
+        "ok":
+            robot.set_autonomous(
+                body.enabled,
+                control_source(user),
+            )
+    }
+
+
+# =============================================================
+# 软件急停
+# =============================================================
+
+@app.post(
+    "/api/emergency-stop"
+)
+def emergency_stop(
+    request: Request
+):
+
+    user = require_user(
+        request
+    )
+
+    return {
+        "ok":
+            robot.emergency_stop(
+                control_source(user)
+            )
+    }
+
+
+@app.post(
+    "/api/emergency-clear"
+)
+def emergency_clear(
+    request: Request
+):
+
+    require_developer(
+        request
+    )
+
+    return {
+        "ok":
+            robot.clear_emergency_stop(
+                "developer"
+            )
+    }
+
+
+# =============================================================
+# Developer 原始命令
+# =============================================================
+
+@app.post(
+    "/api/developer/raw"
+)
+def raw_command(
+    body: RawBody,
+    request: Request,
+):
+
+    require_developer(
+        request
+    )
+
+    command = (
+        body.command
+        .strip()
+    )
+
+    if not command:
+
+        raise HTTPException(
+            status_code=400,
+            detail="命令不能为空",
+        )
+
+    return {
+        "ok":
+            robot.developer_raw(
+                command
+            )
+    }
+
+
+# =============================================================
+# Robot 状态
+# =============================================================
+
+@app.get("/api/status")
+def status(
+    request: Request
+):
+
+    require_user(
+        request
+    )
+
+    try:
+
+        mega = (
+            robot.get_mega_status()
+        )
+
+    except Exception as exc:
+
+        mega = {
+            "error":
+                str(exc)
+        }
+
+    try:
+
+        camera_state = (
+            camera.status()
+        )
+
+    except Exception as exc:
+
+        camera_state = {
+            "running": False,
+            "error": str(exc),
+        }
+
+    try:
+
+        audio_state = (
+            audio.status()
+        )
+
+        audio_state[
+            "test_music_playing"
+        ] = test_music_is_playing()
+
+        audio_state[
+            "test_music_mp3_exists"
+        ] = TEST_MUSIC_MP3.exists()
+
+        audio_state[
+            "test_music_wav_exists"
+        ] = TEST_MUSIC_WAV.exists()
+
+    except Exception as exc:
+
+        audio_state = {
+            "online": False,
+            "error": str(exc),
+            "test_music_playing":
+                test_music_is_playing(),
+            "test_music_mp3_exists":
+                TEST_MUSIC_MP3.exists(),
+            "test_music_wav_exists":
+                TEST_MUSIC_WAV.exists(),
+        }
+
+    return {
+        "control":
+            robot.get_control_status(),
+
+        "mega":
+            mega,
+
+        "camera":
+            camera_state,
+
+        "audio":
+            audio_state,
+    }
+
+
+@app.get("/api/sensors")
+def sensors(
+    request: Request
+):
+
+    require_user(
+        request
+    )
+
+    data = {}
+
+    try:
+
+        data["ultrasonic"] = (
+            robot.get_ultrasonic()
+        )
+
+    except Exception as exc:
+
+        data["ultrasonic"] = {
+            "error": str(exc)
+        }
+
+    try:
+
+        data["encoder"] = (
+            robot.get_encoder()
+        )
+
+    except Exception as exc:
+
+        data["encoder"] = {
+            "error": str(exc)
+        }
+
+    return data
+
+
+# =============================================================
+# 摄像头实时流
+# =============================================================
+
+@app.get(
+    "/api/camera/stream"
+)
+def camera_stream(
+    request: Request
+):
+
+    require_user(
+        request
+    )
+
+    return StreamingResponse(
+        camera.stream(),
+
+        media_type=(
+            "multipart/"
+            "x-mixed-replace;"
+            "boundary=frame"
+        ),
+
+        headers={
+            "Cache-Control":
+                "no-cache, no-store, "
+                "must-revalidate",
+
+            "Pragma":
+                "no-cache",
+
+            "Expires":
+                "0",
+        },
+    )
+
+
+# =============================================================
+# 摄像头拍照
+# =============================================================
+
+@app.post(
+    "/api/camera/snapshot"
+)
+def camera_snapshot(
+    request: Request
+):
+
+    require_user(
+        request
+    )
+
+    try:
+
+        result = camera.snapshot()
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(exc),
+        )
+
+    return {
+        "ok": True,
+
+        "filename":
+            result["filename"],
+
+        "size":
+            result["size"],
+
+        "url":
+            (
+                "/api/camera/photo/"
+                + result["filename"]
+            ),
+    }
+
+
+@app.get(
+    "/api/camera/photo/{filename}"
+)
+def camera_photo(
+    filename: str,
+    request: Request,
+):
+
+    require_user(
+        request
+    )
+
+    safe_name = Path(
+        filename
+    ).name
+
+    path = (
+        camera.photo_dir
+        / safe_name
+    )
+
+    if not path.exists():
+
+        raise HTTPException(
+            status_code=404,
+            detail="照片不存在",
+        )
+
+    return FileResponse(
+        path,
+        media_type="image/jpeg",
+        filename=safe_name,
+    )
+
+
+# =============================================================
+# 音频状态
+# =============================================================
+
+@app.get(
+    "/api/audio/status"
+)
+def audio_status(
+    request: Request
+):
+
+    require_user(
+        request
+    )
+
+    try:
+
+        result = audio.status()
+
+        result["volume"] = (
+            audio.get_volume()
+        )
+
+        result[
+            "test_music_playing"
+        ] = test_music_is_playing()
+
+        result[
+            "test_music_mp3_exists"
+        ] = TEST_MUSIC_MP3.exists()
+
+        result[
+            "test_music_wav_exists"
+        ] = TEST_MUSIC_WAV.exists()
+
+        result[
+            "test_music_filename"
+        ] = (
+            TEST_MUSIC_WAV.name
+            if TEST_MUSIC_WAV.exists()
+            else TEST_MUSIC_MP3.name
+        )
+
+        result[
+            "test_music_device"
+        ] = TEST_AUDIO_DEVICE
+
+        return result
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(exc),
+        )
+
+
+# =============================================================
+# 麦克风录音
+# =============================================================
+
+@app.post(
+    "/api/audio/record"
+)
+def audio_record(
+    body: RecordBody,
+    request: Request,
+):
+
+    require_user(
+        request
+    )
+
+    # 防止把测试音乐重新录进麦克风
+    stop_test_music_process()
+
+    try:
+
+        audio.stop_playback()
+
+    except Exception:
+        pass
+
+    try:
+
+        result = audio.record(
+            body.seconds
+        )
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(exc),
+        )
+
+    return {
+        "ok": True,
+        **result,
+    }
+
+
+# =============================================================
+# 主喇叭播放最近录音
+# =============================================================
+
+@app.post(
+    "/api/audio/play"
+)
+def audio_play(
+    request: Request
+):
+
+    require_user(
+        request
+    )
+
+    # 最近录音播放前停止测试音乐
+    stop_test_music_process()
+
+    try:
+
+        audio.play()
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(exc),
+        )
+
+    return {
+        "ok": True,
+    }
+
+
+# =============================================================
+# 所有主喇叭播放停止
+# =============================================================
+
+@app.post(
+    "/api/audio/stop"
+)
+def audio_stop(
+    request: Request
+):
+
+    require_user(
+        request
+    )
+
+    stop_test_music_process()
+
+    try:
+
+        audio.stop_playback()
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(exc),
+        )
+
+    return {
+        "ok": True,
+        "playing": False,
+    }
+
+
+# =============================================================
+# 测试音乐播放
+# =============================================================
+
+@app.post(
+    "/api/audio/test/play"
+)
+def audio_test_play(
+    request: Request
+):
+
+    require_user(
+        request
+    )
+
+    try:
+
+        return play_test_music_process()
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(exc),
+        )
+
+
+@app.post(
+    "/api/audio/test/stop"
+)
+def audio_test_stop(
+    request: Request
+):
+
+    require_user(
+        request
+    )
+
+    stop_test_music_process()
+
+    return {
+        "ok": True,
+        "playing": False,
+    }
+
+
+@app.get(
+    "/api/audio/test/status"
+)
+def audio_test_status(
+    request: Request
+):
+
+    require_user(
+        request
+    )
+
+    return {
+        "ok": True,
+
+        "playing":
+            test_music_is_playing(),
+
+        "mp3_exists":
+            TEST_MUSIC_MP3.exists(),
+
+        "wav_exists":
+            TEST_MUSIC_WAV.exists(),
+
+        "mp3":
+            str(TEST_MUSIC_MP3),
+
+        "wav":
+            str(TEST_MUSIC_WAV),
+
+        "device":
+            TEST_AUDIO_DEVICE,
+    }
+
+
+# =============================================================
+# 主喇叭音量
+# =============================================================
+
+@app.post(
+    "/api/audio/volume"
+)
+def audio_volume(
+    body: VolumeBody,
+    request: Request,
+):
+
+    require_user(
+        request
+    )
+
+    try:
+
+        volume = audio.set_volume(
+            body.volume
+        )
+
+    except Exception as exc:
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(exc),
+        )
+
+    return {
+        "ok": True,
+        "volume": volume,
+    }
+
+
+# =============================================================
+# 浏览器播放最近录音
+# =============================================================
+
+@app.get(
+    "/api/audio/latest"
+)
+def audio_latest(
+    request: Request
+):
+
+    require_user(
+        request
+    )
+
+    path = (
+        audio.latest_recording()
+    )
+
+    if path is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="暂无录音",
+        )
+
+    return FileResponse(
+        path,
+        media_type="audio/wav",
+        filename=path.name,
+    )
+
+
+# =============================================================
+# Web 页面
+# =============================================================
+
+HTML_PAGE = r"""
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HengGui Robot - Control Panel</title>
+<style>
+/* ============================================================
+   CSS Variables & Reset
+   ============================================================ */
+:root {
+    --bg-deep: #06080d;
+    --bg-card: rgba(13, 17, 28, 0.85);
+    --bg-card-hover: rgba(18, 23, 38, 0.92);
+    --border-subtle: rgba(80, 120, 200, 0.18);
+    --border-glow: rgba(100, 160, 255, 0.35);
+    --accent: #4da6ff;
+    --accent-glow: #3d8af7;
+    --accent-dim: rgba(77, 166, 255, 0.15);
+    --green: #34d399;
+    --green-glow: #22c55e;
+    --red: #f87171;
+    --red-glow: #ef4444;
+    --orange: #fbbf24;
+    --orange-glow: #f59e0b;
+    --purple: #a78bfa;
+    --purple-glow: #8b5cf6;
+    --cyan: #22d3ee;
+    --text-primary: #e2e8f0;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --radius: 14px;
+    --radius-sm: 9px;
+    --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    margin: 0;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: "Inter", "SF Pro Display", "Segoe UI", "Microsoft YaHei", sans-serif;
+    min-height: 100vh;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+/* ---- Animated Background ---- */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 60% 50% at 20% 15%, rgba(77,166,255,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 55% at 80% 85%, rgba(139,92,246,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(34,211,238,0.04) 0%, transparent 70%);
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image:
+        linear-gradient(rgba(77,166,255,0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(77,166,255,0.3) 1px, transparent 1px);
+    background-size: 50px 50px;
+    background-position: 0 0;
+}
+
+/* ---- Typography ---- */
+h2 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+h2 .icon { font-size: 1.25rem; line-height: 1; }
+
+/* ---- Header ---- */
+header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    background: rgba(8, 12, 22, 0.75);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 14px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+header h1::before {
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 10px var(--green-glow);
+    animation: headerPulse 2s ease-in-out infinite;
+}
+
+@keyframes headerPulse {
+    0%, 100% { box-shadow: 0 0 6px var(--green-glow); }
+    50% { box-shadow: 0 0 18px var(--green-glow), 0 0 30px rgba(34,197,94,0.3); }
+}
+
+#userInfo {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: rgba(255,255,255,0.04);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border-subtle);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#userInfo::before {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+}
+
+/* ---- Container ---- */
+.container {
+    position: relative;
+    z-index: 1;
+    padding: 20px 24px;
+    max-width: 1480px;
+    margin: auto;
+}
+
+/* ---- Card ---- */
+.card {
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 20px;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.card:hover {
+    border-color: var(--border-glow);
+    box-shadow: 0 0 30px rgba(77,166,255,0.06), inset 0 1px 0 rgba(255,255,255,0.02);
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius);
+    pointer-events: none;
+    background: radial-gradient(ellipse at 100% 0%, rgba(77,166,255,0.04) 0%, transparent 50%);
+}
+
+/* ---- Grid ---- */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 18px;
+}
+
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+
+/* ---- Buttons ---- */
+button {
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    padding: 11px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--accent), var(--accent-glow));
+    color: #fff;
+    letter-spacing: 0.01em;
+    transition: all var(--transition);
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+
+button:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(77,166,255,0.3); }
+button:hover::after { opacity: 1; }
+button:active { transform: translateY(0); transition: 0.05s; }
+button:disabled { cursor: not-allowed; opacity: 0.4; filter: grayscale(30%); transform: none; box-shadow: none; }
+
+button.stop {
+    background: linear-gradient(135deg, var(--red), var(--red-glow));
+}
+button.stop:hover { box-shadow: 0 4px 20px rgba(248,113,113,0.35); }
+
+button.secondary {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+}
+button.secondary:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.15);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+button.developer {
+    background: linear-gradient(135deg, var(--purple), var(--purple-glow));
+}
+button.developer:hover { box-shadow: 0 4px 20px rgba(139,92,246,0.35); }
+
+button.warning {
+    background: linear-gradient(135deg, var(--orange), var(--orange-glow));
+    color: #1a1a0a;
+}
+button.warning:hover { box-shadow: 0 4px 20px rgba(251,191,36,0.35); }
+
+button.music {
+    background: linear-gradient(135deg, var(--cyan), #0891b2);
+}
+button.music:hover { box-shadow: 0 4px 20px rgba(34,211,238,0.35); }
+
+/* ---- D-Pad ---- */
+.control-pad {
+    display: grid;
+    grid-template-columns: 72px 72px 72px;
+    grid-template-rows: 72px 72px 72px;
+    gap: 8px;
+    justify-content: center;
+    margin-top: 18px;
+}
+
+.control-pad button {
+    width: 72px;
+    height: 72px;
+    font-size: 1.5rem;
+    border-radius: 14px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    font-weight: 600;
+    transition: all var(--transition);
+}
+
+.control-pad button:hover {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(77,166,255,0.2);
+    transform: translateY(-2px);
+}
+
+.control-pad button.stop {
+    background: rgba(248,113,113,0.1);
+    border-color: rgba(248,113,113,0.3);
+    font-size: 1.2rem;
+}
+.control-pad button.stop:hover {
+    background: rgba(248,113,113,0.2);
+    border-color: var(--red);
+    box-shadow: 0 0 20px rgba(248,113,113,0.2);
+}
+
+/* ---- Form Inputs ---- */
+label {
+    display: block;
+    margin: 14px 0 6px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.08);
+    outline: none;
+    cursor: pointer;
+    margin: 4px 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid rgba(255,255,255,0.3);
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba(77,166,255,0.4);
+    transition: all var(--transition);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+    box-shadow: 0 0 20px rgba(77,166,255,0.6);
+}
+
+input[type="text"],
+input[type="password"],
+input[type="number"] {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    background: rgba(0,0,0,0.3);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    transition: all var(--transition);
+    outline: none;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+    background: rgba(0,0,0,0.45);
+}
+
+input::placeholder { color: var(--text-muted); }
+
+/* ---- Status Box ---- */
+.status {
+    white-space: pre-wrap;
+    background: rgba(0,0,0,0.4);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    min-height: 140px;
+    max-height: 360px;
+    overflow: auto;
+    font-family: "JetBrains Mono", "Fira Code", "SF Mono", "Consolas", monospace;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    border: 1px solid rgba(255,255,255,0.04);
+    margin-top: 10px;
+}
+
+/* ---- Login ---- */
+.login-box {
+    position: relative;
+    z-index: 10;
+    width: min(420px, 92%);
+    margin: 120px auto;
+    animation: loginSlideIn 0.6s ease-out;
+}
+
+@keyframes loginSlideIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.login-box .logo-area {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.login-box .logo-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--accent), var(--purple));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 14px;
+    box-shadow: 0 8px 32px rgba(77,166,255,0.25);
+    animation: logoFloat 3s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+.login-box .logo-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.login-box .logo-sub {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* ---- Hidden Utility ---- */
+.hidden { display: none !important; }
+.empty { visibility: hidden; }
+
+/* ---- Row Flex ---- */
+.row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 12px;
+}
+
+/* ---- Badge ---- */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 13px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-subtle);
+    margin: 0 6px 6px 0;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
+}
+
+.badge .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.badge .dot.online { background: var(--green); box-shadow: 0 0 6px var(--green-glow); }
+.badge .dot.offline { background: var(--text-muted); }
+.badge .dot.warning { background: var(--orange); box-shadow: 0 0 6px var(--orange-glow); }
+
+/* ---- Small Text ---- */
+.small {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+
+/* ---- Camera ---- */
+.camera-box {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-subtle);
+    position: relative;
+}
+
+.camera-box::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-sm);
+    pointer-events: none;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.3);
+}
+
+.camera-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* ---- Section Note ---- */
+.section-note {
+    background: rgba(255,255,255,0.02);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    border: 1px solid rgba(255,255,255,0.03);
+}
+
+/* ---- Music Status ---- */
+.music-status {
+    margin-top: 12px;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm);
+    background: rgba(34,211,238,0.06);
+    border: 1px solid rgba(34,211,238,0.15);
+    color: var(--cyan);
+    font-size: 0.85rem;
+    letter-spacing: 0.01em;
+}
+
+/* ---- Audio Player ---- */
+audio {
+    width: 100%;
+    margin-top: 12px;
+    border-radius: var(--radius-sm);
+}
+
+/* ---- Animations ---- */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card { animation: fadeInUp 0.5s ease-out both; }
+.grid > .card:nth-child(1) { animation-delay: 0.05s; }
+.grid > .card:nth-child(2) { animation-delay: 0.1s; }
+.grid > .card:nth-child(3) { animation-delay: 0.15s; }
+.grid > .card:nth-child(4) { animation-delay: 0.2s; }
+
+/* ---- Responsive ---- */
+@media (max-width: 1024px) {
+    .grid { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+    header { padding: 12px 16px; }
+    header h1 { font-size: 1.1rem; }
+    .container { padding: 14px 12px; }
+}
+
+@media (max-width: 768px) {
+    .grid-3 { grid-template-columns: 1fr; }
+    .control-pad {
+        grid-template-columns: 60px 60px 60px;
+        grid-template-rows: 60px 60px 60px;
+    }
+    .control-pad button { width: 60px; height: 60px; font-size: 1.3rem; }
+    .card { padding: 16px; }
+    button { padding: 10px 16px; font-size: 0.85rem; }
+    .login-box { margin: 60px auto; }
+}
+
+@media (max-width: 480px) {
+    header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    header h1 { font-size: 1rem; }
+    .row { gap: 6px; }
+    button { padding: 9px 13px; font-size: 0.82rem; }
+    .badge { font-size: 0.72rem; padding: 4px 9px; }
+}
+
+@media (max-width: 360px) {
+    .container { padding: 10px 6px; }
+    .card { padding: 12px; border-radius: 10px; }
+    input[type="text"],
+    input[type="password"],
+    input[type="number"] { padding: 9px 11px; font-size: 0.82rem; }
+}
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+</style>
+</head>
+<body>
+
+
+<!-- ==========================================================
+     Login Page
+     ========================================================== -->
+<div id="loginView" class="login-box card">
+
+<div class="logo-area">
+<div class="logo-icon">&#x1F916;</div>
+<div class="logo-title">HengGui Robot</div>
+<div class="logo-sub">智能机器人远程控制平台</div>
+</div>
+
+<label>用户名</label>
+<input id="loginUser" type="text" autocomplete="username" placeholder="请输入用户名">
+
+<label>密码</label>
+<input id="loginPass" type="password" autocomplete="current-password" placeholder="请输入密码">
+
+<div class="row">
+<button onclick="login()">登 录</button>
+</div>
+
+<p id="loginMessage" class="small"></p>
+</div>
+
+
+<!-- ==========================================================
+     Main Panel
+     ========================================================== -->
+<div id="mainView" class="hidden">
+
+<header>
+<h1>HengGui Control</h1>
+<div style="display:flex;align-items:center;gap:12px;">
+<span id="userInfo"></span>
+<button class="secondary" onclick="logout()" style="padding:7px 16px;font-size:0.82rem;">退出</button>
+</div>
+</header>
+
+<div class="container">
+
+
+<!-- ==========================================================
+     Row 1: Camera + Status
+     ========================================================== -->
+<div class="grid">
+
+<div class="card">
+<h2><span class="icon">&#x1F4F7;</span> 机器人视觉</h2>
+<div class="camera-box">
+<img id="cameraFeed" alt="HengGui Camera">
+</div>
+<div class="row">
+<button onclick="takePhoto()">&#x1F4F8; 拍照</button>
+<button class="secondary" onclick="restartCameraView()">&#x1F504; 刷新画面</button>
+</div>
+<p id="cameraState" class="small">摄像头：检测中</p>
+<p class="small" style="margin-top:2px;">2560 x 1440 / MJPEG / 30 FPS</p>
+</div>
+
+<div class="card">
+<h2><span class="icon">&#x1F4CA;</span> 系统状态</h2>
+<div>
+<span class="badge">控制权：<span id="owner">-</span></span>
+<span class="badge">Mega：<span id="megaStatus">-</span></span>
+<span class="badge">自主：<span id="autoStatus">-</span></span>
+<span class="badge">摄像头：<span id="cameraBadge">-</span></span>
+<span class="badge">音频：<span id="audioBadge">-</span></span>
+</div>
+<div id="statusBox" class="status">等待状态……</div>
+</div>
+
+</div>
+
+
+<!-- ==========================================================
+     Row 2: Chassis + Head
+     ========================================================== -->
+<div class="grid">
+
+<div class="card">
+<h2><span class="icon">&#x1F69A;</span> 底盘控制</h2>
+<label>速度：<span id="speedValue">80</span></label>
+<input id="speed" type="range" min="0" max="255" value="80"
+    oninput="speedValue.innerText=this.value">
+
+<div class="row">
+<button onclick="enableChassis()">&#x1F7E2; 启用底盘</button>
+<button class="secondary" onclick="disableChassis()">&#x1F534; 禁用底盘</button>
+<button class="secondary" onclick="releaseControl()">&#x1F504; 释放控制权</button>
+</div>
+
+<div class="control-pad">
+<div class="empty"></div>
+<button onclick="move('forward')">&uarr;</button>
+<div class="empty"></div>
+
+<button onclick="move('left')">&larr;</button>
+<button class="stop" onclick="stopRobot()">&#x25A0;</button>
+<button onclick="move('right')">&rarr;</button>
+
+<div class="empty"></div>
+<button onclick="move('backward')">&darr;</button>
+<div class="empty"></div>
+</div>
+
+<p class="small">键盘：W / A / S / D 控制，空格键 STOP</p>
+</div>
+
+<div class="card">
+<h2><span class="icon">&#x1F9E0;</span> 头部控制</h2>
+<label>角度：<span id="headValue">135</span>&deg;</label>
+<input id="headAngle" type="range" min="0" max="270" value="135"
+    oninput="headValue.innerText=this.value">
+<div class="row">
+<button onclick="setHead()">&#x2705; 执行</button>
+<button class="secondary" onclick="headHome()">&#x1F3E0; 归中</button>
+</div>
+</div>
+
+</div>
+
+
+<!-- ==========================================================
+     Row 3: Arms
+     ========================================================== -->
+<div class="grid">
+
+<div class="card">
+<h2><span class="icon">&#x1F91A;</span> 左机械臂</h2>
+<label>关节 0 ~ 5</label>
+<input id="leftJoint" type="number" min="0" max="5" value="0">
+<label>关节角度</label>
+<input id="leftAngle" type="range" min="0" max="180" value="90">
+<div class="row">
+<button onclick="arm('left')">&#x2705; 执行</button>
+</div>
+<label>夹爪角度</label>
+<input id="leftGrip" type="range" min="20" max="90" value="60">
+<div class="row">
+<button onclick="gripper('left')">&#x270A; 控制夹爪</button>
+</div>
+</div>
+
+<div class="card">
+<h2><span class="icon">&#x1F91B;</span> 右机械臂</h2>
+<label>关节 0 ~ 5</label>
+<input id="rightJoint" type="number" min="0" max="5" value="0">
+<label>关节角度</label>
+<input id="rightAngle" type="range" min="0" max="180" value="90">
+<div class="row">
+<button onclick="arm('right')">&#x2705; 执行</button>
+</div>
+<label>夹爪角度</label>
+<input id="rightGrip" type="range" min="20" max="90" value="60">
+<div class="row">
+<button onclick="gripper('right')">&#x270A; 控制夹爪</button>
+</div>
+</div>
+
+</div>
+
+
+<!-- ==========================================================
+     Row 4: AI + Audio
+     ========================================================== -->
+<div class="grid">
+
+<div class="card">
+<h2><span class="icon">&#x1F916;</span> AI 控制</h2>
+<div class="row">
+<button onclick="setAuto(true)">&#x1F504; 开启自主模式</button>
+<button class="secondary" onclick="setAuto(false)">&#x23F9; 关闭自主模式</button>
+</div>
+<div class="section-note" style="margin-top:12px;">
+当前已经预留 AI 自主控制权。下一阶段可以在这里接入：语音识别、AI 对话、视觉理解和自主行为。
+</div>
+</div>
+
+<div class="card">
+<h2><span class="icon">&#x1F50A;</span> 语音 / 主喇叭</h2>
+<label>主喇叭音量：<span id="speakerVolumeValue">50</span>%</label>
+<input id="speakerVolume" type="range" min="0" max="100" value="50"
+    oninput="speakerVolumeValue.innerText=this.value"
+    onchange="setSpeakerVolume()">
+
+<div class="row">
+<button id="recordButton" onclick="recordMic()">&#x1F399; 录音 5 秒</button>
+<button onclick="playRecording()">&#x25B6; 播放最近录音</button>
+<button class="secondary" onclick="stopAudio()">&#x23F9; 停止全部播放</button>
+</div>
+
+<div class="row">
+<button id="testMusicButton" class="music" onclick="playTestMusic()">&#x25B6; 播放测试音乐</button>
+<button class="secondary" onclick="stopTestMusic()">&#x25A0; 停止测试音乐</button>
+</div>
+
+<div id="testMusicState" class="music-status">测试音乐：检测中……</div>
+
+<div class="row">
+<button class="secondary" onclick="browserListen()">&#x1F50A; 浏览器试听最近录音</button>
+</div>
+
+<audio id="audioPlayer" controls></audio>
+
+<p id="audioState" class="small">双麦克风：检测中</p>
+<p class="small" style="margin-top:2px;">主声卡：seeed2micvoicec</p>
+<p class="small" style="margin-top:2px;">测试音乐：wake.mp3 / wake.wav</p>
+</div>
+
+</div>
+
+
+<!-- ==========================================================
+     Safety
+     ========================================================== -->
+<div class="card" style="margin-top:18px;">
+<h2><span class="icon">&#x26A0;</span> 安全控制</h2>
+<div class="row">
+<button class="stop" onclick="emergencyStop()">&#x1F6A8; 软件急停</button>
+<button id="clearEstopBtn" class="developer hidden" onclick="clearEmergency()">&#x1F512; 解除软件急停</button>
+</div>
+</div>
+
+
+<!-- ==========================================================
+     Developer
+     ========================================================== -->
+<div id="developerPanel" class="card hidden" style="margin-top:18px;">
+<h2><span class="icon">&#x1F6E0;</span> Developer Tools</h2>
+<div class="row">
+<button class="developer" onclick="developerTakeover()">&#x1F512; 开发人员锁定接管</button>
+<button class="secondary" onclick="developerRelease()">&#x1F513; 释放开发人员控制</button>
+</div>
+<label>Mega 原始命令</label>
+<input id="rawCommand" type="text" placeholder="例如 STATUS">
+<div class="row">
+<button class="developer" onclick="sendRaw()">&#x1F4E8; 发送</button>
+</div>
+</div>
+
+
+</div><!-- /container -->
+</div><!-- /mainView -->
+
+
+<script>
+// ==========================================================
+// Current login state
+// ==========================================================
+let currentRole = null;
+
+// ==========================================================
+// Generic API
+// ==========================================================
+async function api(url, method="GET", body=null) {
+    const options = {
+        method: method,
+        headers: {},
+        credentials: "same-origin"
+    };
+    if (body !== null) {
+        options.headers["Content-Type"] = "application/json";
+        options.body = JSON.stringify(body);
+    }
+    const response = await fetch(url, options);
+    let data = {};
+    try { data = await response.json(); } catch (_) {}
+    if (response.status === 401) {
+        showLogin();
+        throw new Error("登录已失效");
+    }
+    if (!response.ok) {
+        throw new Error(data.detail || "请求失败");
+    }
+    return data;
+}
+
+// ==========================================================
+// Login
+// ==========================================================
+async function login() {
+    const username = loginUser.value.trim();
+    const password = loginPass.value;
+    loginMessage.innerText = "正在登录……";
+    try {
+        const data = await api("/api/login", "POST", { username, password });
+        currentRole = data.role;
+        loginMessage.innerText = "";
+        showMain(data.username, data.role);
+    } catch (e) {
+        loginMessage.innerText = e.message;
+    }
+}
+
+// ==========================================================
+// Logout
+// ==========================================================
+async function logout() {
+    try { await api("/api/logout", "POST"); } catch (_) {}
+    showLogin();
+}
+
+// ==========================================================
+// Show login page
+// ==========================================================
+function showLogin() {
+    mainView.classList.add("hidden");
+    loginView.classList.remove("hidden");
+    const cameraElement = document.getElementById("cameraFeed");
+    if (cameraElement) { cameraElement.removeAttribute("src"); }
+}
+
+// ==========================================================
+// Show main page
+// ==========================================================
+function showMain(username, role) {
+    loginView.classList.add("hidden");
+    mainView.classList.remove("hidden");
+    userInfo.innerText = username + " / " + role;
+    if (role === "developer") {
+        developerPanel.classList.remove("hidden");
+        clearEstopBtn.classList.remove("hidden");
+    } else {
+        developerPanel.classList.add("hidden");
+        clearEstopBtn.classList.add("hidden");
+    }
+    refreshStatus();
+    refreshAudioStatus();
+    restartCameraView();
+}
+
+// ==========================================================
+// Check existing login
+// ==========================================================
+async function checkLogin() {
+    try {
+        const data = await api("/api/me");
+        currentRole = data.role;
+        showMain(data.username, data.role);
+    } catch (_) {
+        showLogin();
+    }
+}
+
+// ==========================================================
+// Camera
+// ==========================================================
+function restartCameraView() {
+    cameraState.innerText = "摄像头：正在连接……";
+    cameraFeed.src = "/api/camera/stream?t=" + Date.now();
+    cameraFeed.onload = function() {
+        cameraState.innerText = "摄像头：在线 / 2K / 30 FPS";
+    };
+    cameraFeed.onerror = function() {
+        cameraState.innerText = "摄像头：画面连接失败";
+    };
+}
+
+async function takePhoto() {
+    try {
+        const data = await api("/api/camera/snapshot", "POST");
+        window.open(data.url, "_blank");
+    } catch (e) {
+        alert("拍照失败：" + e.message);
+    }
+}
+
+// ==========================================================
+// Chassis
+// ==========================================================
+async function enableChassis() {
+    try {
+        const result = await api("/api/chassis/enable", "POST");
+        if (!result.ok) { alert("启用底盘失败"); }
+    } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+async function disableChassis() {
+    try { await api("/api/chassis/disable", "POST"); } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+async function move(direction) {
+    const speed = Number(document.getElementById("speed").value);
+    try {
+        const result = await api("/api/move/" + direction, "POST", { speed });
+        if (!result.ok) { alert("控制被拒绝，请检查控制权、急停或底盘状态"); }
+    } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+async function stopRobot() {
+    try { await api("/api/move/stop", "POST"); } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+async function releaseControl() {
+    try { await api("/api/control/release", "POST"); } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+// ==========================================================
+// Head
+// ==========================================================
+async function setHead() {
+    const angle = Number(headAngle.value);
+    try { await api("/api/head", "POST", { angle }); } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+async function headHome() {
+    try { await api("/api/head/home", "POST"); } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+// ==========================================================
+// Arms
+// ==========================================================
+async function arm(side) {
+    const joint = Number(document.getElementById(side + "Joint").value);
+    const angle = Number(document.getElementById(side + "Angle").value);
+    try { await api("/api/arm/" + side, "POST", { joint, angle }); } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+async function gripper(side) {
+    const angle = Number(document.getElementById(side + "Grip").value);
+    try { await api("/api/gripper/" + side, "POST", { angle }); } catch (e) { alert(e.message); }
+}
+
+// ==========================================================
+// AI Autonomous
+// ==========================================================
+async function setAuto(enabled) {
+    try { await api("/api/autonomous", "POST", { enabled }); } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+// ==========================================================
+// Emergency Stop
+// ==========================================================
+async function emergencyStop() {
+    if (!confirm("确定执行软件急停？底盘将立即停止并禁用。")) { return; }
+    try { await api("/api/emergency-stop", "POST"); } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+async function clearEmergency() {
+    try { await api("/api/emergency-clear", "POST"); } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+// ==========================================================
+// Developer
+// ==========================================================
+async function developerTakeover() {
+    try { await api("/api/control/developer/takeover", "POST"); } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+async function developerRelease() {
+    try { await api("/api/control/developer/release", "POST"); } catch (e) { alert(e.message); }
+    refreshStatus();
+}
+
+async function sendRaw() {
+    const command = rawCommand.value.trim();
+    if (!command) { return; }
+    try {
+        const result = await api("/api/developer/raw", "POST", { command });
+        if (!result.ok) { alert("Mega 命令执行失败"); }
+    } catch (e) { alert(e.message); }
+}
+
+// ==========================================================
+// Microphone Recording
+// ==========================================================
+async function recordMic() {
+    recordButton.disabled = true;
+    audioState.innerText = "双麦克风：正在录音 5 秒……";
+    try {
+        const data = await api("/api/audio/record", "POST", { seconds: 5 });
+        audioState.innerText = "录音完成：" + data.filename;
+        audioPlayer.src = "/api/audio/latest?t=" + Date.now();
+    } catch (e) {
+        audioState.innerText = "录音失败：" + e.message;
+    } finally {
+        recordButton.disabled = false;
+    }
+}
+
+// ==========================================================
+// Play Recording via Speaker
+// ==========================================================
+async function playRecording() {
+    try {
+        await api("/api/audio/play", "POST");
+        audioState.innerText = "正在通过机器人主喇叭播放最近录音";
+        testMusicState.innerText = "测试音乐：未播放";
+    } catch (e) {
+        alert("播放失败：" + e.message);
+    }
+}
+
+// ==========================================================
+// Test Music
+// ==========================================================
+async function playTestMusic() {
+    testMusicButton.disabled = true;
+    testMusicState.innerText = "测试音乐：正在启动……";
+    try {
+        const data = await api("/api/audio/test/play", "POST");
+        if (data.ok) {
+            testMusicState.innerText = "测试音乐：播放中 / " + data.filename;
+            audioState.innerText = "主喇叭：正在播放测试音乐";
+        } else {
+            testMusicState.innerText = "测试音乐：播放失败";
+        }
+    } catch (e) {
+        testMusicState.innerText = "测试音乐：播放失败 / " + e.message;
+        alert("测试音乐播放失败：" + e.message);
+    } finally {
+        testMusicButton.disabled = false;
+    }
+}
+
+async function stopTestMusic() {
+    try {
+        await api("/api/audio/test/stop", "POST");
+        testMusicState.innerText = "测试音乐：已停止";
+        audioState.innerText = "主喇叭：空闲";
+    } catch (e) {
+        alert("停止测试音乐失败：" + e.message);
+    }
+}
+
+// ==========================================================
+// Stop All Audio
+// ==========================================================
+async function stopAudio() {
+    try {
+        await api("/api/audio/stop", "POST");
+        audioState.innerText = "主喇叭播放已停止";
+        testMusicState.innerText = "测试音乐：已停止";
+    } catch (e) { alert(e.message); }
+}
+
+// ==========================================================
+// Browser Playback
+// ==========================================================
+function browserListen() {
+    audioPlayer.src = "/api/audio/latest?t=" + Date.now();
+    audioPlayer.play().catch(function(error) {
+        alert("浏览器播放失败：" + error.message);
+    });
+}
+
+// ==========================================================
+// Speaker Volume
+// ==========================================================
+async function setSpeakerVolume() {
+    const volume = Number(speakerVolume.value);
+    try { await api("/api/audio/volume", "POST", { volume }); } catch (e) { alert("音量设置失败：" + e.message); }
+}
+
+// ==========================================================
+// Audio Status Refresh
+// ==========================================================
+async function refreshAudioStatus() {
+    if (mainView.classList.contains("hidden")) { return; }
+    try {
+        const data = await api("/api/audio/status");
+        audioBadge.innerText = data.online ? "在线" : "离线";
+        if (data.test_music_playing) {
+            testMusicState.innerText = "测试音乐：播放中 / wake.wav";
+            audioState.innerText = "双麦克风：在线 / 测试音乐播放中";
+        } else {
+            if (data.test_music_mp3_exists || data.test_music_wav_exists) {
+                testMusicState.innerText = "测试音乐：已就绪";
+            } else {
+                testMusicState.innerText = "测试音乐：文件不存在";
+            }
+            if (data.online) {
+                if (data.playing) {
+                    audioState.innerText = "双麦克风：在线 / 主喇叭播放中";
+                } else {
+                    if (!audioState.innerText.includes("录音完成")) {
+                        audioState.innerText = "双麦克风：在线 / 主喇叭空闲";
+                    }
+                }
+            } else {
+                audioState.innerText = "双麦克风：离线";
+            }
+        }
+        if (data.volume !== null && data.volume !== undefined) {
+            speakerVolume.value = data.volume;
+            speakerVolumeValue.innerText = data.volume;
+        }
+    } catch (_) {
+        audioBadge.innerText = "错误";
+    }
+}
+
+// ==========================================================
+// Global Status Refresh
+// ==========================================================
+async function refreshStatus() {
+    if (mainView.classList.contains("hidden")) { return; }
+    try {
+        const data = await api("/api/status");
+        owner.innerText = data.control.owner || "空闲";
+        megaStatus.innerText = data.control.mega_connected ? "在线" : "离线";
+        autoStatus.innerText = data.control.autonomous ? "开启" : "关闭";
+        if (data.camera && data.camera.running && data.camera.has_frame) {
+            cameraBadge.innerText = "在线";
+        } else {
+            cameraBadge.innerText = "离线";
+        }
+        if (data.audio && data.audio.online) {
+            audioBadge.innerText = "在线";
+        } else {
+            audioBadge.innerText = "离线";
+        }
+        statusBox.innerText = JSON.stringify(data, null, 2);
+    } catch (_) {}
+}
+
+// ==========================================================
+// Timed Refresh
+// ==========================================================
+setInterval(refreshStatus, 2000);
+setInterval(refreshAudioStatus, 3000);
+
+// ==========================================================
+// Keyboard Control
+// ==========================================================
+document.addEventListener("keydown", function(event) {
+    if (mainView.classList.contains("hidden")) { return; }
+    if (event.target.tagName === "INPUT") { return; }
+    const key = event.key.toLowerCase();
+    if (key === "w") { move("forward"); }
+    else if (key === "s") { move("backward"); }
+    else if (key === "a") { move("left"); }
+    else if (key === "d") { move("right"); }
+    else if (key === " ") { event.preventDefault(); stopRobot(); }
+});
+
+// ==========================================================
+// Enter to Login
+// ==========================================================
+loginPass.addEventListener("keydown", function(event) {
+    if (event.key === "Enter") { login(); }
+});
+
+// ==========================================================
+// Page Startup
+// ==========================================================
+checkLogin();
+</script>
+
+</body>
+</html>
+"""

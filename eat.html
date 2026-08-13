@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>校畔寻味 - 校园美食自媒体创业计划书</title>
+  <meta name="description" content="校畔寻味：以大学生视角+校园本地美食为核心定位的垂直校园美食类自媒体矩阵。" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              300: '#fdba74',
+              400: '#fb923c',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+            },
+            cyan: {
+              450: '#0d9488',
+              500: '#14b8a6',
+            },
+            dark: {
+              900: '#0a0a0f',
+              800: '#111118',
+              700: '#1a1a24',
+              600: '#232330',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'PingFang SC', 'Microsoft YaHei', 'sans-serif'],
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'slide-up': 'slideUp 0.8s ease-out forwards',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-20px)' },
+            },
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: #0a0a0f;
+      color: #f8fafc;
+      font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #f97316 0%, #fb923c 50%, #fbbf24 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .gradient-text-cyan {
+      background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+    }
+
+    .glass-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(249, 115, 22, 0.3);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(249, 115, 22, 0.1);
+    }
+
+    .section-label {
+      letter-spacing: 0.2em;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #f97316;
+      font-weight: 600;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(249, 115, 22, 0.15) 0%, transparent 70%);
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    .cyan-glow {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(20, 184, 166, 0.12) 0%, transparent 70%);
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    .timeline-line {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, #f97316, #fb923c, transparent);
+      transform: translateX(-50%);
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #f97316;
+      box-shadow: 0 0 20px rgba(249, 115, 22, 0.5);
+      z-index: 10;
+    }
+
+    .nav-blur {
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(249, 115, 22, 0.3);
+    }
+
+    .flow-arrow::after {
+      content: '→';
+      position: absolute;
+      right: -28px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #f97316;
+      font-size: 1.25rem;
+    }
+
+    .flow-arrow-down::after {
+      content: '↓';
+      position: absolute;
+      bottom: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #f97316;
+      font-size: 1.25rem;
+    }
+
+    .stat-number {
+      background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    @media (max-width: 768px) {
+      .timeline-line {
+        left: 24px;
+      }
+      .timeline-dot {
+        left: 24px;
+      }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s ease-out;
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .organ-line {
+      position: absolute;
+      top: -32px;
+      left: 50%;
+      width: 2px;
+      height: 32px;
+      background: #14b8a6;
+      transform: translateX(-50%);
+    }
+
+    .platform-badge {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="antialiased">
+  <!-- 导航栏 -->
+  <nav class="fixed top-0 left-0 right-0 z-50 nav-blur">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="#" class="text-xl font-bold gradient-text">校畔寻味</a>
+        <div class="hidden md:flex items-center space-x-8">
+          <a href="#overview" class="text-sm text-gray-300 hover:text-brand-400 transition">项目概述</a>
+          <a href="#model" class="text-sm text-gray-300 hover:text-brand-400 transition">运营模式</a>
+          <a href="#team" class="text-sm text-gray-300 hover:text-brand-400 transition">团队</a>
+          <a href="#content" class="text-sm text-gray-300 hover:text-brand-400 transition">内容矩阵</a>
+          <a href="#revenue" class="text-sm text-gray-300 hover:text-brand-400 transition">盈利模式</a>
+          <a href="#roadmap" class="text-sm text-gray-300 hover:text-brand-400 transition">发展规划</a>
+        </div>
+        <button id="mobile-menu-btn" class="md:hidden text-gray-300 hover:text-white">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+      </div>
+    </div>
+    <!-- 移动端菜单 -->
+    <div id="mobile-menu" class="hidden md:hidden nav-blur border-t border-white/5">
+      <div class="px-4 py-3 space-y-2">
+        <a href="#overview" class="block py-2 text-sm text-gray-300 hover:text-brand-400">项目概述</a>
+        <a href="#model" class="block py-2 text-sm text-gray-300 hover:text-brand-400">运营模式</a>
+        <a href="#team" class="block py-2 text-sm text-gray-300 hover:text-brand-400">团队</a>
+        <a href="#content" class="block py-2 text-sm text-gray-300 hover:text-brand-400">内容矩阵</a>
+        <a href="#revenue" class="block py-2 text-sm text-gray-300 hover:text-brand-400">盈利模式</a>
+        <a href="#roadmap" class="block py-2 text-sm text-gray-300 hover:text-brand-400">发展规划</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero 区域 -->
+  <section class="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
+    <div class="hero-glow top-0 right-0 translate-x-1/3 -translate-y-1/4"></div>
+    <div class="cyan-glow bottom-0 left-0 -translate-x-1/3 translate-y-1/4"></div>
+
+    <!-- 装饰波浪 -->
+    <div class="absolute inset-0 opacity-20 pointer-events-none">
+      <svg class="absolute top-0 right-0 h-full w-1/2 text-cyan-500" viewBox="0 0 200 800" fill="none" preserveAspectRatio="none">
+        <path d="M200 0C120 100 180 200 120 300C60 400 180 500 100 600C20 700 120 800 80 800V0H200Z" fill="currentColor" opacity="0.3"/>
+        <path d="M200 0C150 120 200 240 140 360C80 480 200 600 120 720C40 840 160 800 120 800V0H200Z" fill="currentColor" opacity="0.15"/>
+      </svg>
+      <svg class="absolute bottom-0 left-0 h-3/4 w-1/3 text-brand-500" viewBox="0 0 200 600" fill="none" preserveAspectRatio="none">
+        <path d="M0 600C80 520 20 420 80 320C140 220 20 120 100 20C160 -40 40 0 0 0V600Z" fill="currentColor" opacity="0.2"/>
+        <path d="M0 600C60 540 10 440 70 340C130 240 30 140 90 60C140 0 30 0 0 0V600Z" fill="currentColor" opacity="0.1"/>
+      </svg>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="reveal active">
+        <p class="section-label mb-4">BUSINESS PLAN</p>
+        <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-extrabold mb-6 tracking-tight">
+          <span class="gradient-text">校畔寻味</span>
+        </h1>
+        <p class="text-xl sm:text-2xl md:text-3xl text-gray-300 mb-4 font-light">
+          校园美食自媒体创业计划书
+        </p>
+        <p class="max-w-2xl mx-auto text-gray-400 mb-10 text-base sm:text-lg leading-relaxed">
+          以大学生视角 + 校园本地美食为核心定位，打造垂直校园美食类自媒体矩阵，构建「内容生产—流量积累—粉丝沉淀—商业变现—品牌升级」的完整运营闭环。
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+          <a href="#overview" class="btn-primary px-8 py-3.5 rounded-full text-white font-semibold text-base">
+            查看详情
+          </a>
+          <a href="#contact" class="px-8 py-3.5 rounded-full border border-white/20 text-gray-300 hover:bg-white/5 hover:text-white transition font-semibold text-base">
+            联系我们
+          </a>
+        </div>
+
+        <!-- 关键数据 -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-4xl mx-auto">
+          <div class="glass-card rounded-2xl p-5 sm:p-6">
+            <div class="text-3xl sm:text-4xl font-bold stat-number mb-1">4</div>
+            <div class="text-xs sm:text-sm text-gray-400">核心平台</div>
+          </div>
+          <div class="glass-card rounded-2xl p-5 sm:p-6">
+            <div class="text-3xl sm:text-4xl font-bold stat-number mb-1">4</div>
+            <div class="text-xs sm:text-sm text-gray-400">核心成员</div>
+          </div>
+          <div class="glass-card rounded-2xl p-5 sm:p-6">
+            <div class="text-3xl sm:text-4xl font-bold stat-number mb-1">5</div>
+            <div class="text-xs sm:text-sm text-gray-400">盈利模式</div>
+          </div>
+          <div class="glass-card rounded-2xl p-5 sm:p-6">
+            <div class="text-3xl sm:text-4xl font-bold stat-number mb-1">1000</div>
+            <div class="text-xs sm:text-sm text-gray-400">元启动成本</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+    </div>
+  </section>
+
+  <!-- 项目概述 -->
+  <section id="overview" class="relative py-24 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16 reveal">
+        <p class="section-label mb-3">OVERVIEW</p>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">项目概述</h2>
+        <p class="text-gray-400 max-w-2xl mx-auto">聚焦高校食堂、校园周边美食、平价小吃、宿舍简易料理等大学生高频消费美食场景</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="glass-card rounded-2xl p-8 reveal">
+          <div class="w-12 h-12 rounded-xl bg-brand-500/20 flex items-center justify-center text-2xl mb-5">🎯</div>
+          <h3 class="text-xl font-bold text-white mb-3">项目定位</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">以大学生视角 + 校园本地美食为核心定位，打造垂直校园美食类自媒体矩阵，通过短视频 + 图文 + 直播多元内容形式分发。</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-8 reveal">
+          <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-2xl mb-5">🤝</div>
+          <h3 class="text-xl font-bold text-white mb-3">核心特色</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">坚持「真实测评、高性价比、贴近校园生活」，拒绝过度包装与虚假测评，做大学生身边真实可靠的美食推荐官。</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-8 reveal">
+          <div class="w-12 h-12 rounded-xl bg-brand-500/20 flex items-center justify-center text-2xl mb-5">🚀</div>
+          <h3 class="text-xl font-bold text-white mb-3">运营闭环</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">构建「内容生产—流量积累—粉丝沉淀—商业变现—品牌升级」的完整运营闭环，实现从自媒体内容创作到校园美食生态服务的延伸。</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-8 reveal">
+          <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-2xl mb-5">👥</div>
+          <h3 class="text-xl font-bold text-white mb-3">精准用户</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">聚焦本校及周边高校 18-25 岁大学生，月生活费 1500-3000 元，美食消费偏向平价、高性价比，人均单次消费 5-50 元。</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-8 reveal">
+          <div class="w-12 h-12 rounded-xl bg-brand-500/20 flex items-center justify-center text-2xl mb-5">💡</div>
+          <h3 class="text-xl font-bold text-white mb-3">轻资产创业</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">无需专业场地，拍摄场景可覆盖宿舍、食堂、校园周边，启动设备要求低，适合大学生团队创业，试错成本低。</p>
+        </div>
+
+        <div class="glass-card rounded-2xl p-8 reveal">
+          <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-2xl mb-5">📈</div>
+          <h3 class="text-xl font-bold text-white mb-3">市场前景</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">校园美食自媒体赛道竞争差异化明显，针对校园场景的垂直美食账号稀缺，市场空白大，用户需求刚性。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 运营模式与商业闭环 -->
+  <section id="model" class="relative py-24 overflow-hidden">
+    <div class="hero-glow top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="text-center mb-16 reveal">
+        <p class="section-label mb-3">MODEL</p>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">运营模式与商业闭环</h2>
+        <p class="text-gray-400 max-w-2xl mx-auto">内容生产标准化 → 多平台分发精准化 → 粉丝运营精细化 → 商业变现多元化</p>
+      </div>
+
+      <!-- 闭环流程图 -->
+      <div class="glass-card rounded-3xl p-8 sm:p-12 mb-16 reveal">
+        <h3 class="text-xl sm:text-2xl font-bold text-center mb-10 gradient-text">运营闭环流程图</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-12 mb-12">
+          <div class="relative flow-arrow flow-arrow-down md:after:content-['→'] md:after:right-[-28px] md:after:top-1/2 md:after:-translate-y-1/2">
+            <div class="glass-card rounded-2xl p-6 text-center border-t-2 border-t-brand-500">
+              <div class="text-3xl mb-3">🎬</div>
+              <h4 class="text-lg font-bold text-brand-400 mb-2">内容生产</h4>
+              <p class="text-gray-400 text-xs leading-relaxed">短视频/图文/直播<br/>校园美食测评<br/>宿舍简易料理</p>
+            </div>
+          </div>
+          <div class="relative flow-arrow flow-arrow-down md:after:content-['→'] md:after:right-[-28px] md:after:top-1/2 md:after:-translate-y-1/2">
+            <div class="glass-card rounded-2xl p-6 text-center border-t-2 border-t-brand-500">
+              <div class="text-3xl mb-3">📊</div>
+              <h4 class="text-lg font-bold text-brand-400 mb-2">流量积累</h4>
+              <p class="text-gray-400 text-xs leading-relaxed">抖音/小红书<br/>视频号/快手<br/>多平台分发</p>
+            </div>
+          </div>
+          <div class="relative">
+            <div class="glass-card rounded-2xl p-6 text-center border-t-2 border-t-brand-500">
+              <div class="text-3xl mb-3">❤️</div>
+              <h4 class="text-lg font-bold text-brand-400 mb-2">粉丝沉淀</h4>
+              <p class="text-gray-400 text-xs leading-relaxed">社群运营<br/>用户互动<br/>私域流量建设</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="text-center mb-10">
+          <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 text-sm">
+            <span>↓</span> 数据驱动 · 持续优化 <span>↓</span>
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+          <div class="glass-card rounded-2xl p-6 text-center border-t-2 border-t-cyan-500">
+            <div class="text-3xl mb-3">🌟</div>
+            <h4 class="text-lg font-bold text-cyan-400 mb-2">品牌升级</h4>
+            <p class="text-gray-400 text-xs leading-relaxed">校园美食 IP<br/>生态服务延伸<br/>自营产品线</p>
+          </div>
+          <div class="glass-card rounded-2xl p-6 text-center border-t-2 border-t-cyan-500">
+            <div class="text-3xl mb-3">💰</div>
+            <h4 class="text-lg font-bold text-cyan-400 mb-2">商业变现</h4>
+            <p class="text-gray-400 text-xs leading-relaxed">平台广告分成<br/>品牌合作/带货<br/>校园团购</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 内容形式 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+        <div class="glass-card rounded-2xl p-8 text-center reveal">
+          <div class="w-16 h-16 rounded-2xl bg-brand-500/10 flex items-center justify-center text-4xl mx-auto mb-5">🎥</div>
+          <h3 class="text-xl font-bold text-white mb-3">短视频</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">15-60 秒校园美食测评、探店 Vlog，突出高性价比与真实体验，适配抖音、快手算法推荐。</p>
+        </div>
+        <div class="glass-card rounded-2xl p-8 text-center reveal">
+          <div class="w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-4xl mx-auto mb-5">📝</div>
+          <h3 class="text-xl font-bold text-white mb-3">图文笔记</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">小红书种草笔记，精致配图 + 详细测评，主打「平价美食图鉴」「食堂隐藏吃法」等话题。</p>
+        </div>
+        <div class="glass-card rounded-2xl p-8 text-center reveal">
+          <div class="w-16 h-16 rounded-2xl bg-brand-500/10 flex items-center justify-center text-4xl mx-auto mb-5">📡</div>
+          <h3 class="text-xl font-bold text-white mb-3">直播互动</h3>
+          <p class="text-gray-400 text-sm leading-relaxed">视频号/抖音直播，实时探店、美食制作教学、粉丝互动问答，增强粘性与信任。</p>
+        </div>
+      </div>
+
+      <!-- 分发平台布局 -->
+      <div class="reveal">
+        <h3 class="text-2xl font-bold text-center text-white mb-8">分发平台布局</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="platform-badge rounded-xl p-5 text-center">
+            <div class="text-2xl mb-2">🎵</div>
+            <div class="text-base font-semibold text-white">抖音</div>
+            <div class="text-xs text-brand-400 mt-1">主平台 · 短视频 + 直播</div>
+          </div>
+          <div class="platform-badge rounded-xl p-5 text-center">
+            <div class="text-2xl mb-2">📕</div>
+            <div class="text-base font-semibold text-white">小红书</div>
+            <div class="text-xs text-brand-400 mt-1">图文种草 · 精准触达</div>
+          </div>
+          <div class="platform-badge rounded-xl p-5 text-center">
+            <div class="text-2xl mb-2">▶️</div>
+            <div class="text-base font-semibold text-white">视频号</div>
+            <div class="text-xs text-brand-400 mt-1">私域流量 · 直播</div>
+          </div>
+          <div class="platform-badge rounded-xl p-5 text-center">
+            <div class="text-2xl mb-2">⚡</div>
+            <div class="text-base font-semibold text-white">快手</div>
+            <div class="text-xs text-brand-400 mt-1">下沉市场 · 短视频</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 核心团队 -->
+  <section id="team" class="relative py-24 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16 reveal">
+        <p class="section-label mb-3">TEAM</p>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">核心团队</h2>
+        <p class="text-gray-400 max-w-2xl mx-auto">四方绝杀团队，各司其职，协同作战</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+        <div class="glass-card rounded-2xl p-8 text-center reveal">
+          <div class="w-20 h-20 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-2xl font-bold text-white mx-auto mb-5">康</div>
+          <h3 class="text-lg font-bold text-white mb-1">王从康</h3>
+          <p class="text-brand-400 text-sm mb-3">💼 内容策划 & 出镜主播</p>
+          <p class="text-gray-400 text-xs leading-relaxed">负责选题策划、视频出镜、脚本撰写，统筹项目全局。</p>
+        </div>
+        <div class="glass-card rounded-2xl p-8 text-center reveal">
+          <div class="w-20 h-20 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-2xl font-bold text-white mx-auto mb-5">松</div>
+          <h3 class="text-lg font-bold text-white mb-1">于凡松</h3>
+          <p class="text-brand-400 text-sm mb-3">🎬 拍摄 & 后期剪辑</p>
+          <p class="text-gray-400 text-xs leading-relaxed">负责视频拍摄、后期制作、特效处理，把控画面质感。</p>
+        </div>
+        <div class="glass-card rounded-2xl p-8 text-center reveal">
+          <div class="w-20 h-20 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-2xl font-bold text-white mx-auto mb-5">粤</div>
+          <h3 class="text-lg font-bold text-white mb-1">田灯粤</h3>
+          <p class="text-brand-400 text-sm mb-3">📊 运营 & 数据分析</p>
+          <p class="text-gray-400 text-xs leading-relaxed">负责账号运营、数据监控、粉丝维护，优化流量策略。</p>
+        </div>
+        <div class="glass-card rounded-2xl p-8 text-center reveal">
+          <div class="w-20 h-20 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-2xl font-bold text-white mx-auto mb-5">乐</div>
+          <h3 class="text-lg font-bold text-white mb-1">杨家乐</h3>
+          <p class="text-brand-400 text-sm mb-3">🤝 商务 & 外部合作</p>
+          <p class="text-gray-400 text-xs leading-relaxed">负责商家对接、广告洽谈、品牌合作，拓展商业资源。</p>
+        </div>
+      </div>
+
+      <!-- 团队组织架构图 -->
+      <div class="reveal">
+        <h3 class="text-2xl font-bold text-center mb-2 gradient-text-cyan">👥 团队组织架构图</h3>
+        <p class="text-center text-gray-400 text-sm mb-10">大学生美食自媒体创业项目 · 总负责</p>
+
+        <div class="flex justify-center mb-16">
+          <div class="glass-card rounded-2xl px-10 py-5 text-center border border-cyan-500/30 relative">
+            <div class="text-xl font-bold text-cyan-400 mb-1">四方绝杀团队</div>
+            <div class="text-xs text-gray-400">大学生美食自媒体创业项目 · 总负责</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-10">
+          <div class="relative">
+            <div class="organ-line hidden md:block"></div>
+            <div class="glass-card rounded-2xl p-6 text-center border-t-2 border-t-brand-500">
+              <div class="text-3xl mb-3">🎬</div>
+              <h4 class="text-lg font-bold text-brand-400 mb-1">拍摄制作组</h4>
+              <p class="text-gray-300 text-sm mb-2">于凡松</p>
+              <p class="text-gray-400 text-xs">视频拍摄 · 后期剪辑<br/>特效处理 · 画面质感</p>
+            </div>
+          </div>
+          <div class="relative">
+            <div class="organ-line hidden md:block"></div>
+            <div class="glass-card rounded-2xl p-6 text-center border-t-2 border-t-brand-500">
+              <div class="text-3xl mb-3">📈</div>
+              <h4 class="text-lg font-bold text-brand-400 mb-1">运营推广组</h4>
+              <p class="text-gray-300 text-sm mb-2">田灯粤</p>
+              <p class="text-gray-400 text-xs">账号运营 · 数据分析<br/>粉丝维护 · 算法优化</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-8 gap-3">
+          <div class="platform-badge rounded-lg p-3 text-center">
+            <div class="text-lg mb-1">🎥</div>
+            <div class="text-xs text-white font-medium">拍摄</div>
+            <div class="text-[10px] text-gray-500">多机位拍摄</div>
+          </div>
+          <div class="platform-badge rounded-lg p-3 text-center">
+            <div class="text-lg mb-1">✂️</div>
+            <div class="text-xs text-white font-medium">剪辑</div>
+            <div class="text-[10px] text-gray-500">后期精修</div>
+          </div>
+          <div class="platform-badge rounded-lg p-3 text-center">
+            <div class="text-lg mb-1">✨</div>
+            <div class="text-xs text-white font-medium">特效</div>
+            <div class="text-[10px] text-gray-500">视觉包装</div>
+          </div>
+          <div class="platform-badge rounded-lg p-3 text-center">
+            <div class="text-lg mb-1">📝</div>
+            <div class="text-xs text-white font-medium">文案</div>
+            <div class="text-[10px] text-gray-500">脚本策划</div>
+          </div>
+          <div class="platform-badge rounded-lg p-3 text-center">
+            <div class="text-lg mb-1">📊</div>
+            <div class="text-xs text-white font-medium">数据监控</div>
+            <div class="text-[10px] text-gray-500">流量分析优化</div>
+          </div>
+          <div class="platform-badge rounded-lg p-3 text-center">
+            <div class="text-lg mb-1">💬</div>
+            <div class="text-xs text-white font-medium">社群运营</div>
+            <div class="text-[10px] text-gray-500">粉丝互动维护</div>
+          </div>
+          <div class="platform-badge rounded-lg p-3 text-center">
+            <div class="text-lg mb-1">🔍</div>
+            <div class="text-xs text-white font-medium">SEO优化</div>
+            <div class="text-[10px] text-gray-500">关键词排名</div>
+          </div>
+          <div class="platform-badge rounded-lg p-3 text-center">
+            <div class="text-lg mb-1">🏪</div>
+            <div class="text-xs text-white font-medium">商务</div>
+            <div class="text-[10px] text-gray-500">本地商家合作</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 内容矩阵 -->
+  <section id="content" class="relative py-24 overflow-hidden">
+    <div class="cyan-glow top-1/2 right-0 translate-x-1/2"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="text-center mb-16 reveal">
+        <p class="section-label mb-3">CONTENT</p>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">内容定位与经营目标</h2>
+        <p class="text-gray-400 max-w-2xl mx-auto">四大板块覆盖大学生美食全场景，真实接地气、轻松幽默、干货满满</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+        <div class="glass-card rounded-2xl p-8 reveal">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-brand-500/20 flex items-center justify-center text-2xl">🏪</div>
+            <h3 class="text-xl font-bold text-white">校园探店系列</h3>
+          </div>
+          <p class="text-gray-400 text-sm leading-relaxed">校园周边小吃店、家常菜、奶茶店、火锅店等平价店铺真实测评，标注人均消费、推荐菜品、避坑指南。</p>
+        </div>
+        <div class="glass-card rounded-2xl p-8 reveal">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-2xl">🍱</div>
+            <h3 class="text-xl font-bold text-white">食堂宝藏系列</h3>
+          </div>
+          <p class="text-gray-400 text-sm leading-relaxed">高校各食堂窗口测评，挖掘食堂「隐藏菜单」、高性价比套餐、特色美食，解决大学生「干饭选择困难」。</p>
+        </div>
+        <div class="glass-card rounded-2xl p-8 reveal">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-brand-500/20 flex items-center justify-center text-2xl">🍜</div>
+            <h3 class="text-xl font-bold text-white">平价美食系列</h3>
+          </div>
+          <p class="text-gray-400 text-sm leading-relaxed">聚焦 5-20 元高性价比美食，涵盖街边小吃、速食、零食等，贴合大学生消费能力。</p>
+        </div>
+        <div class="glass-card rounded-2xl p-8 reveal">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center text-2xl">🍳</div>
+            <h3 class="text-xl font-bold text-white">宿舍料理系列</h3>
+          </div>
+          <p class="text-gray-400 text-sm leading-relaxed">无需大功率电器的宿舍简易美食教程，食材易购买、步骤简单，适合大学生宿舍制作。</p>
+        </div>
+      </div>
+
+      <!-- 经营目标 -->
+      <div class="reveal">
+        <h3 class="text-2xl font-bold text-center text-white mb-8">分阶段经营目标</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="glass-card rounded-2xl p-8 border-l-4 border-l-brand-500">
+            <div class="text-sm text-brand-400 font-semibold mb-2">短期目标 · 0-12 个月</div>
+            <h4 class="text-lg font-bold text-white mb-3">冷启动与流量积累期</h4>
+            <ul class="text-gray-400 text-sm space-y-2">
+              <li>• 完成抖音、小红书、视频号账号搭建</li>
+              <li>• 每周 4-6 条稳定更新</li>
+              <li>• 三大平台总粉丝达 5 万+</li>
+              <li>• 月均盈利达 500 元以上</li>
+            </ul>
+          </div>
+          <div class="glass-card rounded-2xl p-8 border-l-4 border-l-cyan-500">
+            <div class="text-sm text-cyan-400 font-semibold mb-2">中期目标 · 1-3 年</div>
+            <h4 class="text-lg font-bold text-white mb-3">IP 打造与盈利稳定期</h4>
+            <ul class="text-gray-400 text-sm space-y-2">
+              <li>• 粉丝规模突破 20 万+</li>
+              <li>• 合作商家达 50 家以上</li>
+              <li>• 月均盈利 3000-8000 元</li>
+              <li>• 团队标准化运营</li>
+            </ul>
+          </div>
+          <div class="glass-card rounded-2xl p-8 border-l-4 border-l-brand-500">
+            <div class="text-sm text-brand-400 font-semibold mb-2">长期目标 · 3 年以上</div>
+            <h4 class="text-lg font-bold text-white mb-3">品牌升级与生态拓展期</h4>
+            <ul class="text-gray-400 text-sm space-y-2">
+              <li>• 粉丝规模突破 50 万+</li>
+              <li>• 注册成立新媒体工作室</li>
+              <li>• 打造校园美食团购平台</li>
+              <li>• 形成校园美食生态闭环</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 收入结构与变现路径 -->
+  <section id="revenue" class="relative py-24 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16 reveal">
+        <p class="section-label mb-3">REVENUE</p>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">盈利模式</h2>
+        <p class="text-gray-400 max-w-2xl mx-auto">多元变现路径，构建稳定收入结构</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div class="glass-card rounded-2xl p-8 text-center reveal">
+          <div class="w-16 h-16 rounded-2xl bg-brand-500/10 flex items-center justify-center text-4xl mx-auto mb-5">📢</div>
+          <h3 class="text-lg font-bold text-brand-400 mb-2">平台广告分成</h3>
+          <p class="text-gray-400 text-xs leading-relaxed">短视频播放量广告收益，粉丝打赏及平台激励计划。</p>
+        </div>
+        <div class="glass-card rounded-2xl p-8 text-center reveal">
+          <div class="w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-4xl mx-auto mb-5">🤝</div>
+          <h3 class="text-lg font-bold text-brand-400 mb-2">品牌商业合作</h3>
+          <p class="text-gray-400 text-xs leading-relaxed">本地餐饮商家探店推广、食品品牌产品植入、定制内容。</p>
+        </div>
+        <div class="glass-card rounded-2xl p-8 text-center reveal">
+          <div class="w-16 h-16 rounded-2xl bg-brand-500/10 flex items-center justify-center text-4xl mx-auto mb-5">🛒</div>
+          <h3 class="text-lg font-bold text-brand-400 mb-2">电商带货</h3>
+          <p class="text-gray-400 text-xs leading-relaxed">零食、厨具等关联商品带货，直播带货佣金分成。</p>
+        </div>
+        <div class="glass-card rounded-2xl p-8 text-center reveal">
+          <div class="w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-4xl mx-auto mb-5">🎫</div>
+          <h3 class="text-lg font-bold text-brand-400 mb-2">校园团购</h3>
+          <p class="text-gray-400 text-xs leading-relaxed">校园周边美食团购优惠，粉丝专属折扣券分发。</p>
+        </div>
+      </div>
+
+      <!-- 收入结构与变现路径时间线 -->
+      <div class="reveal">
+        <h3 class="text-2xl font-bold text-center mb-2 gradient-text">💵 收入结构与变现路径</h3>
+        <p class="text-center text-gray-400 text-sm mb-10">分阶段构建多元盈利体系</p>
+
+        <div class="space-y-8">
+          <!-- 第一阶段 -->
+          <div class="glass-card rounded-2xl p-6 sm:p-8">
+            <div class="flex items-center gap-3 mb-5">
+              <span class="text-xl">📣</span>
+              <h4 class="text-lg font-bold text-brand-400">第一阶段（1-6 月）：流量积累变现</h4>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div class="bg-white/5 rounded-xl p-5 text-center">
+                <div class="text-3xl mb-2">▶️</div>
+                <div class="text-base font-semibold text-white mb-1">平台广告分成</div>
+                <div class="text-xs text-gray-400">抖音/快手播放量收益<br/>视频号创作激励计划<br/>小红书品牌合作</div>
+              </div>
+              <div class="bg-white/5 rounded-xl p-5 text-center">
+                <div class="text-3xl mb-2">🎁</div>
+                <div class="text-base font-semibold text-white mb-1">粉丝打赏</div>
+                <div class="text-xs text-gray-400">直播礼物收入<br/>赞赏功能收益<br/>粉丝互动奖励</div>
+              </div>
+            </div>
+            <div class="text-center">
+              <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 text-brand-400 text-sm">
+                ↓ 粉丝破万 · 商业合作启动 ↓
+              </span>
+            </div>
+          </div>
+
+          <!-- 第二阶段 -->
+          <div class="glass-card rounded-2xl p-6 sm:p-8">
+            <div class="flex items-center gap-3 mb-5">
+              <span class="text-xl">💼</span>
+              <h4 class="text-lg font-bold text-brand-400">第二阶段（7-12 月）：商业合作变现</h4>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div class="bg-white/5 rounded-xl p-5 text-center">
+                <div class="text-3xl mb-2">🤝</div>
+                <div class="text-base font-semibold text-white mb-1">品牌商业合作</div>
+                <div class="text-xs text-gray-400">本地餐饮商家探店推广<br/>食品品牌产品植入<br/>定制内容制作</div>
+              </div>
+              <div class="bg-white/5 rounded-xl p-5 text-center">
+                <div class="text-3xl mb-2">🛒</div>
+                <div class="text-base font-semibold text-white mb-1">电商带货</div>
+                <div class="text-xs text-gray-400">零食/厨具关联商品<br/>直播带货佣金分成<br/>团购券分销</div>
+              </div>
+              <div class="bg-white/5 rounded-xl p-5 text-center">
+                <div class="text-3xl mb-2">🎫</div>
+                <div class="text-base font-semibold text-white mb-1">校园团购</div>
+                <div class="text-xs text-gray-400">周边美食团购优惠<br/>粉丝专属折扣券<br/>到店引流服务</div>
+              </div>
+            </div>
+            <div class="text-center">
+              <span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 text-brand-400 text-sm">
+                ↓ 粉丝破 5 万 · 品牌 IP 升级 ↓
+              </span>
+            </div>
+          </div>
+
+          <!-- 第三阶段 -->
+          <div class="glass-card rounded-2xl p-6 sm:p-8">
+            <div class="flex items-center gap-3 mb-5">
+              <span class="text-xl">🌟</span>
+              <h4 class="text-lg font-bold text-brand-400">第三阶段（13-24 月）：品牌生态变现</h4>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-white/5 rounded-xl p-5 text-center">
+                <div class="text-3xl mb-2">🏷️</div>
+                <div class="text-base font-semibold text-white mb-1">自营产品线</div>
+                <div class="text-xs text-gray-400">联名零食/调料<br/>定制美食周边产品<br/>品牌授权合作</div>
+              </div>
+              <div class="bg-white/5 rounded-xl p-5 text-center">
+                <div class="text-3xl mb-2">🎓</div>
+                <div class="text-base font-semibold text-white mb-1">知识付费</div>
+                <div class="text-xs text-gray-400">自媒体运营课程<br/>校园创业指导<br/>美食制作教程</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 发展规划 -->
+  <section id="roadmap" class="relative py-24 overflow-hidden">
+    <div class="hero-glow top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="text-center mb-16 reveal">
+        <p class="section-label mb-3">ROADMAP</p>
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-4">发展规划</h2>
+        <p class="text-gray-400 max-w-2xl mx-auto">从 0 到 1，稳步构建校园美食自媒体品牌</p>
+      </div>
+
+      <div class="relative">
+        <div class="timeline-line hidden md:block"></div>
+
+        <div class="space-y-12">
+          <div class="relative reveal">
+            <div class="timeline-dot top-6 hidden md:block"></div>
+            <div class="md:w-1/2 md:pr-12 md:ml-auto">
+              <div class="glass-card rounded-2xl p-6 border-l-4 border-l-brand-500">
+                <div class="text-sm text-brand-400 font-semibold mb-2">第 1-3 个月</div>
+                <h3 class="text-lg font-bold text-white mb-3">🍦 冷启动期</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">账号注册、内容生产流程搭建、首批 50 条内容发布、种子用户积累、平台算法测试。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative reveal">
+            <div class="timeline-dot top-6 hidden md:block"></div>
+            <div class="md:w-1/2 md:pl-12">
+              <div class="glass-card rounded-2xl p-6 border-l-4 border-l-cyan-500">
+                <div class="text-sm text-cyan-400 font-semibold mb-2">第 4-6 个月</div>
+                <h3 class="text-lg font-bold text-white mb-3">📈 快速增长期</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">稳定周更 3-5 条、粉丝破万、首单商业合作、多平台矩阵完善、社群建设启动。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative reveal">
+            <div class="timeline-dot top-6 hidden md:block"></div>
+            <div class="md:w-1/2 md:pr-12 md:ml-auto">
+              <div class="glass-card rounded-2xl p-6 border-l-4 border-l-brand-500">
+                <div class="text-sm text-brand-400 font-semibold mb-2">第 7-12 个月</div>
+                <h3 class="text-lg font-bold text-white mb-3">💼 商业变现期</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">粉丝突破 5 万，建立稳定商业合作渠道，电商带货启动，月度营收稳定，品牌 IP 初步形成。</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="relative reveal">
+            <div class="timeline-dot top-6 hidden md:block"></div>
+            <div class="md:w-1/2 md:pl-12">
+              <div class="glass-card rounded-2xl p-6 border-l-4 border-l-cyan-500">
+                <div class="text-sm text-cyan-400 font-semibold mb-2">第 13-24 个月</div>
+                <h3 class="text-lg font-bold text-white mb-3">🚀 品牌升级期</h3>
+                <p class="text-gray-400 text-sm leading-relaxed">粉丝突破 10 万，校园美食 IP 影响力扩大，拓展至周边高校，探索自营产品线。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 联系我们 / 页脚 -->
+  <section id="contact" class="relative py-24 overflow-hidden">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="glass-card rounded-3xl p-8 sm:p-12 text-center reveal">
+        <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4">开启校园美食之旅</h2>
+        <p class="text-gray-400 mb-8 max-w-xl mx-auto">如果您是校园周边商家、投资人或志同道合的伙伴，欢迎与我们联系，共同探索校园美食自媒体的无限可能。</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="mailto:hello@xiaobanxunwei.com" class="btn-primary px-8 py-3.5 rounded-full text-white font-semibold">
+            联系合作
+          </a>
+          <a href="#overview" class="px-8 py-3.5 rounded-full border border-white/20 text-gray-300 hover:bg-white/5 transition">
+            查看计划书
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="border-t border-white/5 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="text-xl font-bold gradient-text">校畔寻味</div>
+        <p class="text-gray-500 text-sm text-center">© 2026 校畔寻味 · 校园美食自媒体创业计划书. All rights reserved.</p>
+        <div class="flex items-center gap-4 text-sm text-gray-400">
+          <a href="#" class="hover:text-brand-400 transition">抖音</a>
+          <a href="#" class="hover:text-brand-400 transition">小红书</a>
+          <a href="#" class="hover:text-brand-400 transition">视频号</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // 移动端菜单切换
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    // 点击菜单链接后关闭移动端菜单
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+      });
+    });
+
+    // 滚动显示动画
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      observer.observe(el);
+    });
+
+    // 导航栏滚动效果
+    const nav = document.querySelector('nav');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        nav.classList.add('shadow-lg');
+      } else {
+        nav.classList.remove('shadow-lg');
+      }
+    });
+  </script>
+</body>
+</html>
