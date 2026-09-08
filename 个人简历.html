@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>王从康 - 个人简历</title>
+		<style>
+			:root {
+				--primary: #0b3a6b;
+				--primary-deep: #082c51;
+				--accent: #1d6fb8;
+				--accent-light: #e7f1fb;
+				--text: #2c3e50;
+				--text-light: #5b6b7b;
+				--border: #e4e9f0;
+				--bg-soft: #f5f8fc;
+				--gold: #c9a227;
+			}
+
+			@page {
+				size: A4;
+				margin: 1.6cm 1.8cm;
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			html {
+				scroll-behavior: smooth;
+			}
+
+			body {
+				font-family: "PingFang SC", "Microsoft YaHei", "Source Han Sans SC", "Helvetica Neue", Arial, sans-serif;
+				color: var(--text);
+				background: linear-gradient(160deg, #eef4fb 0%, #dfe9f4 100%);
+				line-height: 1.65;
+				padding: 28px 16px;
+				-webkit-font-smoothing: antialiased;
+			}
+
+			.resume {
+				max-width: 860px;
+				margin: 0 auto;
+				background: #fff;
+				border-radius: 14px;
+				overflow: hidden;
+				box-shadow: 0 10px 40px rgba(11, 58, 107, 0.14);
+				padding: 42px 52px 30px;
+				position: relative;
+			}
+
+			/* 顶部装饰线 */
+			.resume::before {
+				content: "";
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 5px;
+				background: linear-gradient(90deg, var(--primary), var(--accent) 55%, #4aa3df);
+			}
+
+			/* ---------- 头部 ---------- */
+			.header {
+				display: flex;
+				align-items: center;
+				gap: 30px;
+				padding-bottom: 24px;
+				margin-bottom: 26px;
+				border-bottom: 1px solid var(--border);
+				background: linear-gradient(90deg, transparent, transparent);
+			}
+
+			.photo {
+				width: 122px;
+				flex-shrink: 0;
+				position: relative;
+			}
+
+			.photo img {
+				width: 122px;
+				height: 156px;
+				object-fit: cover;
+				object-position: center top;
+				border-radius: 10px;
+				border: 3px solid #fff;
+				box-shadow: 0 6px 20px rgba(11, 58, 107, 0.22), 0 0 0 1px rgba(11, 58, 107, 0.08);
+				background: #f2f6fa;
+				display: block;
+			}
+
+			.header-info {
+				flex: 1;
+				text-align: left;
+			}
+
+			.header h1 {
+				font-size: 32px;
+				font-weight: 700;
+				letter-spacing: 8px;
+				color: var(--primary);
+				margin-bottom: 10px;
+				display: flex;
+				align-items: center;
+				gap: 14px;
+			}
+
+			.tagline {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				font-size: 13.5px;
+				color: #fff;
+				background: linear-gradient(135deg, var(--primary), var(--accent));
+				padding: 4px 14px;
+				border-radius: 999px;
+				margin-bottom: 12px;
+				box-shadow: 0 3px 10px rgba(11, 58, 107, .18);
+			}
+
+			.contact {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 6px 16px;
+				font-size: 13px;
+				color: var(--text-light);
+				margin-top: 10px;
+			}
+
+			.contact span {
+				display: inline-flex;
+				align-items: center;
+				gap: 5px;
+				white-space: nowrap;
+			}
+
+			.contact i {
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				background: var(--accent-light);
+				color: var(--accent);
+				font-style: normal;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 12px;
+				font-weight: 600;
+			}
+
+			.contact a {
+				color: inherit;
+				text-decoration: none;
+			}
+
+			.contact a:hover {
+				color: var(--accent);
+			}
+
+			/* ---------- 通用区块 ---------- */
+			.section {
+				margin-bottom: 24px;
+			}
+
+			.section-title {
+				display: flex;
+				align-items: center;
+				font-size: 17px;
+				font-weight: 700;
+				color: var(--primary);
+				margin-bottom: 14px;
+				letter-spacing: 1px;
+			}
+
+			.section-title::after {
+				content: "";
+				flex: 1;
+				height: 2px;
+				margin-left: 14px;
+				background: linear-gradient(90deg, var(--accent), rgba(29, 111, 184, .12));
+				border-radius: 2px;
+			}
+
+			.section-title .ico {
+				width: 26px;
+				height: 26px;
+				border-radius: 7px;
+				background: linear-gradient(135deg, var(--primary), var(--accent));
+				color: #fff;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 14px;
+				margin-right: 10px;
+				box-shadow: 0 3px 8px rgba(11, 58, 107, .22);
+			}
+
+			/* ---------- 技能 ---------- */
+			.skills-grid {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+
+			.skill-row {
+				display: flex;
+				align-items: flex-start;
+				font-size: 13.5px;
+			}
+
+			.skill-cat {
+				flex-shrink: 0;
+				width: 92px;
+				font-weight: 600;
+				color: var(--primary);
+				padding-top: 1px;
+			}
+
+			.skill-tags {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 6px;
+			}
+
+			.skill-tag {
+				background: var(--accent-light);
+				color: var(--accent);
+				border: 1px solid rgba(29, 111, 184, .12);
+				padding: 1.5px 11px;
+				border-radius: 999px;
+				font-size: 12.5px;
+				transition: all .15s ease;
+			}
+
+			/* ---------- 项目经历 ---------- */
+			.item {
+				position: relative;
+				padding: 14px 16px 12px 18px;
+				margin-bottom: 14px;
+				background: var(--bg-soft);
+				border-radius: 10px;
+				border: 1px solid var(--border);
+				border-left: 3px solid var(--accent);
+				transition: box-shadow .2s ease;
+			}
+
+			.item:last-child {
+				margin-bottom: 0;
+			}
+
+			.item-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: baseline;
+				gap: 12px;
+			}
+
+			.item-title {
+				font-size: 15px;
+				font-weight: 700;
+				color: var(--primary-deep);
+			}
+
+			.item-sub {
+				font-size: 12.5px;
+				color: var(--text-light);
+				margin-top: 2px;
+			}
+
+			.item-time {
+				font-size: 12px;
+				color: var(--accent);
+				font-weight: 600;
+				background: #fff;
+				border: 1px solid rgba(29, 111, 184, .2);
+				padding: 1px 10px;
+				border-radius: 999px;
+				white-space: nowrap;
+			}
+
+			.item-award {
+				display: inline-flex;
+				align-items: center;
+				font-size: 12.5px;
+				font-weight: 600;
+				color: #b7791f;
+				background: #fdf3e0;
+				border: 1px solid #f5ddb0;
+				padding: 1px 12px;
+				border-radius: 999px;
+				margin-top: 8px;
+			}
+
+			.item ul {
+				margin: 8px 0 0 18px;
+				font-size: 13px;
+				color: #3d4c5c;
+			}
+
+			.item li {
+				margin-bottom: 3px;
+			}
+
+			.item li::marker {
+				color: var(--accent);
+			}
+
+			/* ---------- 荣誉奖项 ---------- */
+			.awards-table {
+				width: 100%;
+				border-collapse: separate;
+				border-spacing: 0;
+				font-size: 13px;
+				border-radius: 10px;
+				overflow: hidden;
+				border: 1px solid var(--border);
+			}
+
+			.awards-table th {
+				background: linear-gradient(135deg, var(--primary), var(--accent));
+				color: #fff;
+				padding: 8px 12px;
+				text-align: left;
+				font-weight: 600;
+				letter-spacing: .5px;
+			}
+
+			.awards-table td {
+				padding: 6.5px 12px;
+				border-bottom: 1px solid var(--border);
+			}
+
+			.awards-table tbody tr:last-child td {
+				border-bottom: none;
+			}
+
+			.awards-table tbody tr:nth-child(even) {
+				background: #f6f9fd;
+			}
+
+			.award-level {
+				display: inline-block;
+				padding: 1px 10px;
+				border-radius: 999px;
+				font-size: 11.5px;
+				font-weight: 600;
+			}
+
+			.level-national {
+				background: #fdebd0;
+				color: #c0392b;
+				border: 1px solid #f5c6aa;
+			}
+
+			.level-provincial {
+				background: #eaf7ef;
+				color: #1e8449;
+				border: 1px solid #bfe3cd;
+			}
+
+			.level-school {
+				background: var(--accent-light);
+				color: var(--accent);
+				border: 1px solid rgba(29, 111, 184, .2);
+			}
+
+			.level-public {
+				background: #f7effa;
+				color: #8e44ad;
+				border: 1px solid #e3c9ec;
+			}
+
+			/* ---------- 教育背景 ---------- */
+			.edu-card {
+				background: var(--bg-soft);
+				border: 1px solid var(--border);
+				border-radius: 10px;
+				padding: 12px 16px;
+				margin-bottom: 12px;
+			}
+
+			.edu-card:last-child {
+				margin-bottom: 0;
+			}
+
+			.edu-head {
+				display: flex;
+				justify-content: space-between;
+				align-items: baseline;
+				gap: 12px;
+			}
+
+			.edu-name {
+				font-size: 15px;
+				font-weight: 700;
+				color: var(--primary-deep);
+			}
+
+			.edu-name::before {
+				content: "🎓";
+				font-size: 14px;
+				margin-right: 8px;
+			}
+
+			.edu-card:last-of-type .edu-name::before {
+				content: "🏫";
+			}
+
+			.edu-info {
+				font-size: 13px;
+				color: var(--text-light);
+				margin-top: 3px;
+			}
+
+			.edu-period {
+				font-size: 12px;
+				color: var(--accent);
+				font-weight: 600;
+				background: #fff;
+				border: 1px solid rgba(29, 111, 184, .2);
+				padding: 1px 10px;
+				border-radius: 999px;
+				white-space: nowrap;
+			}
+
+			.edu-highlights {
+				margin: 8px 0 0 18px;
+				font-size: 13px;
+				color: #3d4c5c;
+			}
+
+			.edu-highlights li {
+				margin-bottom: 3px;
+			}
+
+			/* ---------- 实践经历 ---------- */
+			.work-item {
+				display: flex;
+				justify-content: space-between;
+				align-items: baseline;
+				gap: 12px;
+				margin-top: 12px;
+			}
+
+			.work-item:first-child {
+				margin-top: 0;
+			}
+
+			.work-name {
+				font-size: 14.5px;
+				font-weight: 700;
+				color: var(--primary-deep);
+			}
+
+			.work-name::before {
+				content: "💼";
+				font-size: 13px;
+				margin-right: 8px;
+			}
+
+			.work-badge {
+				font-size: 12px;
+				color: var(--text-light);
+				background: #eef1f6;
+				padding: 1px 10px;
+				border-radius: 999px;
+				white-space: nowrap;
+				flex-shrink: 0;
+			}
+
+			.work-desc {
+				font-size: 13px;
+				color: #3d4c5c;
+				margin-top: 4px;
+				padding-left: 26px;
+			}
+
+			.work-desc+.work-desc {
+				margin-top: 6px;
+			}
+
+			/* ---------- 自我评价 ---------- */
+			.self-eval p {
+				display: flex;
+				gap: 10px;
+				font-size: 13px;
+				margin-bottom: 7px;
+				color: #3d4c5c;
+				align-items: baseline;
+			}
+
+			.self-eval .num {
+				flex-shrink: 0;
+				width: 22px;
+				height: 22px;
+				border-radius: 6px;
+				background: linear-gradient(135deg, var(--primary), var(--accent));
+				color: #fff;
+				font-size: 12px;
+				font-weight: 700;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				transform: translateY(3px);
+			}
+
+			.self-eval b {
+				color: var(--primary-deep);
+			}
+
+			/* ---------- 高亮 ---------- */
+			.highlight {
+				color: #b7791f;
+				font-weight: 700;
+				background: linear-gradient(transparent 62%, rgba(255, 220, 140, .45) 62%);
+				padding: 0 2px;
+			}
+
+			.footer-note {
+				text-align: center;
+				font-size: 12px;
+				color: #97a6b6;
+				margin-top: 24px;
+				padding-top: 14px;
+				border-top: 1px solid var(--border);
+				letter-spacing: 2px;
+			}
+
+			.footer-note::before,
+			.footer-note::after {
+				content: "—";
+				margin: 0 8px;
+				color: #c7d2de;
+			}
+
+			/* ---------- 打印 ---------- */
+			@media print {
+				body {
+					padding: 0;
+					background: #fff;
+				}
+
+				.resume {
+					box-shadow: none;
+					border-radius: 0;
+					max-width: none;
+					padding: 0;
+				}
+
+				.resume::before {
+					display: none;
+				}
+
+				.item,
+				.edu-card {
+					break-inside: avoid;
+				}
+
+				* {
+					-webkit-print-color-adjust: exact;
+					print-color-adjust: exact;
+				}
+			}
+
+			/* ---------- 小屏 ---------- */
+			@media (max-width: 640px) {
+				body {
+					padding: 10px 6px;
+				}
+
+				.resume {
+					padding: 24px 18px 18px;
+					border-radius: 8px;
+				}
+
+				.header {
+					flex-direction: column;
+					align-items: center;
+					text-align: center;
+					gap: 18px;
+				}
+
+				.header-info {
+					text-align: center;
+				}
+
+				.header h1 {
+					justify-content: center;
+				}
+
+				.contact {
+					justify-content: center;
+				}
+
+				.item-header,
+				.edu-head,
+				.work-item {
+					flex-direction: column;
+					gap: 4px;
+				}
+
+				.work-desc {
+					padding-left: 0;
+				}
+
+				.edu-period {
+					align-self: flex-start;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="resume">
+			<div class="header">
+				<div class="photo"><img src="C:/Users/Laube/Desktop/图标/1.jpg" alt="证件照"></div>
+				<div class="header-info">
+					<h1>王 从 康</h1>
+					<div class="tagline">🎯 求职意向：Java / Python 后端开发 · 2027 届应届生 · 可立即到岗实习</div>
+					<div class="contact">
+						<span><i>📱</i>159 3725 6976</span>
+						<span><i>✉</i>2659306492@qq.com</span>
+						<span><i>📍</i>上海</span>
+						<span><i>🏫</i>河南质量工程职业学院 · 软件技术</span>
+						<span><i>🌐</i>wcky.top</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="section">
+				<div class="section-title"><span class="ico">💻</span>专业技能</div>
+				<div class="skills-grid">
+					<div class="skill-row"><span class="skill-cat">编程语言</span>
+						<div class="skill-tags"><span class="skill-tag">Java</span><span
+								class="skill-tag">Python</span><span class="skill-tag">JavaScript</span><span
+								class="skill-tag">SQL</span></div>
+					</div>
+					<div class="skill-row"><span class="skill-cat">后端框架</span>
+						<div class="skill-tags"><span class="skill-tag">SpringBoot</span></div>
+					</div>
+					<div class="skill-row"><span class="skill-cat">前端技术</span>
+						<div class="skill-tags"><span class="skill-tag">HTML</span><span
+								class="skill-tag">CSS</span><span class="skill-tag">JavaScript</span></div>
+					</div>
+					<div class="skill-row"><span class="skill-cat">数据库</span>
+						<div class="skill-tags"><span class="skill-tag">MySQL</span></div>
+					</div>
+					<div class="skill-row"><span class="skill-cat">开发工具</span>
+						<div class="skill-tags"><span class="skill-tag">Git</span><span class="skill-tag">VS
+								Code</span><span class="skill-tag">Linux</span></div>
+					</div>
+					<div class="skill-row"><span class="skill-cat">其他技能</span>
+						<div class="skill-tags"><span class="skill-tag">AIGC 应用开发</span><span class="skill-tag">Prompt
+								工程</span><span class="skill-tag">网络安全基础</span><span class="skill-tag">数据分析</span></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="section">
+				<div class="section-title"><span class="ico">🏆</span>竞赛项目经历</div>
+				<div class="item">
+					<div class="item-header">
+						<div>
+							<div class="item-title">第七届传智杯全国 IT 技能大赛 · AIGC 创新挑战赛</div>
+							<div class="item-sub">个人参赛 · AI 古诗意境图像生成</div>
+						</div>
+						<div class="item-time">2024.12 – 2025.05</div>
+					</div>
+					<div class="item-award">🏅 国赛二等奖 | 省级三等奖 | 初赛一等奖</div>
+					<ul>
+						<li>独立完成以唐代元稹《离思五首·其四》为主题的 AI 图像创作，运用 AI 绘画工具将古诗意境进行视觉转译，作品需同时满足诗意准确性与画面艺术性双重评审标准</li>
+						<li>通过 Prompt 工程反复优化生成参数与描述词，多轮迭代调试构图、色调、人物形象等细节，使生成图像精准表达「曾经沧海难为水」的诗意内涵</li>
+						<li>撰写配套创意说明文档，阐述作品创作思路、技术路线与诗意解读，从全国数千支参赛队伍中脱颖而出，晋级国赛并获二等奖</li>
+					</ul>
+				</div>
+				<div class="item">
+					<div class="item-header">
+						<div>
+							<div class="item-title">全国大学生数学建模竞赛</div>
+							<div class="item-sub">队长（3人团队）· 预测类问题建模</div>
+						</div>
+						<div class="item-time">2025.11</div>
+					</div>
+					<div class="item-award">🏅 省级三等奖</div>
+					<ul>
+						<li>担任队长，统筹团队分工与时间管理，带领队员在72小时内完成赛题分析、模型建立、代码实现与论文撰写全流程</li>
+						<li>使用 Python（Pandas/NumPy/Scikit-learn）进行数据清洗、特征工程与建模，针对预测类问题构建回归预测模型，完成数据可视化与结果分析</li>
+						<li>负责核心算法代码编写与论文主体撰写，团队提交完整建模论文并获省级三等奖</li>
+					</ul>
+				</div>
+				<div class="item">
+					<div class="item-header">
+						<div>
+							<div class="item-title">河南省第七届「金盾信安杯」网络与数据安全大赛</div>
+							<div class="item-sub">队长 · CTF夺旗 / 渗透测试 / 安全运维</div>
+						</div>
+						<div class="item-time">2025.12</div>
+					</div>
+					<div class="item-award">🏅 省级三等奖</div>
+					<ul>
+						<li>担任战队队长，组织队员覆盖 Web 渗透、逆向工程、密码学、安全运维等多个 CTF 方向，制定解题策略与时间分配方案</li>
+						<li>参与 Web 渗透测试题目解题，利用 SQL 注入、XSS、文件上传等常见漏洞进行攻击实战，获取 Flag 得分</li>
+						<li>同时参与安全运维赛项，完成漏洞排查、系统加固、日志分析等实操任务，带领团队在省级赛事中获奖</li>
+					</ul>
+				</div>
+				<div class="item">
+					<div class="item-header">
+						<div>
+							<div class="item-title">首届大学生 AI+创新应用大赛</div>
+							<div class="item-sub">队长 · AI 创新应用方向</div>
+						</div>
+						<div class="item-time">2025.12</div>
+					</div>
+					<div class="item-award">🏅 省级二等奖</div>
+					<ul>
+						<li>作为队长带领团队设计并完成 AI 创新应用作品，结合大语言模型 API 开发实用型 AI 应用</li>
+						<li>负责技术方案设计与核心功能实现，协调团队成员完成前后端开发、测试与文档撰写</li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="section">
+				<div class="section-title"><span class="ico">🎖️</span>荣誉奖项</div>
+				<table class="awards-table">
+					<thead>
+						<tr>
+							<th style="width:12%">时间</th>
+							<th style="width:56%">奖项名称</th>
+							<th style="width:14%">级别</th>
+							<th style="width:18%">等次</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>2025-11</td>
+							<td>2024-2025 学年度国家励志奖学金</td>
+							<td><span class="award-level level-national">国家级</span></td>
+							<td>国家励志奖学金</td>
+						</tr>
+						<tr>
+							<td>2025-05</td>
+							<td>第七届传智杯 AIGC 创新挑战赛 C 组国赛</td>
+							<td><span class="award-level level-national">国赛</span></td>
+							<td>二等奖</td>
+						</tr>
+						<tr>
+							<td>2025-12</td>
+							<td>首届大学生 AI+创新应用大赛</td>
+							<td><span class="award-level level-provincial">省级</span></td>
+							<td>二等奖</td>
+						</tr>
+						<tr>
+							<td>2025-03</td>
+							<td>第七届传智杯 AIGC 创新挑战赛 C 组省赛</td>
+							<td><span class="award-level level-provincial">省级</span></td>
+							<td>三等奖</td>
+						</tr>
+						<tr>
+							<td>2025-11</td>
+							<td>全国大学生数学建模竞赛</td>
+							<td><span class="award-level level-provincial">省级</span></td>
+							<td>三等奖</td>
+						</tr>
+						<tr>
+							<td>2025-11</td>
+							<td>河南省高等学校信息技术应用创新大赛</td>
+							<td><span class="award-level level-provincial">省级</span></td>
+							<td>三等奖</td>
+						</tr>
+						<tr>
+							<td>2025-12</td>
+							<td>河南省第七届「金盾信安杯」网络与数据安全大赛</td>
+							<td><span class="award-level level-provincial">省级</span></td>
+							<td>三等奖</td>
+						</tr>
+						<tr>
+							<td>2025-06</td>
+							<td>计算机技术学院计算机组装与维护比赛</td>
+							<td><span class="award-level level-school">校级</span></td>
+							<td>一等奖</td>
+						</tr>
+						<tr>
+							<td>2025-12</td>
+							<td>校级职业技能大赛电子电器与集成电路赛道</td>
+							<td><span class="award-level level-school">校级</span></td>
+							<td>一等奖</td>
+						</tr>
+						<tr>
+							<td>2026-05</td>
+							<td>校级「三好学生」</td>
+							<td><span class="award-level level-school">校级</span></td>
+							<td>三好学生</td>
+						</tr>
+						<tr>
+							<td>2025-05</td>
+							<td>第八届读书月「阅见新知·书香满屏」有奖问答活动</td>
+							<td><span class="award-level level-school">校级</span></td>
+							<td>一等奖</td>
+						</tr>
+						<tr>
+							<td>—</td>
+							<td>联合国儿童基金会月捐项目公益荣誉</td>
+							<td><span class="award-level level-public">公益</span></td>
+							<td>感谢状</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<div class="section">
+				<div class="section-title"><span class="ico">📚</span>教育背景</div>
+				<div class="edu-card">
+					<div class="edu-head">
+						<div>
+							<div class="edu-name">河南质量工程职业学院</div>
+							<div class="edu-info">计算机技术学院 · 软件技术专业 · 大专</div>
+						</div>
+						<div class="edu-period">2024.09 – 2027.06（预计）</div>
+					</div>
+					<ul class="edu-highlights">
+						<li>专业课程：Java 程序设计、Python 程序设计、数据库原理与应用、Web 前端开发、计算机网络、Linux 操作系统、数据结构</li>
+						<li>荣誉：国家励志奖学金（2024-2025学年）、校级三好学生（2025-2026学年）；多次担任竞赛队长，累计获得<span
+								class="highlight">国家级2项、省级7项、校级7项</span>奖项</li>
+					</ul>
+				</div>
+				<div class="edu-card">
+					<div class="edu-head">
+						<div>
+							<div class="edu-name">滑县滑台高中</div>
+							<div class="edu-info">高中</div>
+						</div>
+						<div class="edu-period">2021.09 – 2024.06</div>
+					</div>
+					<ul class="edu-highlights">
+						<li>科技作品《神奇的算盘》获第29届滑县青少年科技创新大赛科学DV作品<span class="highlight">一等奖</span>、第31届安阳市青少年科技创新大赛<span
+								class="highlight">二等奖</span>、第36届河南省青少年科技创新大赛<span class="highlight">三等奖</span></li>
+					</ul>
+				</div>
+			</div>
+
+			<div class="section">
+				<div class="section-title"><span class="ico">👷</span>实践经历</div>
+				<div class="work-item">
+					<div class="work-name">蓝思科技 · 机器操作员（贴膜岗）</div>
+					<div class="work-badge">假期工</div>
+				</div>
+				<div class="work-desc">负责精密电子元器件贴膜工序，操作自动化设备进行屏幕贴膜作业；严格按照工艺标准执行操作，<span
+						class="highlight">保持高合格率零批量事故</span>，培养了严谨细致的质量意识和标准化操作习惯。</div>
+				<div class="work-item">
+					<div class="work-name">俏侬食品 · 红豆包机器操作员</div>
+					<div class="work-badge">假期工</div>
+				</div>
+				<div class="work-desc">负责食品加工流水线设备操作，独立操控红豆包生产机器，完成原料投放、参数调节、成型监控等全流程工作；快速掌握设备操作规范，<span
+						class="highlight">保证生产效率与产品合格率</span>，锻炼了设备操作能力和快速学习能力。</div>
+				<div class="work-item">
+					<div class="work-name">百联食品 · 厨师（炒菜岗位）</div>
+					<div class="work-badge">假期工</div>
+				</div>
+				<div class="work-desc">负责公司食堂菜品烹制工作，独立完成每日菜品的清洗、切配、炒制与出品，<span
+						class="highlight">保证出餐速度与菜品质量</span>；面对高强度出餐压力仍能稳定完成任务，培养了在高压环境下高效工作的责任心与执行力。</div>
+				<div class="work-item">
+					<div class="work-name">美团外卖 · 外卖配送员</div>
+					<div class="work-badge">2个月</div>
+				</div>
+				<div class="work-desc">负责指定区域的外卖订单配送，独立规划最优配送路线，<span class="highlight">日均完成 40+
+						单</span>，高峰期保持准时送达率；在酷暑天气中坚持高强度户外工作，锻炼了出色的时间管理能力、抗压能力和客户沟通能力。</div>
+				<div class="work-desc">此外，高中起连续多年寒暑假勤工俭学，曾在好孩子等制造企业产线岗位工作，养成了吃苦耐劳、踏实肯干的工作作风。</div>
+			</div>
+
+			<div class="section">
+				<div class="section-title"><span class="ico">✍️</span>自我评价</div>
+				<div class="self-eval">
+					<p><span class="num">1</span><span><b>竞赛实战经验丰富</b>：累计在国家级、省级、校级 IT 类竞赛中获奖十余项，涵盖 AIGC、数学建模、网络安全、AI
+							应用开发等方向，具备较强的技术学习能力和问题解决能力；多次担任竞赛队长，有团队组织和协调经验。</span></p>
+					<p><span class="num">2</span><span><b>技术基础扎实</b>：掌握 Java/Python/JavaScript 编程语言，熟悉 SpringBoot 框架与
+							MySQL 数据库，具备 Linux 系统操作和 Git 版本控制能力，有前端基础开发能力，了解 AIGC 应用开发与 Prompt 工程，具备网络安全基础知识。</span></p>
+					<p><span class="num">3</span><span><b>工作态度踏实</b>：从高中起连续多年寒暑假勤工俭学，经历过制造业、服务业等多行业一线岗位锻炼，<span
+								class="highlight">能吃苦、执行力强、抗压能力突出</span>，能快速适应新环境和新任务。</span></p>
+					<p><span class="num">4</span><span><b>持续学习，热爱公益</b>：对新技术保持高度热情，自主学习 AIGC
+							和网络安全相关知识并在竞赛中获奖；参与联合国儿童基金会月捐公益项目，具有社会责任感。</span></p>
+				</div>
+			</div>
+
+			<div class="footer-note">感谢您花时间阅读我的简历，期待能有机会与您进一步交流</div>
+		</div>
+	</body>
+</html>
