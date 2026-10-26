@@ -286,6 +286,51 @@
 				flex-shrink: 0;
 			}
 
+			/* 二维码卡片：鼠标悬停放大预览 */
+			.qr-card {
+				position: relative;
+			}
+
+			.qr-card .qr-thumb {
+				width: 44px;
+				height: 44px;
+				object-fit: contain;
+				border-radius: 6px;
+				display: block;
+				transition: transform 0.25s ease;
+			}
+
+			.qr-card .qr-preview {
+				position: absolute;
+				left: 16px;
+				bottom: calc(100% - 4px);
+				width: 150px;
+				height: 150px;
+				object-fit: contain;
+				background: #fff;
+				border-radius: 10px;
+				box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+				opacity: 0;
+				transform: scale(0.4);
+				transform-origin: left bottom;
+				pointer-events: none;
+				transition: opacity 0.22s ease, transform 0.22s ease;
+				z-index: 50;
+			}
+
+			.qr-card:hover {
+				z-index: 30;
+			}
+
+			.qr-card:hover .qr-thumb {
+				transform: scale(1.15);
+			}
+
+			.qr-card:hover .qr-preview {
+				opacity: 1;
+				transform: scale(1);
+			}
+
 			.link-card .info h3 {
 				font-size: 0.95rem;
 				margin-bottom: 3px;
@@ -668,20 +713,6 @@
 								<p>分块查找与二叉排序树</p>
 							</div>
 						</a>
-						<a class="link-card" href="eat.html">
-							<div class="icon">📄</div>
-							<div class="info">
-								<h3>校畔寻味</h3>
-								<p>创业网站</p>
-							</div>
-						</a>
-						<a class="link-card" href="个人简历.html">
-							<div class="icon">📄</div>
-							<div class="info">
-								<h3>我的简介</h3>
-								<p>个人简历</p>
-							</div>
-						</a>
 						<a class="link-card" href="https://shangcc.top/" target="_blank">
 							<div class="icon">🌐</div>
 							<div class="info">
@@ -696,11 +727,14 @@
 								<p>网页版文件传输助手</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://node1.chatshare.biz/list" target="_blank">
-							<div class="icon">🤖</div>
+						<a class="link-card qr-card" href="https://node1.chatshare.biz/list" target="_blank">
+							<div class="icon">
+								<img class="qr-thumb" src="2.jpg" alt="ChatShare 激活码">
+								<img class="qr-preview" src="2.jpg" alt="ChatShare 激活码">
+							</div>
 							<div class="info">
 								<h3>ChatShare</h3>
-								<p>ChatShare 节点列表</p>
+								<p>节点列表 · 悬停扫码获取激活码</p>
 							</div>
 						</a>
 					</div>
@@ -861,6 +895,13 @@
 								<p>国内外 AIGC 工具导航</p>
 							</div>
 						</a>
+						<a class="link-card" href="https://perchancecn.com/index.html" target="_blank">
+							<div class="icon">🎲</div>
+							<div class="info">
+								<h3>Perchance AI</h3>
+								<p>AI 生成器中文站</p>
+							</div>
+						</a>
 						<!-- AI 智能体平台 -->
 						<a class="link-card" href="https://agent.minimaxi.com" target="_blank">
 							<div class="icon">🎯</div>
@@ -883,6 +924,13 @@
 								<p>开源 LLM 应用平台</p>
 							</div>
 						</a>
+						<a class="link-card" href="https://app.tapnow.media/home" target="_blank">
+							<div class="icon">🎨</div>
+							<div class="info">
+								<h3>TapNow</h3>
+								<p>智能体创意画布</p>
+							</div>
+						</a>
 						<!-- AI 绘画图像 -->
 						<a class="link-card" href="https://ai-kit.cn/favorites/best-ai-image-tools" target="_blank">
 							<div class="icon">🖼️</div>
@@ -903,6 +951,27 @@
 							<div class="info">
 								<h3>CodeFormer</h3>
 								<p>AI 人脸修复增强</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://github.com/AUTOMATIC1111/stable-diffusion-webui" target="_blank">
+							<div class="icon">🎨</div>
+							<div class="info">
+								<h3>SD WebUI</h3>
+								<p>开源 AI 绘画部署</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://github.com/MeiGen-AI/InfiniteTalk" target="_blank">
+							<div class="icon">🎬</div>
+							<div class="info">
+								<h3>InfiniteTalk</h3>
+								<p>无限长度数字人视频</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://reelbench.79px.com" target="_blank">
+							<div class="icon">🎞️</div>
+							<div class="info">
+								<h3>Reelbench</h3>
+								<p>离线 AI 影视创作</p>
 							</div>
 						</a>
 						<a class="link-card" href="https://vocalremover.org/zh" target="_blank">
@@ -1168,6 +1237,13 @@
 								<p>开源 LLM 接口聚合项目</p>
 							</div>
 						</a>
+						<a class="link-card" href="https://github.com/codecrafters-io/build-your-own-x" target="_blank">
+							<div class="icon">🛠️</div>
+							<div class="info">
+								<h3>Build Your Own X</h3>
+								<p>从零实现经典技术</p>
+							</div>
+						</a>
 						<a class="link-card" href="https://stackoverflow.com" target="_blank">
 							<div class="icon">💬</div>
 							<div class="info">
@@ -1307,6 +1383,13 @@
 							<div class="info">
 								<h3>Intel ARK</h3>
 								<p>产品规格查询</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://mirrors.tuna.tsinghua.edu.cn" target="_blank">
+							<div class="icon">🚀</div>
+							<div class="info">
+								<h3>清华开源镜像站</h3>
+								<p>开源软件镜像加速</p>
 							</div>
 						</a>
 					</div>
@@ -1531,6 +1614,13 @@
 								<p>大学生 AI 竞赛</p>
 							</div>
 						</a>
+						<a class="link-card" href="https://aiic.yz-cube.com/#/home" target="_blank">
+							<div class="icon">🤖</div>
+							<div class="info">
+								<h3>东盟 AI 挑战赛</h3>
+								<p>人工智能技术应用赛</p>
+							</div>
+						</a>
 						<!-- 游戏化学习 -->
 						<a class="link-card" href="https://codecombat.cn" target="_blank">
 							<div class="icon">🎮</div>
@@ -1717,6 +1807,13 @@
 								<p>韩漫在线看</p>
 							</div>
 						</a>
+						<a class="link-card" href="https://github.com/Predidit/Kazumi" target="_blank">
+							<div class="icon">🌸</div>
+							<div class="info">
+								<h3>Kazumi</h3>
+								<p>开源番剧采集 APP</p>
+							</div>
+						</a>
 						<!-- 小说 -->
 						<a class="link-card" href="https://write.qq.com/portal/dashboard/books" target="_blank">
 							<div class="icon">✍️</div>
@@ -1738,6 +1835,13 @@
 							<div class="info">
 								<h3>九酷音乐</h3>
 								<p>MP3 下载</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://echonext.moe/zh/" target="_blank">
+							<div class="icon">🎧</div>
+							<div class="info">
+								<h3>ECHO</h3>
+								<p>本地音乐播放器</p>
 							</div>
 						</a>
 						<!-- 影视学习 -->
@@ -1926,6 +2030,20 @@
 								<p>在线工具集合</p>
 							</div>
 						</a>
+						<a class="link-card" href="https://www.btool.cn/hmac-generator" target="_blank">
+							<div class="icon">🔐</div>
+							<div class="info">
+								<h3>BTool HMAC</h3>
+								<p>在线 HMAC 加密</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.toolhelper.cn/EncodeDecode/Base" target="_blank">
+							<div class="icon">🔡</div>
+							<div class="info">
+								<h3>Base 编码解码</h3>
+								<p>多进制编码转换</p>
+							</div>
+						</a>
 
 						<!-- 📊 数据图表 -->
 						<a class="link-card" href="https://www.spsspro.com/mydata/index" target="_blank">
@@ -2016,6 +2134,13 @@
 							<div class="info">
 								<h3>BuildCores</h3>
 								<p>3D PC 装机模拟</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.maumemoji.com/zh-cn/tools/nickname-generator" target="_blank">
+							<div class="icon">🎭</div>
+							<div class="info">
+								<h3>随机昵称生成器</h3>
+								<p>游戏 ID 名称推荐</p>
 							</div>
 						</a>
 
@@ -2328,6 +2453,13 @@
 							<div class="info">
 								<h3>快意库</h3>
 								<p>艺术设计素材</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.rinuo.com/free/icons" target="_blank">
+							<div class="icon">🎯</div>
+							<div class="info">
+								<h3>免费图标资源</h3>
+								<p>图标素材下载</p>
 							</div>
 						</a>
 
