@@ -28,10 +28,10 @@ body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh
 </div>
 <div class="game-area"><div class="board" id="board"></div></div>
 <script>
-let tiles,moves,bestMoves=null;
-function init(){tiles=[...Array(15).keys()].map(i=>i+1);tiles.push(0);let prev=-1;for(let i=0;i<300;i++){const ei=tiles.indexOf(0);const nr=Math.floor(ei/4),nc=ei%4;const dirs=[];if(nr>0&&ei-4!==prev)dirs.push(ei-4);if(nr<3&&ei+4!==prev)dirs.push(ei+4);if(nc>0&&ei-1!==prev)dirs.push(ei-1);if(nc<3&&ei+1!==prev)dirs.push(ei+1);const si=dirs[Math.floor(Math.random()*dirs.length)];prev=ei;[tiles[ei],tiles[si]]=[tiles[si],tiles[ei]]}moves=0;render()}
+let tiles,moves,bestMoves=null,won=false,winTimer;
+function init(){clearTimeout(winTimer);won=false;tiles=[...Array(15).keys()].map(i=>i+1);tiles.push(0);let prev=-1;for(let i=0;i<300;i++){const ei=tiles.indexOf(0);const nr=Math.floor(ei/4),nc=ei%4;const dirs=[];if(nr>0&&ei-4!==prev)dirs.push(ei-4);if(nr<3&&ei+4!==prev)dirs.push(ei+4);if(nc>0&&ei-1!==prev)dirs.push(ei-1);if(nc<3&&ei+1!==prev)dirs.push(ei+1);const si=dirs[Math.floor(Math.random()*dirs.length)];prev=ei;[tiles[ei],tiles[si]]=[tiles[si],tiles[ei]]}moves=0;render()}
 function render(){const b=document.getElementById('board');b.innerHTML='';tiles.forEach((v,i)=>{const d=document.createElement('div');d.className='tile'+(v===0?' empty':'');if(v===i+1&&v!==0)d.classList.add('correct');d.textContent=v||'';if(v)d.addEventListener('click',()=>move(i));b.appendChild(d)});document.getElementById('mv').textContent=moves;document.getElementById('best').textContent=bestMoves!==null?bestMoves:'-'}
-function move(i){const ei=tiles.indexOf(0);const ir=Math.floor(i/4),ic=i%4,er=Math.floor(ei/4),ec=ei%4;if(Math.abs(ir-er)+Math.abs(ic-ec)!==1)return;[tiles[i],tiles[ei]]=[tiles[ei],tiles[i]];moves++;render();if(tiles.slice(0,15).every((v,i)=>v===i+1)&&tiles[15]===0){if(bestMoves===null||moves<bestMoves)bestMoves=moves;setTimeout(()=>{alert('🎉 恭喜通关! 步数: '+moves+(bestMoves!==null?' | 最佳: '+bestMoves:''))},200)}}
+function move(i){if(won)return;const ei=tiles.indexOf(0);const ir=Math.floor(i/4),ic=i%4,er=Math.floor(ei/4),ec=ei%4;if(Math.abs(ir-er)+Math.abs(ic-ec)!==1)return;[tiles[i],tiles[ei]]=[tiles[ei],tiles[i]];moves++;const win=tiles.slice(0,15).every((v,i)=>v===i+1)&&tiles[15]===0;if(win){won=true;if(bestMoves===null||moves<bestMoves)bestMoves=moves}render();if(win)winTimer=setTimeout(()=>{alert('🎉 恭喜通关! 步数: '+moves+(bestMoves!==null?' | 最佳: '+bestMoves:''))},200)}
 document.getElementById('restart').addEventListener('click',init);init();
 </script>
 </body>

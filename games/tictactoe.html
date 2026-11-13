@@ -34,14 +34,14 @@ body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh
 </div>
 <div class="game-area"><div class="board" id="board"></div></div>
 <script>
-let board,turn,over,ai,sx=0,so=0,sd=0;
-function init(){board=Array(9).fill('');turn='X';over=false;render();document.getElementById('st').textContent='X 的回合';document.getElementById('st').style.color='#818cf8'}
+let board,turn,over,ai,sx=0,so=0,sd=0,aiTimer,hlTimer;
+function init(){clearTimeout(aiTimer);clearTimeout(hlTimer);board=Array(9).fill('');turn='X';over=false;render();document.getElementById('st').textContent='X 的回合';document.getElementById('st').style.color='#818cf8'}
 function toggleAI(){ai=!ai;document.getElementById('aiBtn').textContent=ai?'人机':'双人';document.getElementById('aiBtn').classList.toggle('active',ai);init()}
 function render(){const b=document.getElementById('board');b.innerHTML='';board.forEach((v,i)=>{const d=document.createElement('div');d.className='cell'+(v?' '+v:'');d.textContent=v;d.addEventListener('click',()=>play(i));b.appendChild(d)})}
-function play(i){if(board[i]||over)return;board[i]=turn;if(check())return;turn=turn==='X'?'O':'X';document.getElementById('st').textContent=turn+' 的回合';document.getElementById('st').style.color=turn==='X'?'#818cf8':'#f87171';render();if(ai&&turn==='O'&&!over)setTimeout(aiMove,250)}
+function play(i){if(board[i]||over)return;board[i]=turn;if(check())return;turn=turn==='X'?'O':'X';document.getElementById('st').textContent=turn+' 的回合';document.getElementById('st').style.color=turn==='X'?'#818cf8':'#f87171';render();if(ai&&turn==='O'&&!over)aiTimer=setTimeout(aiMove,250)}
 function aiMove(){const e=board.map((v,i)=>v===''?i:-1).filter(i=>i>=0);if(!e.length)return;const pick=e[Math.floor(Math.random()*e.length)];play(pick)}
 function check(){const w=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];for(const[a,b,c]of w){if(board[a]&&board[a]===board[b]&&board[a]===board[c]){over=true;board[a]==='X'?sx++:so++;document.getElementById('st').textContent=board[a]+' 赢了! 🎉';document.getElementById('st').style.color=board[a]==='X'?'#818cf8':'#f87171';highlight([a,b,c]);updateScores();render();return true}}if(!board.includes('')){over=true;sd++;document.getElementById('st').textContent='平局! 🤝';document.getElementById('st').style.color='#fbbf24';updateScores();render();return true}return false}
-function highlight(cells){setTimeout(()=>{document.querySelectorAll('.cell').forEach((el,i)=>{if(cells.includes(i))el.classList.add('win')})},50)}
+function highlight(cells){hlTimer=setTimeout(()=>{document.querySelectorAll('.cell').forEach((el,i)=>{if(cells.includes(i))el.classList.add('win')})},50)}
 function updateScores(){document.getElementById('sx').textContent=sx;document.getElementById('so').textContent=so;document.getElementById('sd').textContent=sd}
 document.getElementById('restart').addEventListener('click',init);document.getElementById('aiBtn').addEventListener('click',toggleAI);
 ai=false;init();

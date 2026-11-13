@@ -36,13 +36,13 @@ body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh
 <div class="game-area"><div class="board" id="board"></div></div>
 <script>
 const N=8,DR=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
-let bd,turn,validMoves;
-function init(){bd=Array(N).fill(null).map(()=>Array(N).fill(0));bd[3][3]=2;bd[3][4]=1;bd[4][3]=1;bd[4][4]=2;turn=1;findMoves();render()}
+let bd,turn,validMoves,endTimer;
+function init(){clearTimeout(endTimer);bd=Array(N).fill(null).map(()=>Array(N).fill(0));bd[3][3]=2;bd[3][4]=1;bd[4][3]=1;bd[4][4]=2;turn=1;findMoves();render()}
 function findMoves(){validMoves=[];for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(bd[r][c]===0&&flips(r,c,turn).length>0)validMoves.push([r,c])}
 function flips(r,c,p){const f=[];DR.forEach(([dr,dc])=>{const tmp=[];let nr=r+dr,nc=c+dc;while(nr>=0&&nr<N&&nc>=0&&nc<N&&bd[nr][nc]===3-p){tmp.push([nr,nc]);nr+=dr;nc+=dc}if(tmp.length&&nr>=0&&nr<N&&nc>=0&&nc<N&&bd[nr][nc]===p)f.push(...tmp)});return f}
 function play(r,c){const idx=validMoves.findIndex(([vr,vc])=>vr===r&&vc===c);if(idx<0)return;const allFlips=flips(r,c,turn);bd[r][c]=turn;allFlips.forEach(([fr,fc])=>bd[fr][fc]=turn);turn=3-turn;findMoves();if(validMoves.length===0){turn=3-turn;findMoves();if(validMoves.length===0)endGame()}render()}
 function count(p){let c=0;bd.forEach(r=>r.forEach(v=>{if(v===p)c++}));return c}
-function endGame(){const b=count(1),w=count(2);setTimeout(()=>{alert((b>w?'黑棋':w>b?'白棋':'平局')+'获胜!\n⚫'+b+' : '+w+' ⚪')},200)}
+function endGame(){const b=count(1),w=count(2);document.getElementById('st').textContent='游戏结束';endTimer=setTimeout(()=>{alert((b>w?'黑棋':w>b?'白棋':'平局')+'获胜!\n⚫'+b+' : '+w+' ⚪')},200)}
 function render(){const board=document.getElementById('board');board.innerHTML='';const bc=count(1),wc=count(2);document.getElementById('scb').textContent='⚫ '+bc;document.getElementById('scw').textContent='⚪ '+wc;document.getElementById('st').textContent=(turn===1?'黑棋':'白棋')+'回合';for(let r=0;r<N;r++)for(let c=0;c<N;c++){const d=document.createElement('div');d.className='cell';if(bd[r][c]===1)d.innerHTML='<div class="piece black"></div>';else if(bd[r][c]===2)d.innerHTML='<div class="piece white"></div>';else if(validMoves.some(([vr,vc])=>vr===r&&vc===c))d.classList.add('valid');d.addEventListener('click',()=>play(r,c));board.appendChild(d)}}
 document.getElementById('restart').addEventListener('click',init);init();
 </script>

@@ -38,16 +38,16 @@ const W=1,F=0,T=2,B=3,P=4,BT=5,PT=6;
 const levels=[
 {map:[[W,W,W,W,W,W,W],[W,F,F,F,W,F,W],[W,F,B,F,W,F,W],[W,F,F,F,T,F,W],[W,W,W,F,F,F,W],[W,F,F,F,B,F,W],[W,F,T,F,F,P,W],[W,W,W,W,W,W,W]],name:'入门'},
 {map:[[W,W,W,W,W,W],[W,F,F,T,F,W],[W,F,B,F,F,W],[W,F,F,B,F,W],[W,T,F,F,P,W],[W,W,W,W,W,W]],name:'简单'},
-{map:[[W,W,W,W,W,W,W],[W,F,F,T,F,F,W],[W,F,W,F,W,B,W],[W,F,F,B,F,F,W],[W,T,W,F,W,F,W],[W,F,F,P,F,F,W],[W,W,W,W,W,W,W]],name:'中等'},
-{map:[[W,W,W,W,W,W,W,W],[W,F,F,F,F,F,F,W],[W,F,W,W,F,W,W,W],[W,F,F,B,F,F,F,W],[W,F,W,F,W,B,F,W],[W,T,W,F,W,F,T,W],[W,F,F,F,P,F,F,W],[W,W,W,W,W,W,W,W]],name:'进阶'},
-{map:[[W,W,W,W,W],[W,F,P,W,W],[W,F,B,W,W],[W,F,F,B,W],[W,B,F,T,W],[W,T,F,F,W],[W,W,W,W,W]],name:'挑战'}
+{map:[[W,W,W,W,W,W,W],[W,F,F,F,F,T,W],[W,F,W,F,W,B,W],[W,F,F,B,F,F,W],[W,T,W,F,W,F,W],[W,F,F,P,F,F,W],[W,W,W,W,W,W,W]],name:'中等'},
+{map:[[W,W,W,W,W,W,W,W],[W,F,F,F,F,F,F,W],[W,F,W,W,F,W,W,W],[W,F,F,B,F,F,F,W],[W,F,W,F,W,B,F,W],[W,T,W,F,F,F,T,W],[W,F,F,F,P,F,F,W],[W,W,W,W,W,W,W,W]],name:'进阶'},
+{map:[[W,W,W,W,W],[W,T,P,W,W],[W,F,B,F,W],[W,F,F,B,W],[W,B,F,T,W],[W,T,F,F,W],[W,W,W,W,W]],name:'挑战'}
 ];
-let lv=0,grid,moves,originalGrid;
-function loadLevel(n){lv=n;const l=levels[n];grid=l.map.map(r=>[...r]);originalGrid=l.map.map(r=>[...r]);moves=0;render()}
+let lv=0,grid,moves,originalGrid,won=false,winTimer;
+function loadLevel(n){clearTimeout(winTimer);won=false;lv=n;const l=levels[n];grid=l.map.map(r=>[...r]);originalGrid=l.map.map(r=>[...r]);moves=0;render()}
 function findPlayer(){for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++)if(grid[r][c]===P||grid[r][c]===PT)return[r,c]}
 function render(){const b=document.getElementById('board');const maxW=Math.floor((window.innerWidth-40)/grid[0].length);const maxH=Math.floor((window.innerHeight-100)/grid.length);const sz=Math.min(maxW,maxH,64);b.style.gridTemplateColumns=`repeat(${grid[0].length},${sz}px)`;b.innerHTML='';const symbols={[W]:{cls:' wall',e:''},[F]:{cls:' floor',e:''},[T]:{cls:' target',e:'🎯'},[B]:{cls:' box',e:'📦'},[BT]:{cls:' boxOnTarget',e:'✅'},[P]:{cls:' player',e:'🧑'},[PT]:{cls:' player',e:'🧑'}};for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++){const d=document.createElement('div');const v=grid[r][c];d.className='cell'+(symbols[v]?.cls||'');d.style.width=sz+'px';d.style.height=sz+'px';d.style.fontSize=Math.round(sz*0.55)+'px';d.textContent=symbols[v]?.e;b.appendChild(d)}document.getElementById('lvi').textContent='关卡: '+(lv+1);document.getElementById('lvn').textContent=levels[lv].name;document.getElementById('stp').textContent=moves}
-function move(dr,dc){const[pr,pc]=findPlayer();const nr=pr+dr,nc=pc+dc;if(grid[nr][nc]===W)return;if(grid[nr][nc]===B||grid[nr][nc]===BT){const br=nr+dr,bc=nc+dc;if(grid[br][bc]===W||grid[br][bc]===B||grid[br][bc]===BT)return;grid[br][bc]=grid[br][bc]===T?BT:B;grid[nr][nc]=grid[nr][nc]===BT?T:F}else if(grid[nr][nc]!==F&&grid[nr][nc]!==T)return;grid[pr][pc]=grid[pr][pc]===PT?T:F;grid[nr][nc]=grid[nr][nc]===T?PT:P;moves++;render();checkWin()}
-function checkWin(){for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++)if(grid[r][c]===B)return;if(grid.flat().every(v=>v!==T))setTimeout(()=>alert('🎉 通关! 步数: '+moves),150)}
+function move(dr,dc){if(won)return;const[pr,pc]=findPlayer();const nr=pr+dr,nc=pc+dc;if(!grid[nr]||grid[nr][nc]===W)return;if(grid[nr][nc]===B||grid[nr][nc]===BT){const br=nr+dr,bc=nc+dc;if(!grid[br]||grid[br][bc]===W||grid[br][bc]===B||grid[br][bc]===BT)return;grid[br][bc]=grid[br][bc]===T?BT:B;grid[nr][nc]=grid[nr][nc]===BT?T:F}else if(grid[nr][nc]!==F&&grid[nr][nc]!==T)return;grid[pr][pc]=grid[pr][pc]===PT?T:F;grid[nr][nc]=grid[nr][nc]===T?PT:P;moves++;render();checkWin()}
+function checkWin(){for(let r=0;r<grid.length;r++)for(let c=0;c<grid[r].length;c++)if(grid[r][c]===B)return;if(grid.flat().every(v=>v!==T)){won=true;winTimer=setTimeout(()=>alert('🎉 通关! 步数: '+moves),150)}}
 document.addEventListener('keydown',e=>{const k=e.key;if(k==='ArrowUp'||k==='ArrowDown'||k==='ArrowLeft'||k==='ArrowRight')e.preventDefault();if(k==='ArrowUp')move(-1,0);if(k==='ArrowDown')move(1,0);if(k==='ArrowLeft')move(0,-1);if(k==='ArrowRight')move(0,1)});
 document.getElementById('prev').addEventListener('click',()=>loadLevel(lv>0?lv-1:0));document.getElementById('next').addEventListener('click',()=>loadLevel(lv<levels.length-1?lv+1:lv));document.getElementById('reset').addEventListener('click',()=>loadLevel(lv));window.addEventListener('resize',render);
 loadLevel(0);

@@ -13,20 +13,28 @@
 
 | 分类 | 内容 |
 |------|------|
-| 🤖 AI 大模型 | ChatGPT、Claude、Gemini、Kimi、DeepSeek、通义千问、文心一言、讯飞星火、智谱 AI、秘塔搜索、Perplexity、豆包、360智脑、Coze扣子 等 |
-| 🛠️ AI 应用 | MiniMax Agent、Dreamify、AI 工具集、Vocal Remover、AI 绘画、SiliconCloud 等 |
-| 🎨 我的作品 | 作品集、算法可视化、查找算法演示 |
-| 💻 编程开发 | GitHub、Stack Overflow、MDN、W3School、菜鸟教程、phpStudy、JSRUN、仓颉编程、Intel ARK、软仓、Matplotlib 等 |
-| 📚 在线学习 | Bilibili、YouTube、腾讯课堂、网易云课堂、慕课网、腾讯云社区、CSDN、博客园、doyoudo 等 |
-| 🎯 刷题竞赛 | LeetCode、牛客网、洛谷、Codeforces、AtCoder、AcWing、NowCoder、CTFHub 等 |
-| 🛡️ 网络安全 | CTFWar、補丁网络、FreeBuf、先知社区、安全客、Vulhub、Kali工具 等 |
-| 🎬 影音娱乐 | YouTube、Bilibili、爱奇艺、腾讯视频、优酷、豆瓣、网易云音乐、喜马拉雅 等 |
-| 🔧 效率工具 | iSlide、创客贴、图怪兽、remove.bg、腾讯文档、百度网盘、迅雷、CloudConvert 等 |
-| 📑 模板素材 | 简历模板、PPT模板、图标库、图片素材、字体下载、设计工具 等 |
-| 🎮 游戏相关 | Steam、Epic、游民星空、3DM、TapTap、原神官网、WIKI 等 |
-| 🎓 校园生活 | 教务系统、图书馆、课程表、学校官网、校园论坛 等 |
-| 🧭 导航网站 | 各种导航站点集合 |
-| 📦 网盘资源 | 百度网盘、阿里云盘、天翼云、夸克网盘 等 |
+| 🔗 快捷链接 | 个人简历、算法演示、GitHub 主页、ChatShare 等 |
+| 🤖 AI 大模型 | ChatGPT、Claude、Gemini、DeepSeek、Kimi、通义千问、豆包、腾讯元宝、Grok、秘塔搜索 等 |
+| 🛠️ AI 应用 | Cursor、Trae、通义灵码、Coze、Dify、Ollama、魔搭、可灵、即梦、硅基流动 等 |
+| 💻 编程开发 | GitHub/Gitee、MDN、菜鸟教程、掘金、Spring、Redis、MyBatis、Kafka、Nacos、小林coding、pdai 等 |
+| 🎯 刷题竞赛 | LeetCode、牛客、洛谷、Codeforces、AcWing、AtCoder、蓝桥杯、Kaggle、天池、OI Wiki 等 |
+| 🛡️ 网络安全 | 攻防世界、CTFHub、CTFtime、HackTheBox、FreeBuf、先知、看雪、Vulhub、OWASP 等 |
+| 📚 在线学习 | 中国大学MOOC、学堂在线、Coursera、可汗学院、知网、arXiv、B站课堂 等 |
+| 🚀 求职实习 | BOSS直聘、实习僧、智联、前程无忧、猎聘、应届生、看准网、超级简历、OfferShow 等 |
+| 🎓 校园生活 | 学信网、超星、四六级、计算机等级考试、河南省教育考试院、助学贷款 等 |
+| 📋 办公协作 | 腾讯文档、金山文档、语雀、飞书、钉钉、腾讯会议、Notion、邮箱 等 |
+| 🔧 效率工具 | DeepL、Smallpdf、draw.io、草料二维码、iconfont、Canva、正则调试、PDF 工具 等 |
+| 💾 系统软件 | 7-Zip、Everything、OBS、火绒、Snipaste、ToDesk、Win11/Win10 官方下载 等 |
+| 📑 模板素材 | 千图网、包图网、稻壳儿、OfficePLUS、Unsplash、Pexels、站酷、花瓣网 等 |
+| 📦 网盘资源 | 阿里云盘、夸克、百度网盘、天翼云、123 云盘、蓝奏云、文叔叔、资源分享 等 |
+| 🎬 影音娱乐 | Bilibili、爱奇艺、优酷、豆瓣、网易云/QQ 音乐、斗鱼、小红书、起点 等 |
+| ⬇️ 视频下载 | yt-dlp、Cobalt、you-get、哔哩下载姬、唧唧下载、SnapAny 等 |
+| 🎮 小游戏 | 20 个本地单文件小游戏 + 4399、Poki、CrazyGames、2048 原版 等 |
+| 🎮 游戏相关 | Steam、Epic、小黑盒、SteamDB、游民星空、3DM、TapTap、NGA 等 |
+| 🛒 购物电商 | 淘宝、京东、拼多多、闲鱼、得物、小米商城、慢慢买 等 |
+| 🧭 导航网站 | 虫部落、小众软件、异次元、吾爱破解、优设导航 等 |
+
+> 共 20 个分类、约 490 个链接，全部经可用性实测后收录。
 
 ## 技术实现
 
@@ -51,12 +59,13 @@
 
 ```
 wcky/
-├── index.html          # 导航首页（主页面）
-├── home.html           # 其他页面
-├── works.html          # 作品集页面
-├── search-algorithm.html # 查找算法演示页面
-├── styles.css          # 样式文件
-└── main.js             # JavaScript 逻辑
+├── index.html              # 导航首页（主页面，样式内联）
+├── resume.html              # 个人简历
+├── search-algorithm.html    # 查找算法演示（styles.css / main.js）
+├── games/                   # 20 个单文件小游戏
+├── styles.css / main.js      # 算法演示页资源
+├── 2.jpg / favicon.ico      # 二维码与站点图标
+└── CNAME                    # 自定义域名 wcky.top
 ```
 
 ## 自定义

@@ -27,21 +27,85 @@ body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh
   <div class="hud-item">得分: <span id="sc">0</span></div>
   <div class="hud-item">等级: <span id="lv">1</span></div>
   <div class="hud-item">HP: <span id="hp">5</span></div>
-  <button class="btn" id="restart">开始游戏</button>
+  <button class="btn" id="restart">重新开始</button>
 </div>
 <div class="game-area"><div id="area"></div><div class="input-bar"><input id="input" placeholder="输入单词消除..." autocomplete="off"></div></div>
 <script>
 const words=['code','game','play','fast','type','word','hello','world','speed','quick','jump','move','fire','cool','nice','best','hero','win','run','bug','key','dev','web','app','css','html','node','loop','hack','test','push','pull','git','api','sql','bool','char','link','text','null','true','void','main','sort','find','each'];
 const area=document.getElementById('area');const input=document.getElementById('input');
-let score,level,lives,running,wordsArr,dropAnim;
-function startGame(){score=0;level=1;lives=5;running=true;wordsArr=[];area.innerHTML='';clearInterval(dropAnim);updateInfo();spawnLoop();dropLoop();input.value='';input.focus()}
-function spawnLoop(){if(!running)return;spawn();setTimeout(spawnLoop,Math.max(500,2200-level*200))}
-function spawn(){if(!running)return;const t=document.createElement('div');t.className='word';const w=words[Math.floor(Math.random()*words.length)];t.textContent=w;const aw=area.clientWidth;t.style.left=Math.random()*(aw-80)+'px';t.style.top='0px';t.dataset.word=w;t.dataset.y=0;t.dataset.speed=0.4+level*0.15;area.appendChild(t);wordsArr.push(t)}
-function dropLoop(){dropAnim=requestAnimationFrame(()=>{if(!running)return;const ah=area.clientHeight;wordsArr.forEach(w=>{let y=parseFloat(w.dataset.y)+parseFloat(w.dataset.speed);w.dataset.y=y;w.style.top=y+'px';if(y>ah-70)w.classList.add('danger');if(y>ah-20){lives--;w.remove();wordsArr=wordsArr.filter(x=>x!==w);if(lives<=0){running=false;setTimeout(()=>alert('💥 游戏结束!\n得分: '+score+' | 等级: '+level),100)}}});updateInfo();if(running)dropLoop()})}
-function spawnPop(x,y,pts){const p=document.createElement('div');p.className='pop-effect';p.textContent='+'+pts;p.style.left=x+'px';p.style.top=y+'px';area.appendChild(p);setTimeout(()=>p.remove(),600)}
-input.addEventListener('input',function(){if(!running)return;const v=this.value.trim().toLowerCase();let found=false;wordsArr.forEach(w=>{if(w.dataset.word===v){found=true;const pts=10+level*2;score+=pts;if(score%60===0)level++;const rect=w.getBoundingClientRect();const ar=area.getBoundingClientRect();spawnPop(w.style.left,rect.top-ar.top,pts);w.remove();wordsArr=wordsArr.filter(x=>x!==w);this.value='';updateInfo()}});if(!found&&v.length>=Math.max(3,wordsArr[0]?.dataset.word?.length||4)){this.value=''}});
-function updateInfo(){document.getElementById('sc').textContent=score;document.getElementById('lv').textContent=level;document.getElementById('hp').textContent=lives;document.getElementById('hp').style.color=lives<=2?'#f87171':lives<=3?'#fbbf24':'#34d399'}
-document.getElementById('restart').addEventListener('click',startGame);input.focus();
+let score,level,lives,running,wordsArr,dropAnim,spawnTimer,endTimer;
+function startGame(){
+  cancelAnimationFrame(dropAnim);      // 必须用 cancelAnimationFrame，clearInterval 清不掉 raf
+  clearTimeout(spawnTimer);             // 停掉旧的生成链，避免重开后单词翻倍
+  score=0;level=1;lives=5;running=true;wordsArr=[];
+  clearTimeout(endTimer);area.innerHTML='';input.value='';input.focus();updateInfo();
+  spawnLoop();dropLoop();
+}
+function spawnLoop(){
+  if(!running)return;
+  spawn();
+  spawnTimer=setTimeout(spawnLoop,Math.max(500,2200-level*200));
+}
+function spawn(){
+  if(!running)return;
+  const t=document.createElement('div');t.className='word';
+  const w=words[Math.floor(Math.random()*words.length)];
+  t.textContent=w;
+  const aw=area.clientWidth;
+  t.style.left=Math.max(0,Math.random()*(aw-80))+'px';
+  t.style.top='0px';t.dataset.word=w;t.dataset.y=0;t.dataset.speed=0.4+level*0.15;
+  area.appendChild(t);wordsArr.push(t);
+}
+function spawnPop(x,y,pts){
+  const p=document.createElement('div');p.className='pop-effect';p.textContent='+'+pts;
+  p.style.left=x+'px';p.style.top=y+'px';area.appendChild(p);
+  setTimeout(()=>p.remove(),600);
+}
+function dropLoop(){
+  dropAnim=requestAnimationFrame(()=>{
+    if(!running)return;
+    const ah=area.clientHeight,keep=[];
+    wordsArr.forEach(w=>{
+      const y=parseFloat(w.dataset.y)+parseFloat(w.dataset.speed);
+      w.dataset.y=y;w.style.top=y+'px';
+      if(y>ah-70)w.classList.add('danger');
+      if(y>ah-20){lives--;w.remove()}else keep.push(w);
+    });
+    wordsArr=keep;
+    updateInfo();
+    if(lives<=0){endGame();return}
+    dropLoop();
+  });
+}
+function endGame(){
+  running=false;
+  clearTimeout(spawnTimer);cancelAnimationFrame(dropAnim);
+  endTimer=setTimeout(()=>alert('💥 游戏结束!\n得分: '+score+' | 等级: '+level),100);
+}
+input.addEventListener('input',function(){
+  if(!running)return;
+  const v=this.value.trim().toLowerCase();
+  let hit=null;
+  for(const w of wordsArr){if(w.dataset.word===v){hit=w;break}}
+  if(hit){
+    const pts=10+level*2;score+=pts;
+    while(score>=level*60)level++;    // 分数跳过整十倍数时也能正常升级
+    const rect=hit.getBoundingClientRect(),ar=area.getBoundingClientRect();
+    spawnPop(hit.style.left,rect.top-ar.top,pts);
+    hit.remove();wordsArr=wordsArr.filter(x=>x!==hit);
+    this.value='';updateInfo();
+  }else if(wordsArr.length&&!wordsArr.some(w=>w.dataset.word.startsWith(v))){
+    this.value='';   // 只在不可能是任何现存单词的前缀时才清空，不打断正常输入
+  }
+});
+function updateInfo(){
+  document.getElementById('sc').textContent=score;
+  document.getElementById('lv').textContent=level;
+  document.getElementById('hp').textContent=lives;
+  document.getElementById('hp').style.color=lives<=2?'#f87171':lives<=3?'#fbbf24':'#34d399';
+}
+document.getElementById('restart').addEventListener('click',startGame);
+startGame();   // 打开即开始，不必再点按钮
 </script>
 </body>
 </html>

@@ -24,20 +24,135 @@ canvas{border-radius:8px;box-shadow:0 0 30px rgba(249,115,22,0.06);touch-action:
 <div class="game-area"><canvas id="c"></canvas></div>
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
-let W,H,pad,ball,bricks,score,lives,started,anim,particles=[],level=1,powerUp=null;
+let W,H,pad,ball,bricks,score,lives,started,anim,particles=[],level=1,powerUp=null,finished=false,endTimer;
 const ROWS=[5,6,6],COLS=[8,9,9];
-function resize(){const area=document.querySelector('.game-area');W=c.width=Math.min(area.clientWidth-16,520);H=c.height=Math.min(area.clientHeight-16,Math.round(W*0.85));W=Math.max(W,300);H=Math.max(H,300)}
-function getX(e){const r=c.getBoundingClientRect();const cx=(e.clientX||(e.touches&&e.touches[0].clientX)||0)-r.left;return cx*W/r.width}
-function init(){resize();const r=ROWS[level-1]||5,co=COLS[level-1]||8;const BW=Math.min(50,(W-40-co*4)/co),BH=14,BPAD=4,BTOP=30;pad={w:Math.max(50,Math.min(90,W/6)),h:12,x:W/2,y:H-25};ball={x:W/2,y:H-40,r:6,dx:(Math.random()>0.5?1:-1)*3,dy:-3.5};bricks=[];score=0;lives=3;started=false;particles=[];powerUp=null;for(let ri=0;ri<r;ri++)for(let ci=0;ci<co;ci++)bricks.push({x:ci*(BW+BPAD)+(W-co*(BW+BPAD))/2,y:ri*(BH+BPAD)+BTOP,w:BW,h:BH,alive:true,hp:ri>=r-2?2:1,color:`hsl(${ri*25+ci*8+200},75%,${55-ri*4}%)`});cancelAnimationFrame(anim);draw()}
-function update(){if(!started)return;ball.x+=ball.dx;ball.y+=ball.dy;if(ball.x<=ball.r||ball.x>=W-ball.r)ball.dx=-ball.dx;if(ball.y<=ball.r)ball.dy=-ball.dy;if(ball.y>=H+30){lives--;if(lives<=0){gameOver();return}started=false;ball.x=pad.x+pad.w/2;ball.y=pad.y-15;ball.dx=0;ball.dy=0;powerUp=null;draw();return}if(ball.y+ball.r>=pad.y&&ball.x>=pad.x-ball.r&&ball.x<=pad.x+pad.w+ball.r&&ball.dy>0){const hit=(ball.x-pad.x-pad.w/2)/(pad.w/2+ball.r);ball.dy=-Math.abs(ball.dy);ball.dx=hit*5;ball.y=pad.y-ball.r}let aliveBricks=false;const hitBricks=new Set();bricks.forEach((b,i)=>{if(!b.alive)return;aliveBricks=true;if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h){hitBricks.add(i)}});hitBricks.forEach(i=>{const b=bricks[i];b.hp--;if(b.hp<=0){b.alive=false;score+=10;for(let j=0;j<4;j++)particles.push({x:b.x+b.w/2,y:b.y+b.h/2,vx:(Math.random()-0.5)*5,vy:(Math.random()-0.5)*5,life:20,color:b.color});if(Math.random()<0.05&&!powerUp){powerUp={x:b.x+b.w/2,y:b.y,type:'wide'}}}}else{score+=5}ball.dy=-ball.dy});if(!aliveBricks){level++;if(level>3)level=1;cancelAnimationFrame(anim);setTimeout(()=>{alert('🎉 通关! 进入第'+level+'关');init()},300);return}if(powerUp){powerUp.y+=1.5;if(powerUp.y>=pad.y&&powerUp.x>=pad.x&&powerUp.x<=pad.x+pad.w){pad.w=Math.min(pad.w*1.3,120);powerUp=null}else if(powerUp.y>H)powerUp=null}particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});draw();anim=requestAnimationFrame(update)}
-function gameOver(){started=false;cancelAnimationFrame(anim);setTimeout(()=>alert('💥 游戏结束! 得分: '+score),100);draw();document.getElementById('sc').textContent='得分: '+score+' (GAME OVER)'}
-function draw(){ctx.fillStyle='#0d0d2b';ctx.fillRect(0,0,W,H);ctx.fillStyle='rgba(255,255,255,0.03)';for(let x=0;x<W;x+=20)for(let y=0;y<H;y+=20)ctx.fillRect(x,y,1,1);bricks.forEach(b=>{if(!b.alive)return;ctx.fillStyle=b.color;ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,4);ctx.fill();if(b.hp===2){ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.stroke();ctx.fillStyle='rgba(255,255,255,0.06)';ctx.fillRect(b.x+3,b.y+1,b.w-6,b.h-2)}});ctx.fillStyle='rgba(255,255,255,0.5)';ctx.beginPath();ctx.roundRect(pad.x,pad.y,pad.w,pad.h,6);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();if(powerUp){ctx.fillStyle='#fbbf24';ctx.beginPath();ctx.arc(powerUp.x,powerUp.y,6,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.font='8px sans-serif';ctx.textAlign='center';ctx.fillText('W',powerUp.x,powerUp.y+3);ctx.textAlign='start'}particles.forEach(p=>{ctx.globalAlpha=p.life/20;ctx.fillStyle=p.color;ctx.fillRect(p.x-2,p.y-2,4,4);ctx.globalAlpha=1});ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='12px system-ui';for(let i=0;i<lives;i++)ctx.fillText('❤️',10+i*20,H-5);document.getElementById('sc').textContent='得分: '+score+(level>1?' | 第'+level+'关':'')}
-c.addEventListener('mousemove',e=>{pad.x=Math.max(0,Math.min(W-pad.w,getX(e)-pad.w/2));if(!started){ball.x=pad.x+pad.w/2;ball.y=pad.y-15}draw()});
-c.addEventListener('touchmove',e=>{e.preventDefault();pad.x=Math.max(0,Math.min(W-pad.w,getX(e)-pad.w/2));if(!started){ball.x=pad.x+pad.w/2;ball.y=pad.y-15}draw()},{passive:false});
-c.addEventListener('click',()=>{if(!started){started=true;const dir=Math.random()>0.5?1:-1;ball.dx=dir*(3+Math.random());ball.dy=-Math.abs(ball.dy||3.5);anim=requestAnimationFrame(update)}});
-c.addEventListener('touchstart',e=>{e.preventDefault();if(!started){started=true;const dir=Math.random()>0.5?1:-1;ball.dx=dir*(3+Math.random());ball.dy=-Math.abs(ball.dy||3.5);anim=requestAnimationFrame(update)}},{passive:false});
+function resize(){
+  const area=document.querySelector('.game-area');
+  W=Math.max(300,Math.min(area.clientWidth-16,520));
+  H=Math.max(300,Math.min(area.clientHeight-16,Math.round(W*0.85)));
+  c.width=W;c.height=H;
+}
+function getX(e){
+  const r=c.getBoundingClientRect();
+  const cx=(e.clientX||(e.touches&&e.touches[0].clientX)||0)-r.left;
+  return cx*W/r.width;
+}
+function brickLayout(){
+  const r=ROWS[level-1]||5,co=COLS[level-1]||8;
+  const BW=Math.min(50,(W-40-co*4)/co),BH=14,BPAD=4,BTOP=30;
+  bricks.forEach((b,i)=>{
+    const ri=Math.floor(i/co),ci=i%co;
+    b.x=ci*(BW+BPAD)+(W-co*(BW+BPAD))/2;
+    b.y=ri*(BH+BPAD)+BTOP;b.w=BW;b.h=BH;
+  });
+}
+function init(){
+  resize();
+  const r=ROWS[level-1]||5,co=COLS[level-1]||8;
+  const BW=Math.min(50,(W-40-co*4)/co),BH=14,BPAD=4,BTOP=30;
+  pad={w:Math.max(50,Math.min(90,W/6)),h:12,x:W/2,y:H-25};
+  ball={x:W/2,y:H-40,r:6,dx:(Math.random()>0.5?1:-1)*3,dy:-3.5};
+  bricks=[];score=0;lives=3;started=false;finished=false;particles=[];powerUp=null;clearTimeout(endTimer);
+  for(let ri=0;ri<r;ri++)for(let ci=0;ci<co;ci++)bricks.push({
+    x:ci*(BW+BPAD)+(W-co*(BW+BPAD))/2,y:ri*(BH+BPAD)+BTOP,w:BW,h:BH,
+    alive:true,hp:ri>=r-2?2:1,color:`hsl(${ri*25+ci*8+200},75%,${55-ri*4}%)`
+  });
+  cancelAnimationFrame(anim);
+  draw();
+}
+function update(){
+  if(!started||finished)return;
+  ball.x+=ball.dx;ball.y+=ball.dy;
+  if(ball.x<=ball.r){ball.x=ball.r;ball.dx=-ball.dx}
+  if(ball.x>=W-ball.r){ball.x=W-ball.r;ball.dx=-ball.dx}
+  if(ball.y<=ball.r){ball.y=ball.r;ball.dy=-ball.dy}
+  if(ball.y>=H+30){
+    lives--;
+    if(lives<=0){gameOver();return}
+    started=false;ball.x=pad.x+pad.w/2;ball.y=pad.y-15;ball.dx=0;ball.dy=0;powerUp=null;
+    draw();return;
+  }
+  if(ball.y+ball.r>=pad.y&&ball.x>=pad.x-ball.r&&ball.x<=pad.x+pad.w+ball.r&&ball.dy>0){
+    const hit=(ball.x-pad.x-pad.w/2)/(pad.w/2+ball.r);
+    ball.dy=-Math.abs(ball.dy);ball.dx=hit*5;ball.y=pad.y-ball.r;
+  }
+  const hitBricks=new Set();
+  bricks.forEach((b,i)=>{
+    if(!b.alive)return;
+    if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h)hitBricks.add(i);
+  });
+  hitBricks.forEach(i=>{
+    const b=bricks[i];b.hp--;
+    if(b.hp<=0){
+      b.alive=false;score+=10;
+      for(let j=0;j<4;j++)particles.push({x:b.x+b.w/2,y:b.y+b.h/2,vx:(Math.random()-0.5)*5,vy:(Math.random()-0.5)*5,life:20,color:b.color});
+      if(Math.random()<0.05&&!powerUp)powerUp={x:b.x+b.w/2,y:b.y,type:'wide'};
+    }else score+=5;
+  });
+  if(hitBricks.size)ball.dy=-ball.dy;   // 一帧只反弹一次，避免打中多块互相抵消
+  if(!bricks.some(b=>b.alive)){
+    level++;if(level>3)level=1;
+    finished=true;cancelAnimationFrame(anim);
+    endTimer=setTimeout(()=>{alert('🎉 通关! 进入第'+level+'关');init()},300);
+    return;
+  }
+  if(powerUp){
+    powerUp.y+=1.5;
+    if(powerUp.y>=pad.y&&powerUp.x>=pad.x&&powerUp.x<=pad.x+pad.w){
+      pad.w=Math.min(pad.w*1.3,120);powerUp=null;
+    }else if(powerUp.y>H)powerUp=null;
+  }
+  particles=particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;return p.life>0});
+  draw();anim=requestAnimationFrame(update);
+}
+function gameOver(){
+  started=false;finished=true;cancelAnimationFrame(anim);
+  draw();
+  endTimer=setTimeout(()=>alert('💥 游戏结束! 得分: '+score),100);
+  document.getElementById('sc').textContent='得分: '+score+' (GAME OVER)';
+}
+function draw(){
+  ctx.fillStyle='#0d0d2b';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(255,255,255,0.03)';
+  for(let x=0;x<W;x+=20)for(let y=0;y<H;y+=20)ctx.fillRect(x,y,1,1);
+  bricks.forEach(b=>{
+    if(!b.alive)return;
+    ctx.fillStyle=b.color;ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,4);ctx.fill();
+    if(b.hp===2){
+      ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.stroke();
+      ctx.fillStyle='rgba(255,255,255,0.06)';ctx.fillRect(b.x+3,b.y+1,b.w-6,b.h-2);
+    }
+  });
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.beginPath();ctx.roundRect(pad.x,pad.y,pad.w,pad.h,6);ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,Math.PI*2);ctx.fill();
+  if(powerUp){
+    ctx.fillStyle='#fbbf24';ctx.beginPath();ctx.arc(powerUp.x,powerUp.y,6,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='8px sans-serif';ctx.textAlign='center';ctx.fillText('W',powerUp.x,powerUp.y+3);ctx.textAlign='start';
+  }
+  particles.forEach(p=>{ctx.globalAlpha=p.life/20;ctx.fillStyle=p.color;ctx.fillRect(p.x-2,p.y-2,4,4);ctx.globalAlpha=1});
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='12px system-ui';
+  for(let i=0;i<lives;i++)ctx.fillText('❤️',10+i*20,H-5);
+  if(!finished)document.getElementById('sc').textContent='得分: '+score+(level>1?' | 第'+level+'关':'');
+}
+function movePad(e){
+  if(finished)return;
+  pad.x=Math.max(0,Math.min(W-pad.w,getX(e)-pad.w/2));
+  if(!started){ball.x=pad.x+pad.w/2;ball.y=pad.y-15}
+  draw();
+}
+function launch(){
+  if(started||finished)return;
+  started=true;
+  const dir=Math.random()>0.5?1:-1;
+  ball.dx=dir*(3+Math.random());ball.dy=-Math.abs(ball.dy||3.5);
+  cancelAnimationFrame(anim);anim=requestAnimationFrame(update);
+}
+c.addEventListener('mousemove',movePad);
+c.addEventListener('touchmove',e=>{e.preventDefault();movePad(e)},{passive:false});
+c.addEventListener('click',launch);
+c.addEventListener('touchstart',e=>{e.preventDefault();launch()},{passive:false});
 document.getElementById('restart').addEventListener('click',()=>{level=1;init()});
-window.addEventListener('resize',resize);
+window.addEventListener('resize',()=>{resize();brickLayout();draw()});
 init();
 </script>
 </body>

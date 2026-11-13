@@ -3,636 +3,912 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="孤月的个人导航站 —— AI、编程、学习、工具等常用网站快速访问">
+		<meta name="theme-color" content="#0b0e1a">
 		<title>Redamancy</title>
 		<link rel="icon" href="/favicon.ico" type="image/x-icon">
-		<style>
-			* {
-				margin: 0;
-				padding: 0;
-				box-sizing: border-box;
-			}
-
-			html {
-				scroll-behavior: smooth;
-			}
-
-			body {
-				font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-				background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-				min-height: 100vh;
-				display: flex;
-				padding: 0;
-				color: #fff;
-			}
-
-			.sidebar {
-				width: 210px;
-				position: sticky;
-				top: 0;
-				height: 100vh;
-				background: rgba(20, 20, 36, 0.95);
-				border-right: 1px solid rgba(255, 255, 255, 0.08);
-				display: flex;
-				flex-direction: column;
-				padding: 20px 0;
-				overflow-y: auto;
-				flex-shrink: 0;
-			}
-
-			.sidebar-header {
-				padding: 0 20px 15px;
-				font-size: 1.2rem;
-				font-weight: bold;
-				border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-				margin-bottom: 10px;
-				color: #fff;
-			}
-
-			.main-content {
-				flex: 1;
-				padding: 40px 20px;
-				min-width: 0;
-				overflow-y: auto;
-			}
-
-			.container {
-				max-width: 1100px;
-				margin: 0 auto;
-			}
-
-			h1 {
-				text-align: center;
-				font-size: 2.5rem;
-				margin-bottom: 15px;
-				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-				-webkit-background-clip: text;
-				-webkit-text-fill-color: transparent;
-				background-clip: text;
-			}
-
-			.subtitle {
-				text-align: center;
-				color: rgba(255, 255, 255, 0.6);
-				margin-bottom: 30px;
-				font-size: 1.1rem;
-			}
-
-			/* 搜索区域 - 合并 */
-			.search-section {
-				background: rgba(255, 255, 255, 0.05);
-				border-radius: 12px;
-				padding: 15px 20px;
-				margin-bottom: 20px;
-				border: 1px solid rgba(255, 255, 255, 0.08);
-			}
-
-			.link-filter {
-				width: 100%;
-				margin-bottom: 12px;
-				display: flex;
-				gap: 10px;
-				align-items: center;
-			}
-
-			.link-filter-input {
-				flex: 1;
-				background: rgba(255, 255, 255, 0.1);
-				border: 1px solid rgba(255, 255, 255, 0.2);
-				border-radius: 8px;
-				padding: 10px 15px;
-				color: #fff;
-				font-size: 0.9rem;
-			}
-
-			.link-filter-input:focus {
-				border-color: #667eea;
-				outline: none;
-			}
-
-			.link-filter-input::placeholder {
-				color: rgba(255, 255, 255, 0.4);
-			}
-
-			.filter-clear {
-				padding: 8px 16px;
-				background: rgba(255, 100, 100, 0.2);
-				border: 1px solid rgba(255, 100, 100, 0.4);
-				border-radius: 8px;
-				color: #fff;
-				cursor: pointer;
-				font-size: 0.85rem;
-			}
-
-			.filter-clear:hover {
-				background: rgba(255, 100, 100, 0.3);
-			}
-
-			.no-results {
-				text-align: center;
-				padding: 40px;
-				color: rgba(255, 255, 255, 0.5);
-				display: none;
-			}
-
-			.no-results.show {
-				display: block;
-			}
-
-			.search-divider {
-				height: 1px;
-				background: rgba(255, 255, 255, 0.08);
-				margin: 12px 0;
-			}
-
-			.search-box {
-				display: flex;
-				background: rgba(255, 255, 255, 0.08);
-				border-radius: 20px;
-				padding: 4px;
-				border: 1px solid rgba(255, 255, 255, 0.1);
-				transition: all 0.3s;
-			}
-
-			.search-box:focus-within {
-				border-color: #667eea;
-			}
-
-			.search-engine-select {
-				background: transparent;
-				border: none;
-				color: #fff;
-				padding: 6px 10px;
-				font-size: 0.85rem;
-				cursor: pointer;
-			}
-
-			.search-engine-select option {
-				background: #1a1a2e;
-				color: #fff;
-			}
-
-			.search-input {
-				flex: 1;
-				background: transparent;
-				border: none;
-				color: #fff;
-				padding: 6px 10px;
-				font-size: 0.85rem;
-				outline: none;
-			}
-
-			.search-input::placeholder {
-				color: rgba(255, 255, 255, 0.4);
-			}
-
-			.search-btn {
-				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-				border: none;
-				color: #fff;
-				padding: 6px 16px;
-				border-radius: 16px;
-				cursor: pointer;
-				font-size: 0.85rem;
-			}
-
-			/* 分类快速导航 */
-			.category-nav {
-				display: flex;
-				flex-direction: column;
-				gap: 2px;
-				padding: 0 10px;
-				background: transparent;
-				backdrop-filter: none;
-				border: none;
-				border-radius: 0;
-				margin-bottom: 0;
-			}
-
-			.category-nav a {
-				white-space: nowrap;
-				padding: 8px 12px;
-				border-radius: 8px;
-				text-decoration: none;
-				color: rgba(255, 255, 255, 0.7);
-				font-size: 0.9rem;
-				transition: all 0.3s;
-				display: flex;
-				align-items: center;
-				gap: 8px;
-			}
-
-			.category-nav a:hover,
-			.category-nav a.active {
-				background: rgba(102, 126, 234, 0.25);
-				color: #fff;
-			}
-
-			.category {
-				margin-bottom: 35px;
-			}
-
-			.category-title {
-				font-size: 1.3rem;
-				margin-bottom: 18px;
-				padding-left: 15px;
-				border-left: 4px solid #667eea;
-				display: flex;
-				align-items: center;
-				gap: 10px;
-			}
-
-			.category-title .emoji {
-				font-size: 1.5rem;
-			}
-
-			.category-title .count {
-				font-size: 0.75rem;
-				background: rgba(102, 126, 234, 0.25);
-				color: rgba(255, 255, 255, 0.7);
-				padding: 2px 8px;
-				border-radius: 10px;
-				font-weight: normal;
-			}
-
-			.links-grid {
-				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-				gap: 12px;
-			}
-
-			.link-card {
-				background: rgba(255, 255, 255, 0.08);
-				backdrop-filter: blur(10px);
-				border-radius: 12px;
-				padding: 16px;
-				text-decoration: none;
-				color: #fff;
-				transition: all 0.3s;
-				border: 1px solid rgba(255, 255, 255, 0.1);
-				display: flex;
-				align-items: center;
-				gap: 12px;
-			}
-
-			.link-card:hover {
-				transform: translateY(-3px);
-				background: rgba(255, 255, 255, 0.12);
-				border-color: #667eea;
-				box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
-			}
-
-			.link-card .icon {
-				font-size: 1.8rem;
-				flex-shrink: 0;
-			}
-
-			/* 二维码卡片：鼠标悬停放大预览 */
-			.qr-card {
-				position: relative;
-			}
-
-			.qr-card .qr-thumb {
-				width: 44px;
-				height: 44px;
-				object-fit: contain;
-				border-radius: 6px;
-				display: block;
-				transition: transform 0.25s ease;
-			}
-
-			.qr-card .qr-preview {
-				position: absolute;
-				left: 16px;
-				bottom: calc(100% - 4px);
-				width: 150px;
-				height: 150px;
-				object-fit: contain;
-				background: #fff;
-				border-radius: 10px;
-				box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
-				opacity: 0;
-				transform: scale(0.4);
-				transform-origin: left bottom;
-				pointer-events: none;
-				transition: opacity 0.22s ease, transform 0.22s ease;
-				z-index: 50;
-			}
-
-			.qr-card:hover {
-				z-index: 30;
-			}
-
-			.qr-card:hover .qr-thumb {
-				transform: scale(1.15);
-			}
-
-			.qr-card:hover .qr-preview {
-				opacity: 1;
-				transform: scale(1);
-			}
-
-			.link-card .info h3 {
-				font-size: 0.95rem;
-				margin-bottom: 3px;
-			}
-
-			.link-card .info p {
-				font-size: 0.78rem;
-				color: rgba(255, 255, 255, 0.5);
-			}
-
-			/* 回到顶部 */
-			.back-to-top {
-				position: fixed;
-				right: 24px;
-				bottom: 30px;
-				width: 44px;
-				height: 44px;
-				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-				border: none;
-				border-radius: 50%;
-				color: #fff;
-				font-size: 1.2rem;
-				cursor: pointer;
-				opacity: 0;
-				visibility: hidden;
-				transition: all 0.3s;
-				z-index: 99;
-				box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-				display: flex;
-				align-items: center;
-				justify-content: center;
-			}
-
-			.back-to-top.show {
-				opacity: 1;
-				visibility: visible;
-			}
-
-			.back-to-top:hover {
-				transform: translateY(-3px);
-				box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-			}
-
-			footer {
-				text-align: center;
-				margin-top: 60px;
-				padding-top: 30px;
-				border-top: 1px solid rgba(255, 255, 255, 0.1);
-				color: rgba(255, 255, 255, 0.4);
-				font-size: 0.9rem;
-			}
-
-			/* 响应式 */
-			/* 超宽屏 */
-			@media (min-width: 1600px) {
-				.container {
-					max-width: 1300px;
-				}
-
-				.links-grid {
-					grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-				}
-			}
-
-			/* 大平板/小桌面 */
-			@media (max-width: 1024px) {
-				.sidebar {
-					width: 180px;
-				}
-
-				.container {
-					max-width: 100%;
-				}
-			}
-
-			/* 平板 */
-			@media (max-width: 768px) {
-				.main-content {
-					padding: 20px 12px;
-				}
-
-				.sidebar {
-					width: 160px;
-				}
-
-				.sidebar-header {
-					padding: 0 12px 10px;
-					font-size: 1rem;
-				}
-
-				.category-nav a {
-					font-size: 0.8rem;
-					padding: 6px 10px;
-				}
-
-				h1 {
-					font-size: 1.6rem;
-				}
-
-				.subtitle {
-					font-size: 0.95rem;
-					margin-bottom: 20px;
-				}
-
-				.links-grid {
-					grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-					gap: 8px;
-				}
-
-				.link-card {
-					padding: 12px;
-					gap: 10px;
-				}
-
-				.link-card .icon {
-					font-size: 1.5rem;
-				}
-
-				.link-card .info h3 {
-					font-size: 0.85rem;
-				}
-
-				.link-card .info p {
-					font-size: 0.72rem;
-				}
-
-				.category-title {
-					font-size: 1.1rem;
-				}
-
-				.search-section {
-					padding: 12px 15px;
-				}
-
-				.link-filter-input {
-					padding: 8px 12px;
-					font-size: 0.85rem;
-				}
-			}
-
-			/* 大手机 */
-			@media (max-width: 600px) {
-				body {
-					display: block;
-				}
-
-				.sidebar {
-					position: static;
-					width: 100%;
-					height: auto;
-					border-right: none;
-					border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-					padding: 8px 0;
-				}
-
-				.sidebar-header {
-					display: none;
-				}
-
-				.category-nav {
-					flex-direction: row;
-					overflow-x: auto;
-					padding: 0 10px;
-					gap: 4px;
-					-webkit-overflow-scrolling: touch;
-					scrollbar-width: none;
-				}
-
-				.category-nav::-webkit-scrollbar {
-					display: none;
-				}
-
-				.category-nav a {
-					flex-shrink: 0;
-					background: rgba(255, 255, 255, 0.06);
-					border-radius: 20px;
-					padding: 5px 10px;
-					font-size: 0.75rem;
-				}
-
-				.main-content {
-					padding: 16px 10px;
-				}
-
-				h1 {
-					font-size: 1.4rem;
-					margin-bottom: 10px;
-				}
-
-				.subtitle {
-					font-size: 0.85rem;
-					margin-bottom: 16px;
-				}
-
-				.links-grid {
-					grid-template-columns: repeat(2, 1fr);
-					gap: 6px;
-				}
-
-				.link-card {
-					padding: 10px;
-					gap: 8px;
-				}
-
-				.link-card .icon {
-					font-size: 1.3rem;
-				}
-
-				.link-card .info h3 {
-					font-size: 0.8rem;
-				}
-
-				.link-card .info p {
-					font-size: 0.68rem;
-				}
-
-				.category-title {
-					font-size: 1rem;
-					margin-bottom: 12px;
-				}
-
-				.search-section {
-					padding: 10px 12px;
-					margin-bottom: 15px;
-				}
-
-				.search-box {
-					padding: 3px;
-				}
-
-				.search-input {
-					font-size: 0.8rem;
-					padding: 5px 8px;
-				}
-
-				.search-btn {
-					padding: 5px 12px;
-					font-size: 0.8rem;
-				}
-
-				.link-filter {
-					gap: 6px;
-				}
-
-				.link-filter-input {
-					padding: 7px 10px;
-					font-size: 0.8rem;
-				}
-
-				.filter-clear {
-					padding: 6px 12px;
-					font-size: 0.8rem;
-				}
-
-				.back-to-top {
-					right: 14px;
-					bottom: 20px;
-					width: 38px;
-					height: 38px;
-					font-size: 1rem;
-				}
-			}
-
-			/* 小手机 */
-			@media (max-width: 360px) {
-				.main-content {
-					padding: 12px 8px;
-				}
-
-				h1 {
-					font-size: 1.2rem;
-				}
-
-				.subtitle {
-					font-size: 0.8rem;
-				}
-
-				.links-grid {
-					grid-template-columns: 1fr;
-					gap: 6px;
-				}
-
-				.link-card {
-					padding: 10px;
-					gap: 8px;
-				}
-
-				.category-title {
-					font-size: 0.95rem;
-				}
-
-				.category-nav a {
-					font-size: 0.7rem;
-					padding: 4px 8px;
-				}
-
-				.search-engine-select {
-					font-size: 0.75rem;
-					padding: 4px 6px;
-				}
-			}
-		</style>
+	<style>
+/* ============================================================
+   Redamancy · 个人导航  v2.0
+   深空极光主题：玻璃拟态 + 渐变高光 + 入场动画
+   ============================================================ */
+
+:root {
+	--bg-0: #0b0e1a;
+	--bg-1: #111631;
+	--card: rgba(255, 255, 255, 0.055);
+	--card-hover: rgba(255, 255, 255, 0.1);
+	--border: rgba(255, 255, 255, 0.09);
+	--border-hover: rgba(129, 140, 248, 0.65);
+	--txt: #eef1ff;
+	--txt-dim: rgba(238, 241, 255, 0.62);
+	--txt-faint: rgba(238, 241, 255, 0.4);
+	--a1: #6366f1;
+	--a2: #22d3ee;
+	--a3: #a855f7;
+	--grad: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #22d3ee 100%);
+	--radius: 14px;
+	--shadow-card: 0 12px 32px rgba(0, 0, 0, 0.35);
+	--glow: 0 8px 28px rgba(99, 102, 241, 0.35);
+	color-scheme: dark;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+body {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+		'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+	background: linear-gradient(160deg, #0b0e1a 0%, #111631 45%, #0d1b3a 100%);
+	background-attachment: fixed;
+	min-height: 100vh;
+	display: flex;
+	padding: 0;
+	color: var(--txt);
+	-webkit-font-smoothing: antialiased;
+}
+
+/* 极光氛围层（纯装饰，不响应鼠标） */
+body::before {
+	content: '';
+	position: fixed;
+	inset: -20%;
+	z-index: -1;
+	pointer-events: none;
+	background:
+		radial-gradient(620px circle at 12% 18%, rgba(99, 102, 241, 0.22), transparent 62%),
+		radial-gradient(720px circle at 88% 8%, rgba(34, 211, 238, 0.14), transparent 62%),
+		radial-gradient(860px circle at 50% 105%, rgba(168, 85, 247, 0.17), transparent 65%);
+	animation: aurora 22s ease-in-out infinite alternate;
+}
+
+@keyframes aurora {
+	0% {
+		transform: translate3d(0, 0, 0) scale(1);
+	}
+	50% {
+		transform: translate3d(2%, -2%, 0) scale(1.05);
+	}
+	100% {
+		transform: translate3d(-2%, 2%, 0) scale(1.02);
+	}
+}
+
+::selection {
+	background: rgba(99, 102, 241, 0.45);
+	color: #fff;
+}
+
+/* 滚动条 */
+::-webkit-scrollbar {
+	width: 9px;
+	height: 9px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: linear-gradient(180deg, rgba(99, 102, 241, 0.55), rgba(34, 211, 238, 0.45));
+	border-radius: 8px;
+	border: 2px solid transparent;
+	background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: linear-gradient(180deg, rgba(99, 102, 241, 0.85), rgba(34, 211, 238, 0.7));
+	border: 2px solid transparent;
+	background-clip: padding-box;
+}
+
+:focus-visible {
+	outline: 2px solid var(--a2);
+	outline-offset: 2px;
+	border-radius: 6px;
+}
+
+/* ===== 侧边栏 ===== */
+.sidebar {
+	width: 210px;
+	position: sticky;
+	top: 0;
+	height: 100vh;
+	background: rgba(13, 16, 32, 0.72);
+	backdrop-filter: blur(18px);
+	-webkit-backdrop-filter: blur(18px);
+	border-right: 1px solid var(--border);
+	display: flex;
+	flex-direction: column;
+	padding: 20px 0;
+	overflow-y: auto;
+	flex-shrink: 0;
+	scrollbar-width: none;
+}
+
+.sidebar::-webkit-scrollbar {
+	display: none;
+}
+
+.sidebar-header {
+	padding: 0 20px 15px;
+	font-size: 1.2rem;
+	font-weight: bold;
+	border-bottom: 1px solid var(--border);
+	margin-bottom: 10px;
+	color: var(--txt);
+	letter-spacing: 1px;
+}
+
+/* ===== 主区域 ===== */
+.main-content {
+	flex: 1;
+	padding: 48px 24px;
+	min-width: 0;
+	overflow-y: auto;
+}
+
+.container {
+	max-width: 1100px;
+	margin: 0 auto;
+}
+
+h1 {
+	text-align: center;
+	font-size: 2.6rem;
+	margin-bottom: 14px;
+	font-weight: 800;
+	letter-spacing: 2px;
+	background: linear-gradient(120deg, #818cf8 0%, #c084fc 30%, #22d3ee 60%, #818cf8 100%);
+	background-size: 220% auto;
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+	animation: shimmer 7s linear infinite;
+}
+
+@keyframes shimmer {
+	to {
+		background-position: 220% center;
+	}
+}
+
+.subtitle {
+	text-align: center;
+	color: var(--txt-faint);
+	margin-bottom: 32px;
+	font-size: 1.05rem;
+	letter-spacing: 3px;
+}
+
+/* ===== 搜索区域 ===== */
+.search-section {
+	background: rgba(255, 255, 255, 0.05);
+	backdrop-filter: blur(14px);
+	-webkit-backdrop-filter: blur(14px);
+	border-radius: 16px;
+	padding: 16px 20px;
+	margin-bottom: 24px;
+	border: 1px solid var(--border);
+	box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+	transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-section:focus-within {
+	border-color: var(--border-hover);
+	box-shadow: 0 8px 32px rgba(99, 102, 241, 0.18);
+}
+
+.link-filter {
+	width: 100%;
+	margin-bottom: 12px;
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}
+
+.link-filter-input {
+	flex: 1;
+	background: rgba(255, 255, 255, 0.08);
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	border-radius: 10px;
+	padding: 11px 16px;
+	color: var(--txt);
+	font-size: 0.92rem;
+	transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+
+.link-filter-input:focus {
+	border-color: var(--a1);
+	background: rgba(255, 255, 255, 0.11);
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+	outline: none;
+}
+
+.link-filter-input::placeholder {
+	color: var(--txt-faint);
+}
+
+.filter-clear {
+	padding: 8px 16px;
+	background: rgba(255, 100, 100, 0.16);
+	border: 1px solid rgba(255, 100, 100, 0.35);
+	border-radius: 10px;
+	color: var(--txt);
+	cursor: pointer;
+	font-size: 0.85rem;
+	transition: background 0.25s, transform 0.2s;
+}
+
+.filter-clear:hover {
+	background: rgba(255, 100, 100, 0.3);
+	transform: scale(1.05);
+}
+
+.no-results {
+	text-align: center;
+	padding: 40px;
+	color: var(--txt-faint);
+	display: none;
+}
+
+.no-results.show {
+	display: block;
+}
+
+.search-divider {
+	height: 1px;
+	background: var(--border);
+	margin: 12px 0;
+}
+
+.search-box {
+	display: flex;
+	background: rgba(255, 255, 255, 0.07);
+	border-radius: 22px;
+	padding: 4px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-box:focus-within {
+	border-color: var(--a1);
+	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.search-engine-select {
+	background: transparent;
+	border: none;
+	color: var(--txt);
+	padding: 6px 10px;
+	font-size: 0.85rem;
+	cursor: pointer;
+}
+
+.search-engine-select option {
+	background: #141833;
+	color: var(--txt);
+}
+
+.search-input {
+	flex: 1;
+	background: transparent;
+	border: none;
+	color: var(--txt);
+	padding: 6px 10px;
+	font-size: 0.85rem;
+	outline: none;
+}
+
+.search-input::placeholder {
+	color: var(--txt-faint);
+}
+
+.search-btn {
+	background: var(--grad);
+	border: none;
+	color: #fff;
+	padding: 6px 18px;
+	border-radius: 16px;
+	cursor: pointer;
+	font-size: 0.85rem;
+	transition: transform 0.2s, box-shadow 0.25s;
+}
+
+.search-btn:hover {
+	transform: translateY(-1px) scale(1.04);
+	box-shadow: var(--glow);
+}
+
+/* ===== 侧边分类导航 ===== */
+.category-nav {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 0 10px;
+}
+
+.category-nav a {
+	white-space: nowrap;
+	padding: 8px 12px;
+	border-radius: 10px;
+	text-decoration: none;
+	color: var(--txt-dim);
+	font-size: 0.9rem;
+	transition: all 0.25s;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	position: relative;
+}
+
+.category-nav a:hover,
+.category-nav a.active {
+	background: linear-gradient(90deg, rgba(99, 102, 241, 0.28), rgba(99, 102, 241, 0.08));
+	color: #fff;
+}
+
+.category-nav a.active::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 22%;
+	height: 56%;
+	width: 3px;
+	border-radius: 3px;
+	background: var(--grad);
+	box-shadow: 0 0 8px rgba(99, 102, 241, 0.8);
+}
+
+/* ===== 分类区块 ===== */
+.category {
+	margin-bottom: 38px;
+}
+
+/* 入场动画：由 JS 添加 .js-reveal / .in */
+.js-reveal .category {
+	opacity: 0;
+	transform: translateY(26px);
+	transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.js-reveal .category.in {
+	opacity: 1;
+	transform: none;
+}
+
+.category-title {
+	font-size: 1.3rem;
+	margin-bottom: 18px;
+	padding-left: 15px;
+	border-left: 4px solid;
+	border-image: linear-gradient(180deg, #6366f1, #22d3ee) 1;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	text-shadow: 0 0 24px rgba(99, 102, 241, 0.35);
+}
+
+.category-title .emoji {
+	font-size: 1.5rem;
+}
+
+.category-title .count {
+	font-size: 0.72rem;
+	background: rgba(99, 102, 241, 0.22);
+	border: 1px solid rgba(99, 102, 241, 0.35);
+	color: rgba(165, 180, 252, 0.95);
+	padding: 2px 9px;
+	border-radius: 10px;
+	font-weight: normal;
+	font-family: 'Consolas', 'JetBrains Mono', monospace;
+}
+
+/* ===== 链接卡片 ===== */
+.links-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+	gap: 12px;
+}
+
+.link-card {
+	background: var(--card);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
+	border-radius: var(--radius);
+	padding: 16px;
+	text-decoration: none;
+	color: var(--txt);
+	transition: transform 0.28s cubic-bezier(0.22, 0.68, 0.36, 1.2),
+		background 0.28s, border-color 0.28s, box-shadow 0.28s;
+	border: 1px solid var(--border);
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	position: relative;
+	overflow: hidden;
+}
+
+/* 悬停扫光 */
+.link-card::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -80%;
+	width: 55%;
+	height: 100%;
+	background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.09), transparent);
+	transform: skewX(-18deg);
+	transition: left 0.55s ease;
+	pointer-events: none;
+}
+
+.link-card:hover::after {
+	left: 130%;
+}
+
+.link-card:hover {
+	transform: translateY(-4px);
+	background: var(--card-hover);
+	border-color: var(--border-hover);
+	box-shadow: var(--shadow-card), var(--glow);
+}
+
+.link-card:active {
+	transform: translateY(-1px) scale(0.99);
+}
+
+.link-card .icon {
+	font-size: 1.5rem;
+	flex-shrink: 0;
+	width: 46px;
+	height: 46px;
+	display: grid;
+	place-items: center;
+	background: linear-gradient(135deg, rgba(99, 102, 241, 0.24), rgba(34, 211, 238, 0.13));
+	border: 1px solid rgba(255, 255, 255, 0.09);
+	border-radius: 12px;
+	transition: transform 0.28s;
+}
+
+.link-card:hover .icon {
+	transform: scale(1.12) rotate(-4deg);
+}
+
+/* 二维码卡片：悬停大幅放大预览 + 扫码提示 */
+.link-card.qr-card {
+	position: relative;
+	overflow: visible; /* 允许预览浮层溢出卡片，否则会被裁掉 */
+}
+
+.qr-card::after {
+	display: none; /* 关闭扫光，避免溢出到浮层区域 */
+}
+
+.qr-card .qr-thumb {
+	width: 40px;
+	height: 40px;
+	object-fit: contain;
+	background: #fff;
+	border-radius: 8px;
+	display: block;
+	transition: transform 0.25s ease;
+}
+
+.qr-card:hover {
+	z-index: 30;
+}
+
+.qr-card:hover .qr-thumb {
+	transform: scale(1.12);
+}
+
+.qr-preview {
+	position: absolute;
+	top: calc(100% + 12px);
+	left: 0;
+	width: 300px;
+	padding: 16px 16px 14px;
+	background: #fff;
+	border-radius: 16px;
+	box-shadow: 0 20px 55px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(99, 102, 241, 0.35);
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(-12px) scale(0.82);
+	transform-origin: top left;
+	pointer-events: none; /* 鼠标移到浮层上不会触发卡片 mouseleave 而闪退 */
+	transition: opacity 0.25s ease,
+		transform 0.28s cubic-bezier(0.22, 0.68, 0.36, 1.25), visibility 0.25s;
+	z-index: 60;
+}
+
+/* 小尖角指向卡片 */
+.qr-preview::before {
+	content: '';
+	position: absolute;
+	top: -8px;
+	left: 22px;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-bottom: 8px solid #fff;
+}
+
+.qr-preview img {
+	width: 100%;
+	display: block;
+	border-radius: 10px;
+}
+
+.qr-preview .qr-tip {
+	display: block;
+	margin-top: 12px;
+	text-align: center;
+	font-size: 0.95rem;
+	font-weight: 700;
+	color: #1e293b;
+	letter-spacing: 1px;
+}
+
+.qr-card:hover .qr-preview {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(0) scale(1);
+}
+
+@media (max-width: 600px) {
+	.qr-preview { width: 240px; }
+}
+
+.link-card .info {
+	min-width: 0;
+}
+
+.link-card .info h3 {
+	font-size: 0.95rem;
+	margin-bottom: 3px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.link-card .info p {
+	font-size: 0.78rem;
+	color: var(--txt-faint);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	transition: color 0.28s;
+}
+
+.link-card:hover .info p {
+	color: var(--txt-dim);
+}
+
+/* ===== 回到顶部 ===== */
+.back-to-top {
+	position: fixed;
+	right: 24px;
+	bottom: 30px;
+	width: 44px;
+	height: 44px;
+	background: var(--grad);
+	background-size: 160% auto;
+	border: none;
+	border-radius: 50%;
+	color: #fff;
+	font-size: 1.2rem;
+	cursor: pointer;
+	opacity: 0;
+	visibility: hidden;
+	transition: all 0.3s;
+	z-index: 99;
+	box-shadow: var(--glow);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.back-to-top.show {
+	opacity: 1;
+	visibility: visible;
+}
+
+.back-to-top:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 10px 30px rgba(99, 102, 241, 0.55);
+}
+
+/* ===== 页脚 ===== */
+footer {
+	text-align: center;
+	margin-top: 60px;
+	padding-top: 30px;
+	border-top: 1px solid var(--border);
+	color: var(--txt-faint);
+	font-size: 0.9rem;
+	letter-spacing: 1px;
+}
+
+/* ===== 动效偏好 ===== */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation: none !important;
+		transition: none !important;
+	}
+
+	html {
+		scroll-behavior: auto;
+	}
+}
+
+/* ===== 响应式 ===== */
+/* 超宽屏 */
+@media (min-width: 1600px) {
+	.container {
+		max-width: 1300px;
+	}
+
+	.links-grid {
+		grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	}
+}
+
+/* 大平板/小桌面 */
+@media (max-width: 1024px) {
+	.sidebar {
+		width: 180px;
+	}
+
+	.container {
+		max-width: 100%;
+	}
+}
+
+/* 平板 */
+@media (max-width: 768px) {
+	.main-content {
+		padding: 24px 14px;
+	}
+
+	.sidebar {
+		width: 160px;
+	}
+
+	.sidebar-header {
+		padding: 0 12px 10px;
+		font-size: 1rem;
+	}
+
+	.category-nav a {
+		font-size: 0.8rem;
+		padding: 6px 10px;
+	}
+
+	h1 {
+		font-size: 1.7rem;
+	}
+
+	.subtitle {
+		font-size: 0.95rem;
+		margin-bottom: 20px;
+	}
+
+	.links-grid {
+		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+		gap: 8px;
+	}
+
+	.link-card {
+		padding: 12px;
+		gap: 10px;
+	}
+
+	.link-card .icon {
+		width: 40px;
+		height: 40px;
+		font-size: 1.25rem;
+	}
+
+	.link-card .info h3 {
+		font-size: 0.85rem;
+	}
+
+	.link-card .info p {
+		font-size: 0.72rem;
+	}
+
+	.category-title {
+		font-size: 1.1rem;
+	}
+
+	.search-section {
+		padding: 12px 15px;
+	}
+
+	.link-filter-input {
+		padding: 8px 12px;
+		font-size: 0.85rem;
+	}
+}
+
+/* 大手机 */
+@media (max-width: 600px) {
+	body {
+		display: block;
+	}
+
+	.sidebar {
+		position: static;
+		width: 100%;
+		height: auto;
+		border-right: none;
+		border-bottom: 1px solid var(--border);
+		padding: 8px 0;
+	}
+
+	.sidebar-header {
+		display: none;
+	}
+
+	.category-nav {
+		flex-direction: row;
+		overflow-x: auto;
+		padding: 0 10px;
+		gap: 4px;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+	}
+
+	.category-nav::-webkit-scrollbar {
+		display: none;
+	}
+
+	.category-nav a {
+		flex-shrink: 0;
+		background: rgba(255, 255, 255, 0.06);
+		border-radius: 20px;
+		padding: 5px 10px;
+		font-size: 0.75rem;
+	}
+
+	.category-nav a.active::before {
+		display: none;
+	}
+
+	.main-content {
+		padding: 16px 10px;
+	}
+
+	h1 {
+		font-size: 1.45rem;
+		margin-bottom: 10px;
+	}
+
+	.subtitle {
+		font-size: 0.85rem;
+		margin-bottom: 16px;
+	}
+
+	.links-grid {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 6px;
+	}
+
+	.link-card {
+		padding: 10px;
+		gap: 8px;
+	}
+
+	.link-card .icon {
+		width: 36px;
+		height: 36px;
+		font-size: 1.1rem;
+		border-radius: 10px;
+	}
+
+	.link-card .info h3 {
+		font-size: 0.8rem;
+	}
+
+	.link-card .info p {
+		font-size: 0.68rem;
+	}
+
+	.category-title {
+		font-size: 1rem;
+		margin-bottom: 12px;
+	}
+
+	.search-section {
+		padding: 10px 12px;
+		margin-bottom: 15px;
+	}
+
+	.search-box {
+		padding: 3px;
+	}
+
+	.search-input {
+		font-size: 0.8rem;
+		padding: 5px 8px;
+	}
+
+	.search-btn {
+		padding: 5px 12px;
+		font-size: 0.8rem;
+	}
+
+	.link-filter {
+		gap: 6px;
+	}
+
+	.link-filter-input {
+		padding: 7px 10px;
+		font-size: 0.8rem;
+	}
+
+	.filter-clear {
+		padding: 6px 12px;
+		font-size: 0.8rem;
+	}
+
+	.back-to-top {
+		right: 14px;
+		bottom: 20px;
+		width: 38px;
+		height: 38px;
+		font-size: 1rem;
+	}
+}
+
+/* 小手机 */
+@media (max-width: 360px) {
+	.main-content {
+		padding: 12px 8px;
+	}
+
+	h1 {
+		font-size: 1.2rem;
+	}
+
+	.subtitle {
+		font-size: 0.8rem;
+	}
+
+	.links-grid {
+		grid-template-columns: 1fr;
+		gap: 6px;
+	}
+
+	.link-card {
+		padding: 10px;
+		gap: 8px;
+	}
+
+	.category-title {
+		font-size: 0.95rem;
+	}
+
+	.category-nav a {
+		font-size: 0.7rem;
+		padding: 4px 8px;
+	}
+
+	.search-engine-select {
+		font-size: 0.75rem;
+		padding: 4px 6px;
+	}
+}
+	</style>
 	</head>
 	<body>
 		<aside class="sidebar">
@@ -641,22 +917,23 @@
 				<a href="#cat-quick">🔗 快捷</a>
 				<a href="#cat-ai">🤖 AI</a>
 				<a href="#cat-aiapp">🛠️ AI应用</a>
-				<a href="#cat-game-mini">🎮 小游戏</a>
 				<a href="#cat-dev">💻 编程</a>
-				<a href="#cat-office">📋 办公</a>
-				<a href="#cat-learn">📚 学习</a>
 				<a href="#cat-contest">🎯 刷题</a>
 				<a href="#cat-security">🛡️ 安全</a>
-				<a href="#cat-media">🎬 影音</a>
-				<a href="#cat-download">⬇️ 下载</a>
+				<a href="#cat-learn">📚 学习</a>
+				<a href="#cat-jobs">🚀 求职</a>
+				<a href="#cat-campus">🎓 校园</a>
+				<a href="#cat-office">📋 办公</a>
 				<a href="#cat-tools">🔧 工具</a>
 				<a href="#cat-software">💾 软件</a>
-				<a href="#cat-game">🎮 游戏</a>
 				<a href="#cat-assets">📑 素材</a>
-				<a href="#cat-campus">🎓 校园</a>
-				<a href="#cat-nav">🧭 导航</a>
 				<a href="#cat-drive">📦 网盘</a>
+				<a href="#cat-media">🎬 影音</a>
+				<a href="#cat-download">⬇️ 下载</a>
+				<a href="#cat-game-mini">🎮 小游戏</a>
+				<a href="#cat-game">🎮 游戏</a>
 				<a href="#cat-shop">🛒 购物</a>
+				<a href="#cat-nav">🧭 导航</a>
 			</nav>
 		</aside>
 		<div class="main-content">
@@ -695,6 +972,7 @@
 				</div>
 
 
+
 				<!-- 快捷链接 -->
 				<div class="category" id="cat-quick">
 					<h2 class="category-title"><span class="emoji">🔗</span> 快捷链接</h2>
@@ -730,22 +1008,52 @@
 						<a class="link-card qr-card" href="https://node1.chatshare.biz/list" target="_blank">
 							<div class="icon">
 								<img class="qr-thumb" src="2.jpg" alt="ChatShare 激活码">
-								<img class="qr-preview" src="2.jpg" alt="ChatShare 激活码">
+							</div>
+							<div class="qr-preview">
+								<img src="2.jpg" alt="ChatShare 激活码">
+								<span class="qr-tip">微信扫码获取激活码</span>
 							</div>
 							<div class="info">
 								<h3>ChatShare</h3>
 								<p>节点列表 · 悬停扫码获取激活码</p>
 							</div>
 						</a>
+						<a class="link-card" href="https://github.com/MrWangCK" target="_blank">
+							<div class="icon">🐙</div>
+							<div class="info">
+								<h3>我的 GitHub</h3>
+								<p>个人代码仓库主页</p>
+							</div>
+						</a>
 					</div>
 				</div>
-
 				<!-- AI 大模型 -->
 				<div class="category" id="cat-ai">
 					<h2 class="category-title"><span class="emoji">🤖</span> AI 大模型</h2>
 					<div class="links-grid">
+						<a class="link-card" href="https://grok.com" target="_blank">
+							<div class="icon">⚡</div>
+							<div class="info">
+								<h3>Grok</h3>
+								<p>xAI 对话模型</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://yuanbao.tencent.com" target="_blank">
+							<div class="icon">🐟</div>
+							<div class="info">
+								<h3>腾讯元宝</h3>
+								<p>腾讯混元大模型</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://hailuoai.com" target="_blank">
+							<div class="icon">🐚</div>
+							<div class="info">
+								<h3>海螺 AI</h3>
+								<p>MiniMax 旗下对话</p>
+							</div>
+						</a>
 						<!-- 国外大模型 -->
-						<a class="link-card" href="https://chat.openai.com" target="_blank">
+						<a class="link-card" href="https://chatgpt.com" target="_blank">
 							<div class="icon">🧠</div>
 							<div class="info">
 								<h3>ChatGPT</h3>
@@ -845,9 +1153,36 @@
 								<p>AI 搜索引擎</p>
 							</div>
 						</a>
+						<a class="link-card" href="https://chatglm.cn" target="_blank">
+							<div class="icon">🧠</div>
+							<div class="info">
+								<h3>智谱清言</h3>
+								<p>GLM 大模型对话</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.tiangong.cn" target="_blank">
+							<div class="icon">🌌</div>
+							<div class="info">
+								<h3>天工 AI</h3>
+								<p>昆仑万维大模型</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://chat.stepfun.com" target="_blank">
+							<div class="icon">🪜</div>
+							<div class="info">
+								<h3>阶跃 AI</h3>
+								<p>Step 系列大模型</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://hunyuan.tencent.com" target="_blank">
+							<div class="icon">💧</div>
+							<div class="info">
+								<h3>腾讯混元</h3>
+								<p>混元大模型官网</p>
+							</div>
+						</a>
 					</div>
 				</div>
-
 				<!-- AI 应用 -->
 				<div class="category" id="cat-aiapp">
 					<h2 class="category-title"><span class="emoji">🛠️</span> AI 应用</h2>
@@ -881,13 +1216,6 @@
 								<p>AI 工具导航</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.ai-tools.icu/office/introduce" target="_blank">
-							<div class="icon">📦</div>
-							<div class="info">
-								<h3>AI 盒子</h3>
-								<p>AI 工具导航集合</p>
-							</div>
-						</a>
 						<a class="link-card" href="https://feizhuke.com" target="_blank">
 							<div class="icon">🧭</div>
 							<div class="info">
@@ -917,7 +1245,7 @@
 								<p>字节 AI 应用平台</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://dify.cn" target="_blank">
+						<a class="link-card" href="https://dify.ai" target="_blank">
 							<div class="icon">🔄</div>
 							<div class="info">
 								<h3>Dify</h3>
@@ -937,13 +1265,6 @@
 							<div class="info">
 								<h3>AI 绘画工具</h3>
 								<p>AI 图片生成工具导航</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://dreamify.slmnb.cn/zh" target="_blank">
-							<div class="icon">🎨</div>
-							<div class="info">
-								<h3>Dreamify</h3>
-								<p>免费 AI 绘画生成</p>
 							</div>
 						</a>
 						<a class="link-card" href="https://codeformerai.com/zh" target="_blank">
@@ -1053,167 +1374,180 @@
 								<p>AI 接口聚合面板</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://agentskill.work/zh" target="_blank">
-							<div class="icon">🤖</div>
+						<a class="link-card" href="https://www.cursor.com" target="_blank">
+							<div class="icon">🖱️</div>
 							<div class="info">
-								<h3>AgentSkill</h3>
-								<p>Claude Skill 项目搜索</p>
+								<h3>Cursor</h3>
+								<p>AI 原生代码编辑器</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.trae.cn" target="_blank">
+							<div class="icon">🛠️</div>
+							<div class="info">
+								<h3>Trae</h3>
+								<p>字节 AI IDE</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://lingma.aliyun.com" target="_blank">
+							<div class="icon">🧩</div>
+							<div class="info">
+								<h3>通义灵码</h3>
+								<p>阿里 AI 编程助手</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://codegeex.cn" target="_blank">
+							<div class="icon">💠</div>
+							<div class="info">
+								<h3>CodeGeeX</h3>
+								<p>智谱 AI 编程插件</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://ollama.com" target="_blank">
+							<div class="icon">🦙</div>
+							<div class="info">
+								<h3>Ollama</h3>
+								<p>本地大模型运行</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.cherry-ai.com" target="_blank">
+							<div class="icon">🍒</div>
+							<div class="info">
+								<h3>Cherry Studio</h3>
+								<p>多模型桌面客户端</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://n8n.io" target="_blank">
+							<div class="icon">🔗</div>
+							<div class="info">
+								<h3>n8n</h3>
+								<p>工作流自动化</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.langchain.com" target="_blank">
+							<div class="icon">⛓️</div>
+							<div class="info">
+								<h3>LangChain</h3>
+								<p>LLM 应用框架</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://modelscope.cn" target="_blank">
+							<div class="icon">🧬</div>
+							<div class="info">
+								<h3>魔搭社区</h3>
+								<p>阿里模型开源社区</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://klingai.com" target="_blank">
+							<div class="icon">🎞️</div>
+							<div class="info">
+								<h3>可灵 AI</h3>
+								<p>快手 AI 视频生成</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://jimeng.jianying.com" target="_blank">
+							<div class="icon">🎨</div>
+							<div class="info">
+								<h3>即梦 AI</h3>
+								<p>字节 AI 绘画视频</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://immersivetranslate.com" target="_blank">
+							<div class="icon">🌏</div>
+							<div class="info">
+								<h3>沉浸式翻译</h3>
+								<p>双语对照网页翻译</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.coze.cn/space" target="_blank">
+							<div class="icon">🧱</div>
+							<div class="info">
+								<h3>扣子空间</h3>
+								<p>AI Agent 工作空间</p>
 							</div>
 						</a>
 					</div>
 				</div>
-
-				<!-- 小游戏 -->
-				<div class="category" id="cat-game-mini">
-					<h2 class="category-title"><span class="emoji">🎮</span> 小游戏</h2>
-					<div class="links-grid">
-						<a class="link-card" href="games/snake.html">
-							<div class="icon">🐍</div>
-							<div class="info">
-								<h3>贪吃蛇</h3>
-								<p>经典贪吃蛇游戏</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/2048.html">
-							<div class="icon">🔥</div>
-							<div class="info">
-								<h3>2048</h3>
-								<p>数字合并益智游戏</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/typing.html">
-							<div class="icon">⌨️</div>
-							<div class="info">
-								<h3>打字游戏</h3>
-								<p>练习打字速度</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/memory.html">
-							<div class="icon">🃏</div>
-							<div class="info">
-								<h3>记忆翻牌</h3>
-								<p>翻牌配对记忆</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/tictactoe.html">
-							<div class="icon">❌</div>
-							<div class="info">
-								<h3>井字棋</h3>
-								<p>双人对战/人机</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/breakout.html">
-							<div class="icon">🧱</div>
-							<div class="info">
-								<h3>弹球打砖块</h3>
-								<p>经典弹球消除</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/puzzle15.html">
-							<div class="icon">🔢</div>
-							<div class="info">
-								<h3>数字华容道</h3>
-								<p>15数字滑块拼图</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/guess.html">
-							<div class="icon">🎯</div>
-							<div class="info">
-								<h3>猜数字</h3>
-								<p>猜1~100的数字</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/tetris.html">
-							<div class="icon">🧱</div>
-							<div class="info">
-								<h3>俄罗斯方块</h3>
-								<p>经典消除方块</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/flappy.html">
-							<div class="icon">🐦</div>
-							<div class="info">
-								<h3>Flappy Bird</h3>
-								<p>像素鸟飞行闯关</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/whack.html">
-							<div class="icon">🔨</div>
-							<div class="info">
-								<h3>打地鼠</h3>
-								<p>限时30秒挑战</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/pong.html">
-							<div class="icon">🏓</div>
-							<div class="info">
-								<h3>乒乓球</h3>
-								<p>经典Pong对战</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/sokoban.html">
-							<div class="icon">📦</div>
-							<div class="info">
-								<h3>推箱子</h3>
-								<p>经典推箱子益智</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/pacman.html">
-							<div class="icon">👾</div>
-							<div class="info">
-								<h3>吃豆人</h3>
-								<p>经典吃豆人冒险</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/shooter.html">
-							<div class="icon">🚀</div>
-							<div class="info">
-								<h3>太空射击</h3>
-								<p>消灭外星飞船</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/gomoku.html">
-							<div class="icon">⚫</div>
-							<div class="info">
-								<h3>五子棋</h3>
-								<p>双人对战五子棋</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/catch.html">
-							<div class="icon">🍎</div>
-							<div class="info">
-								<h3>接水果</h3>
-								<p>篮子接水果避炸弹</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/othello.html">
-							<div class="icon">⚪</div>
-							<div class="info">
-								<h3>黑白棋</h3>
-								<p>经典翻转棋</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/minesweeper.html">
-							<div class="icon">💣</div>
-							<div class="info">
-								<h3>扫雷</h3>
-								<p>经典扫雷游戏</p>
-							</div>
-						</a>
-						<a class="link-card" href="games/reaction.html">
-							<div class="icon">⚡</div>
-							<div class="info">
-								<h3>反应速度</h3>
-								<p>测试反应时间</p>
-							</div>
-						</a>
-					</div>
-				</div>
-
 				<!-- 编程开发 -->
 				<div class="category" id="cat-dev">
 					<h2 class="category-title"><span class="emoji">💻</span> 编程开发</h2>
 					<div class="links-grid">
+						<a class="link-card" href="https://spring.io" target="_blank">
+							<div class="icon">🍃</div>
+							<div class="info">
+								<h3>Spring</h3>
+								<p>Java 生态框架官网</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://mvnrepository.com" target="_blank">
+							<div class="icon">📦</div>
+							<div class="info">
+								<h3>Maven 仓库</h3>
+								<p>依赖坐标查询</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://xiaolincoding.com" target="_blank">
+							<div class="icon">📖</div>
+							<div class="info">
+								<h3>小林 coding</h3>
+								<p>图解网络与 MySQL</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://pdai.tech" target="_blank">
+							<div class="icon">☕</div>
+							<div class="info">
+								<h3>Java 全栈知识体系</h3>
+								<p>后端面试知识大全</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.hello-algo.com" target="_blank">
+							<div class="icon">📐</div>
+							<div class="info">
+								<h3>Hello 算法</h3>
+								<p>动画图解数据结构</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://redis.io" target="_blank">
+							<div class="icon">🧱</div>
+							<div class="info">
+								<h3>Redis</h3>
+								<p>缓存数据库官网</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://docs.python.org/zh-cn/3/" target="_blank">
+							<div class="icon">🐍</div>
+							<div class="info">
+								<h3>Python 文档</h3>
+								<p>官方中文文档</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.jetbrains.com" target="_blank">
+							<div class="icon">🧠</div>
+							<div class="info">
+								<h3>JetBrains</h3>
+								<p>IDEA 等 IDE 官网</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://code.visualstudio.com" target="_blank">
+							<div class="icon">📝</div>
+							<div class="info">
+								<h3>VS Code</h3>
+								<p>微软开源编辑器</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.docker.com" target="_blank">
+							<div class="icon">🐳</div>
+							<div class="info">
+								<h3>Docker</h3>
+								<p>容器化平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://git-scm.com" target="_blank">
+							<div class="icon">🌳</div>
+							<div class="info">
+								<h3>Git</h3>
+								<p>版本控制官网</p>
+							</div>
+						</a>
 						<!-- 在线工具 -->
 						<a class="link-card" href="https://www.jyshare.com/" target="_blank">
 							<div class="icon">🛠️</div>
@@ -1392,65 +1726,542 @@
 								<p>开源软件镜像加速</p>
 							</div>
 						</a>
+						<a class="link-card" href="https://gitee.com" target="_blank">
+							<div class="icon">🇨🇳</div>
+							<div class="info">
+								<h3>Gitee</h3>
+								<p>国内代码托管</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://juejin.cn" target="_blank">
+							<div class="icon">⛏️</div>
+							<div class="info">
+								<h3>掘金</h3>
+								<p>开发者技术社区</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://segmentfault.com" target="_blank">
+							<div class="icon">❓</div>
+							<div class="info">
+								<h3>SegmentFault</h3>
+								<p>中文技术问答</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://start.spring.io" target="_blank">
+							<div class="icon">🌱</div>
+							<div class="info">
+								<h3>Spring Initializr</h3>
+								<p>Spring Boot 脚手架</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.npmjs.com" target="_blank">
+							<div class="icon">📦</div>
+							<div class="info">
+								<h3>npm</h3>
+								<p>Node 包仓库</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://pypi.org" target="_blank">
+							<div class="icon">🐍</div>
+							<div class="info">
+								<h3>PyPI</h3>
+								<p>Python 包仓库</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.mysql.com" target="_blank">
+							<div class="icon">🐬</div>
+							<div class="info">
+								<h3>MySQL</h3>
+								<p>关系型数据库官网</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://nginx.org" target="_blank">
+							<div class="icon">⚙️</div>
+							<div class="info">
+								<h3>Nginx</h3>
+								<p>高性能 Web 服务器</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.postman.com" target="_blank">
+							<div class="icon">📮</div>
+							<div class="info">
+								<h3>Postman</h3>
+								<p>API 调试工具</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://apifox.com" target="_blank">
+							<div class="icon">🦊</div>
+							<div class="info">
+								<h3>Apifox</h3>
+								<p>国产 API 一体化平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://devdocs.io" target="_blank">
+							<div class="icon">📚</div>
+							<div class="info">
+								<h3>DevDocs</h3>
+								<p>离线 API 文档集</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://caniuse.com" target="_blank">
+							<div class="icon">✅</div>
+							<div class="info">
+								<h3>Can I Use</h3>
+								<p>浏览器兼容查询</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://vuejs.org" target="_blank">
+							<div class="icon">💚</div>
+							<div class="info">
+								<h3>Vue.js</h3>
+								<p>渐进式前端框架</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://react.dev" target="_blank">
+							<div class="icon">⚛️</div>
+							<div class="info">
+								<h3>React</h3>
+								<p>前端 UI 库官网</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://mybatis.org" target="_blank">
+							<div class="icon">🗃️</div>
+							<div class="info">
+								<h3>MyBatis</h3>
+								<p>Java 持久层框架</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://kafka.apache.org" target="_blank">
+							<div class="icon">📨</div>
+							<div class="info">
+								<h3>Kafka</h3>
+								<p>分布式消息队列</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://nacos.io" target="_blank">
+							<div class="icon">🧭</div>
+							<div class="info">
+								<h3>Nacos</h3>
+								<p>服务发现与配置中心</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.elastic.co" target="_blank">
+							<div class="icon">🔎</div>
+							<div class="info">
+								<h3>Elasticsearch</h3>
+								<p>搜索引擎官网</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.ruanyifeng.com/blog/" target="_blank">
+							<div class="icon">✍️</div>
+							<div class="info">
+								<h3>阮一峰的网络日志</h3>
+								<p>技术博客与教程</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://liaoxuefeng.com" target="_blank">
+							<div class="icon">📖</div>
+							<div class="info">
+								<h3>廖雪峰的官方网站</h3>
+								<p>Java/Python 教程</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://developer.aliyun.com" target="_blank">
+							<div class="icon">☁️</div>
+							<div class="info">
+								<h3>阿里云开发者社区</h3>
+								<p>云原生技术文章</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://time.geekbang.org" target="_blank">
+							<div class="icon">⏰</div>
+							<div class="info">
+								<h3>极客时间</h3>
+								<p>体系化技术课程</p>
+							</div>
+						</a>
 					</div>
 				</div>
-
-				<!-- 办公协作 -->
-				<div class="category" id="cat-office">
-					<h2 class="category-title"><span class="emoji">📋</span> 办公协作</h2>
+				<!-- 刷题竞赛 -->
+				<div class="category" id="cat-contest">
+					<h2 class="category-title"><span class="emoji">🎯</span> 刷题竞赛</h2>
 					<div class="links-grid">
-						<!-- 在线文档 -->
-						<a class="link-card" href="https://shimo.im" target="_blank">
+						<a class="link-card" href="https://www.nowcoder.com" target="_blank">
+							<div class="icon">🐮</div>
+							<div class="info">
+								<h3>牛客网</h3>
+								<p>面笔试真题题库</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.luogu.com.cn" target="_blank">
+							<div class="icon">🏔️</div>
+							<div class="info">
+								<h3>洛谷</h3>
+								<p>算法竞赛题库</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://codeforces.com" target="_blank">
+							<div class="icon">🌍</div>
+							<div class="info">
+								<h3>Codeforces</h3>
+								<p>全球竞赛排名</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.acwing.com" target="_blank">
+							<div class="icon">📚</div>
+							<div class="info">
+								<h3>AcWing</h3>
+								<p>算法基础课</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.lanqiao.cn" target="_blank">
+							<div class="icon">🏆</div>
+							<div class="info">
+								<h3>蓝桥杯</h3>
+								<p>蓝桥杯大赛官网</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://oi-wiki.org" target="_blank">
+							<div class="icon">🔖</div>
+							<div class="info">
+								<h3>OI Wiki</h3>
+								<p>竞赛知识百科</p>
+							</div>
+						</a>
+						<!-- 算法刷题 -->
+						<a class="link-card" href="https://leetcode.cn" target="_blank">
+							<div class="icon">🎯</div>
+							<div class="info">
+								<h3>LeetCode</h3>
+								<p>算法刷题平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://examcrafts.com/" target="_blank">
 							<div class="icon">📝</div>
 							<div class="info">
-								<h3>石墨文档</h3>
-								<p>在线协作文档</p>
+								<h3>ExamCrafts</h3>
+								<p>在线考试刷题</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.yuque.com" target="_blank">
-							<div class="icon">🐭</div>
+						<!-- 程序竞赛 -->
+						<a class="link-card" href="https://pintia.cn" target="_blank">
+							<div class="icon">🏆</div>
 							<div class="info">
-								<h3>语雀</h3>
-								<p>知识管理工具</p>
+								<h3>PTA</h3>
+								<p>程序设计天梯赛</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.feishu.cn" target="_blank">
-							<div class="icon">✈️</div>
+						<a class="link-card" href="https://cumcm.cnki.net" target="_blank">
+							<div class="icon">🏆</div>
 							<div class="info">
-								<h3>飞书</h3>
-								<p>企业协作平台</p>
+								<h3>数学建模</h3>
+								<p>全国大学生建模</p>
 							</div>
 						</a>
-						<!-- 笔记与思维导图 -->
-						<a class="link-card" href="https://mubu.com" target="_blank">
-							<div class="icon">📋</div>
+						<a class="link-card" href="https://xuexi.boxuegu.com/matchCenter" target="_blank">
+							<div class="icon">🏆</div>
 							<div class="info">
-								<h3>幕布</h3>
-								<p>思维导图笔记</p>
+								<h3>传智杯大赛</h3>
+								<p>程序设计竞赛</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.notion.so" target="_blank">
-							<div class="icon">📑</div>
+						<a class="link-card" href="https://aijs.zhongbenjiaoyu.com/home" target="_blank">
+							<div class="icon">🤖</div>
 							<div class="info">
-								<h3>Notion</h3>
-								<p>笔记与文档工具</p>
+								<h3>AI+ 创新大赛</h3>
+								<p>大学生 AI 竞赛</p>
 							</div>
 						</a>
-						<!-- 邮件服务 -->
-						<a class="link-card" href="https://mail.qq.com/" target="_blank">
-							<div class="icon">📧</div>
+						<a class="link-card" href="https://aiic.yz-cube.com/#/home" target="_blank">
+							<div class="icon">🤖</div>
 							<div class="info">
-								<h3>QQ 邮箱</h3>
-								<p>邮件服务</p>
+								<h3>东盟 AI 挑战赛</h3>
+								<p>人工智能技术应用赛</p>
+							</div>
+						</a>
+						<!-- 游戏化学习 -->
+						<a class="link-card" href="https://codecombat.cn" target="_blank">
+							<div class="icon">🎮</div>
+							<div class="info">
+								<h3>CodeCombat</h3>
+								<p>玩游戏学编程</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.codedex.io" target="_blank">
+							<div class="icon">🎮</div>
+							<div class="info">
+								<h3>CodeDEX</h3>
+								<p>游戏化编程学习</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://leetcode.com" target="_blank">
+							<div class="icon">🌐</div>
+							<div class="info">
+								<h3>LeetCode 国际站</h3>
+								<p>全球算法题库</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://atcoder.jp" target="_blank">
+							<div class="icon">🅰️</div>
+							<div class="info">
+								<h3>AtCoder</h3>
+								<p>日本算法竞赛</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://vjudge.net" target="_blank">
+							<div class="icon">⚖️</div>
+							<div class="info">
+								<h3>VJudge</h3>
+								<p>多 OJ 题库聚合</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://acm.hdu.edu.cn" target="_blank">
+							<div class="icon">🏫</div>
+							<div class="info">
+								<h3>HDU OJ</h3>
+								<p>杭电在线判题</p>
+							</div>
+						</a>
+						<a class="link-card" href="http://poj.org" target="_blank">
+							<div class="icon">🏛️</div>
+							<div class="info">
+								<h3>POJ</h3>
+								<p>北大在线判题</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.kaggle.com" target="_blank">
+							<div class="icon">🏅</div>
+							<div class="info">
+								<h3>Kaggle</h3>
+								<p>数据科学竞赛</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://tianchi.aliyun.com" target="_blank">
+							<div class="icon">🏆</div>
+							<div class="info">
+								<h3>阿里天池</h3>
+								<p>AI 算法大赛</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.heywhale.com" target="_blank">
+							<div class="icon">🐋</div>
+							<div class="info">
+								<h3>和鲸社区</h3>
+								<p>数据科学竞赛社区</p>
 							</div>
 						</a>
 					</div>
 				</div>
-
+				<!-- 网络安全 -->
+				<div class="category" id="cat-security">
+					<h2 class="category-title"><span class="emoji">🛡️</span> 网络安全</h2>
+					<div class="links-grid">
+						<a class="link-card" href="https://www.ctfhub.com" target="_blank">
+							<div class="icon">🎯</div>
+							<div class="info">
+								<h3>CTFHub</h3>
+								<p>CTF 技能树</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.freebuf.com" target="_blank">
+							<div class="icon">🛡️</div>
+							<div class="info">
+								<h3>FreeBuf</h3>
+								<p>网络安全行业门户</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://xz.aliyun.com" target="_blank">
+							<div class="icon">🔮</div>
+							<div class="info">
+								<h3>先知社区</h3>
+								<p>阿里安全攻防社区</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://bbs.kanxue.com" target="_blank">
+							<div class="icon">❄️</div>
+							<div class="info">
+								<h3>看雪</h3>
+								<p>安全技术论坛</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://vulhub.org" target="_blank">
+							<div class="icon">💣</div>
+							<div class="info">
+								<h3>Vulhub</h3>
+								<p>漏洞复现环境</p>
+							</div>
+						</a>
+						<!-- CTF 平台 -->
+						<a class="link-card" href="https://adworld.xctf.org.cn/home/index" target="_blank">
+							<div class="icon">🎯</div>
+							<div class="info">
+								<h3>攻防世界</h3>
+								<p>CTF 竞赛平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://hack.zkaq.cn/index" target="_blank">
+							<div class="icon">⚔️</div>
+							<div class="info">
+								<h3>封神台</h3>
+								<p>渗透测试演练</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://ctfwar.org.cn/index.html" target="_blank">
+							<div class="icon">🏴</div>
+							<div class="info">
+								<h3>CTFWar</h3>
+								<p>攻防战争靶场</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://bm.yuwangbei.cn" target="_blank">
+							<div class="icon">🏆</div>
+							<div class="info">
+								<h3>御网杯大赛</h3>
+								<p>网络安全大赛报名</p>
+							</div>
+						</a>
+						<!-- 漏洞响应 -->
+						<a class="link-card" href="https://www.butian.net/Register.html" target="_blank">
+							<div class="icon">🛡️</div>
+							<div class="info">
+								<h3>补天</h3>
+								<p>漏洞响应平台</p>
+							</div>
+						</a>
+						<!-- 安全工具 -->
+						<a class="link-card" href="https://cybermap.kaspersky.com/cn" target="_blank">
+							<div class="icon">🌍</div>
+							<div class="info">
+								<h3>卡巴斯基</h3>
+								<p>网络威胁地图</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://hackcode.tonghei.com/hacker/" target="_blank">
+							<div class="icon">💀</div>
+							<div class="info">
+								<h3>黑客模拟攻击</h3>
+								<p>在线演示</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.offsec.com/" target="_blank">
+							<div class="icon">🏴‍☠️</div>
+							<div class="info">
+								<h3>OffSec</h3>
+								<p>网络安全培训与认证</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://blog.lololowe.com/posts/f502/" target="_blank">
+							<div class="icon">🔑</div>
+							<div class="info">
+								<h3>hashcat 教程</h3>
+								<p>密码暴力破解详解</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://baijiahao.baidu.com/s?id=1745191674926925476"
+							target="_blank">
+							<div class="icon">🛡️</div>
+							<div class="info">
+								<h3>CTF必备网站</h3>
+								<p>打CTF必备的15个网站</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://ctftime.org" target="_blank">
+							<div class="icon">🚩</div>
+							<div class="info">
+								<h3>CTFtime</h3>
+								<p>全球 CTF 赛事日历</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.hackthebox.com" target="_blank">
+							<div class="icon">📦</div>
+							<div class="info">
+								<h3>Hack The Box</h3>
+								<p>渗透靶场平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://tryhackme.com" target="_blank">
+							<div class="icon">🗝️</div>
+							<div class="info">
+								<h3>TryHackMe</h3>
+								<p>网络安全学习路径</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://overthewire.org" target="_blank">
+							<div class="icon">🧗</div>
+							<div class="info">
+								<h3>OverTheWire</h3>
+								<p>Linux 攻防闯关</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://portswigger.net" target="_blank">
+							<div class="icon">🕷️</div>
+							<div class="info">
+								<h3>PortSwigger</h3>
+								<p>Burp Suite 与 Web 学院</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://owasp.org" target="_blank">
+							<div class="icon">🛡️</div>
+							<div class="info">
+								<h3>OWASP</h3>
+								<p>Web 安全 TOP10</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://nvd.nist.gov" target="_blank">
+							<div class="icon">🗄️</div>
+							<div class="info">
+								<h3>NVD</h3>
+								<p>美国漏洞数据库</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.virustotal.com" target="_blank">
+							<div class="icon">🔬</div>
+							<div class="info">
+								<h3>VirusTotal</h3>
+								<p>多引擎查毒</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://x.threatbook.com" target="_blank">
+							<div class="icon">🕵️</div>
+							<div class="info">
+								<h3>微步在线</h3>
+								<p>威胁情报分析</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.anquanke.com" target="_blank">
+							<div class="icon">📰</div>
+							<div class="info">
+								<h3>安全客</h3>
+								<p>安全资讯与漏洞</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://sqlmap.org" target="_blank">
+							<div class="icon">💉</div>
+							<div class="info">
+								<h3>sqlmap</h3>
+								<p>SQL 注入神器</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.cnnvd.org.cn" target="_blank">
+							<div class="icon">🇨🇳</div>
+							<div class="info">
+								<h3>CNNVD</h3>
+								<p>国家信息安全漏洞库</p>
+							</div>
+						</a>
+					</div>
+				</div>
 				<!-- 在线学习 -->
 				<div class="category" id="cat-learn">
 					<h2 class="category-title"><span class="emoji">📚</span> 在线学习</h2>
 					<div class="links-grid">
+						<a class="link-card" href="https://www.icourse163.org" target="_blank">
+							<div class="icon">🎓</div>
+							<div class="info">
+								<h3>中国大学MOOC</h3>
+								<p>名校公开课</p>
+							</div>
+						</a>
 						<!-- 课程平台 -->
 						<a class="link-card" href="https://labex.io/zh/learn" target="_blank">
 							<div class="icon">🧪</div>
@@ -1563,375 +2374,415 @@
 								<p>328个前缀后缀记忆</p>
 							</div>
 						</a>
-					</div>
-				</div>
-
-				<!-- 刷题竞赛 -->
-				<div class="category" id="cat-contest">
-					<h2 class="category-title"><span class="emoji">🎯</span> 刷题竞赛</h2>
-					<div class="links-grid">
-						<!-- 算法刷题 -->
-						<a class="link-card" href="https://leetcode.cn" target="_blank">
-							<div class="icon">🎯</div>
+						<a class="link-card" href="https://www.xuetangx.com" target="_blank">
+							<div class="icon">🏛️</div>
 							<div class="info">
-								<h3>LeetCode</h3>
-								<p>算法刷题平台</p>
+								<h3>学堂在线</h3>
+								<p>清华慕课平台</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://examcrafts.com/" target="_blank">
-							<div class="icon">📝</div>
-							<div class="info">
-								<h3>ExamCrafts</h3>
-								<p>在线考试刷题</p>
-							</div>
-						</a>
-						<!-- 程序竞赛 -->
-						<a class="link-card" href="https://pintia.cn" target="_blank">
-							<div class="icon">🏆</div>
-							<div class="info">
-								<h3>PTA</h3>
-								<p>程序设计天梯赛</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://cumcm.cnki.net" target="_blank">
-							<div class="icon">🏆</div>
-							<div class="info">
-								<h3>数学建模</h3>
-								<p>全国大学生建模</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://xuexi.boxuegu.com/matchCenter" target="_blank">
-							<div class="icon">🏆</div>
-							<div class="info">
-								<h3>传智杯大赛</h3>
-								<p>程序设计竞赛</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://aijs.zhongbenjiaoyu.com/home" target="_blank">
-							<div class="icon">🤖</div>
-							<div class="info">
-								<h3>AI+ 创新大赛</h3>
-								<p>大学生 AI 竞赛</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://aiic.yz-cube.com/#/home" target="_blank">
-							<div class="icon">🤖</div>
-							<div class="info">
-								<h3>东盟 AI 挑战赛</h3>
-								<p>人工智能技术应用赛</p>
-							</div>
-						</a>
-						<!-- 游戏化学习 -->
-						<a class="link-card" href="https://codecombat.cn" target="_blank">
-							<div class="icon">🎮</div>
-							<div class="info">
-								<h3>CodeCombat</h3>
-								<p>玩游戏学编程</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://www.codedex.io" target="_blank">
-							<div class="icon">🎮</div>
-							<div class="info">
-								<h3>CodeDEX</h3>
-								<p>游戏化编程学习</p>
-							</div>
-						</a>
-					</div>
-				</div>
-
-				<!-- 网络安全 -->
-				<div class="category" id="cat-security">
-					<h2 class="category-title"><span class="emoji">🛡️</span> 网络安全</h2>
-					<div class="links-grid">
-						<!-- CTF 平台 -->
-						<a class="link-card" href="https://adworld.xctf.org.cn/home/index" target="_blank">
-							<div class="icon">🎯</div>
-							<div class="info">
-								<h3>攻防世界</h3>
-								<p>CTF 竞赛平台</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://hack.zkaq.cn/index" target="_blank">
-							<div class="icon">⚔️</div>
-							<div class="info">
-								<h3>封神台</h3>
-								<p>渗透测试演练</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://ctfwar.org.cn/index.html" target="_blank">
-							<div class="icon">🏴</div>
-							<div class="info">
-								<h3>CTFWar</h3>
-								<p>攻防战争靶场</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://bm.yuwangbei.cn" target="_blank">
-							<div class="icon">🏆</div>
-							<div class="info">
-								<h3>御网杯大赛</h3>
-								<p>网络安全大赛报名</p>
-							</div>
-						</a>
-						<!-- 漏洞响应 -->
-						<a class="link-card" href="https://www.butian.net/Register.html" target="_blank">
-							<div class="icon">🛡️</div>
-							<div class="info">
-								<h3>补天</h3>
-								<p>漏洞响应平台</p>
-							</div>
-						</a>
-						<!-- 安全工具 -->
-						<a class="link-card" href="https://cybermap.kaspersky.com/cn" target="_blank">
-							<div class="icon">🌍</div>
-							<div class="info">
-								<h3>卡巴斯基</h3>
-								<p>网络威胁地图</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://hackcode.tonghei.com/hacker/" target="_blank">
-							<div class="icon">💀</div>
-							<div class="info">
-								<h3>黑客模拟攻击</h3>
-								<p>在线演示</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://www.offsec.com/" target="_blank">
-							<div class="icon">🏴‍☠️</div>
-							<div class="info">
-								<h3>OffSec</h3>
-								<p>网络安全培训与认证</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://blog.lololowe.com/posts/f502/" target="_blank">
-							<div class="icon">🔑</div>
-							<div class="info">
-								<h3>hashcat 教程</h3>
-								<p>密码暴力破解详解</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://baijiahao.baidu.com/s?id=1745191674926925476"
-							target="_blank">
-							<div class="icon">🛡️</div>
-							<div class="info">
-								<h3>CTF必备网站</h3>
-								<p>打CTF必备的15个网站</p>
-							</div>
-						</a>
-					</div>
-				</div>
-
-				<!-- 影音娱乐 -->
-				<div class="category" id="cat-media">
-					<h2 class="category-title"><span class="emoji">🎬</span> 影音娱乐</h2>
-					<div class="links-grid">
-						<!-- 趣味科普 -->
-						<a class="link-card"
-							href="https://science.nasa.gov/mission/hubble/multimedia/what-did-hubble-see-on-your-birthday/"
-							target="_blank">
-							<div class="icon">🔭</div>
-							<div class="info">
-								<h3>Hubble Birthday</h3>
-								<p>你生日那天哈勃看到了什么</p>
-							</div>
-						</a>
-						<!-- 音效工具 -->
-						<a class="link-card" href="https://soundinstants.com/zh/" target="_blank">
-							<div class="icon">🔊</div>
-							<div class="info">
-								<h3>SoundInstants</h3>
-								<p>即时音效按钮</p>
-							</div>
-						</a>
-						<!-- 视频平台 -->
-						<a class="link-card" href="https://www.bilibili.com" target="_blank">
+						<a class="link-card" href="https://open.163.com" target="_blank">
 							<div class="icon">📺</div>
 							<div class="info">
-								<h3>Bilibili</h3>
-								<p>视频弹幕网站</p>
+								<h3>网易公开课</h3>
+								<p>名校公开课</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.youtube.com" target="_blank">
-							<div class="icon">▶️</div>
+						<a class="link-card" href="https://edu.51cto.com" target="_blank">
+							<div class="icon">🎓</div>
 							<div class="info">
-								<h3>YouTube</h3>
-								<p>视频分享平台</p>
+								<h3>51CTO 学堂</h3>
+								<p>IT 视频课程</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://v.qq.com" target="_blank">
-							<div class="icon">📺</div>
+						<a class="link-card" href="https://www.edx.org" target="_blank">
+							<div class="icon">🎓</div>
 							<div class="info">
-								<h3>腾讯视频</h3>
-								<p>在线视频平台</p>
+								<h3>edX</h3>
+								<p>开放大学课程</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.douyin.com" target="_blank">
-							<div class="icon">🎵</div>
+						<a class="link-card" href="https://zh.khanacademy.org" target="_blank">
+							<div class="icon">🧮</div>
 							<div class="info">
-								<h3>抖音</h3>
-								<p>短视频平台</p>
+								<h3>可汗学院中文</h3>
+								<p>免费基础课程</p>
 							</div>
 						</a>
-						<!-- 动漫 -->
-						<a class="link-card" href="https://cn.yh-dm.cn/zh" target="_blank">
-							<div class="icon">🌸</div>
+						<a class="link-card" href="https://www.wanfangdata.com.cn" target="_blank">
+							<div class="icon">📄</div>
 							<div class="info">
-								<h3>樱花动漫</h3>
-								<p>动漫在线观看</p>
+								<h3>万方数据</h3>
+								<p>学术论文检索</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.yhdmtv.top/" target="_blank">
-							<div class="icon">🌸</div>
+						<a class="link-card" href="https://arxiv.org" target="_blank">
+							<div class="icon">📑</div>
 							<div class="info">
-								<h3>樱花动漫(备用)</h3>
-								<p>动漫在线观看</p>
+								<h3>arXiv</h3>
+								<p>预印本论文库</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.yhdmcc.com" target="_blank">
-							<div class="icon">🌸</div>
+						<a class="link-card" href="https://www.zhihu.com" target="_blank">
+							<div class="icon">💡</div>
 							<div class="info">
-								<h3>樱花动漫官网</h3>
-								<p>动漫在线观看</p>
+								<h3>知乎</h3>
+								<p>知识问答社区</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.biqumh.com" target="_blank">
+					</div>
+				</div>
+				<!-- 求职实习 -->
+				<div class="category" id="cat-jobs">
+					<h2 class="category-title"><span class="emoji">🚀</span> 求职实习</h2>
+					<div class="links-grid">
+						<a class="link-card" href="https://www.zhipin.com" target="_blank">
+							<div class="icon">💼</div>
+							<div class="info">
+								<h3>BOSS直聘</h3>
+								<p>直接和老板谈</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.shixiseng.com" target="_blank">
+							<div class="icon">🧑‍🎓</div>
+							<div class="info">
+								<h3>实习僧</h3>
+								<p>大学生实习招聘</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://maimai.cn" target="_blank">
+							<div class="icon">💬</div>
+							<div class="info">
+								<h3>脉脉</h3>
+								<p>职场社交与公司点评</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.wondercv.com" target="_blank">
+							<div class="icon">📄</div>
+							<div class="info">
+								<h3>超级简历</h3>
+								<p>简历制作工具</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://offershow.cn" target="_blank">
+							<div class="icon">💰</div>
+							<div class="info">
+								<h3>OfferShow</h3>
+								<p>薪资爆料查询</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.zhaopin.com" target="_blank">
+							<div class="icon">💼</div>
+							<div class="info">
+								<h3>智联招聘</h3>
+								<p>综合招聘平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.51job.com" target="_blank">
+							<div class="icon">📋</div>
+							<div class="info">
+								<h3>前程无忧</h3>
+								<p>老牌招聘网站</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.liepin.com" target="_blank">
+							<div class="icon">🎯</div>
+							<div class="info">
+								<h3>猎聘</h3>
+								<p>中高端职位</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.lagou.com" target="_blank">
+							<div class="icon">🦘</div>
+							<div class="info">
+								<h3>拉勾招聘</h3>
+								<p>互联网岗位</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.yingjiesheng.com" target="_blank">
+							<div class="icon">🎓</div>
+							<div class="info">
+								<h3>应届生求职网</h3>
+								<p>校招信息汇总</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.kanzhun.com" target="_blank">
+							<div class="icon">👀</div>
+							<div class="info">
+								<h3>看准网</h3>
+								<p>公司点评与薪资</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.jobui.com" target="_blank">
+							<div class="icon">📊</div>
+							<div class="info">
+								<h3>职友集</h3>
+								<p>职位与薪酬分析</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.tianyancha.com" target="_blank">
+							<div class="icon">🔍</div>
+							<div class="info">
+								<h3>天眼查</h3>
+								<p>企业信息查询</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.qcc.com" target="_blank">
+							<div class="icon">🏢</div>
+							<div class="info">
+								<h3>企查查</h3>
+								<p>企业工商信息</p>
+							</div>
+						</a>
+					</div>
+				</div>
+				<!-- 校园生活 -->
+				<div class="category" id="cat-campus">
+					<h2 class="category-title"><span class="emoji">🎓</span> 校园生活</h2>
+					<div class="links-grid">
+						<a class="link-card" href="https://www.chsi.com.cn" target="_blank">
+							<div class="icon">🎖️</div>
+							<div class="info">
+								<h3>学信网</h3>
+								<p>学籍学历查询</p>
+							</div>
+						</a>
+						<!-- 📚 学习平台 -->
+						<a class="link-card" href="https://zlgcxy.fanya.chaoxing.com/portal" target="_blank">
 							<div class="icon">📖</div>
 							<div class="info">
-								<h3>笔趣阁漫画</h3>
-								<p>免费漫画在线看</p>
+								<h3>超星学习通</h3>
+								<p>在线课程学习</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://cn.baozimhcn.com/" target="_blank">
-							<div class="icon">📚</div>
+						<a class="link-card" href="https://passport2.xuexitong.com/login" target="_blank">
+							<div class="icon">📖</div>
 							<div class="info">
-								<h3>包子漫画</h3>
-								<p>韩漫在线看</p>
+								<h3>学习通登录</h3>
+								<p>学习通官方登录</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://github.com/Predidit/Kazumi" target="_blank">
-							<div class="icon">🌸</div>
+						<!-- 📝 考试相关 -->
+						<a class="link-card" href="https://cet-bm.neea.edu.cn" target="_blank">
+							<div class="icon">📝</div>
 							<div class="info">
-								<h3>Kazumi</h3>
-								<p>开源番剧采集 APP</p>
+								<h3>四六级报名</h3>
+								<p>英语等级考试</p>
 							</div>
 						</a>
-						<!-- 小说 -->
-						<a class="link-card" href="https://write.qq.com/portal/dashboard/books" target="_blank">
-							<div class="icon">✍️</div>
+						<a class="link-card" href="https://www.heao.com.cn/path/index/" target="_blank">
+							<div class="icon">📋</div>
 							<div class="info">
-								<h3>阅文作家专区</h3>
-								<p>小说创作平台</p>
+								<h3>河南省教育考试院</h3>
+								<p>考试信息查询</p>
 							</div>
 						</a>
-						<!-- 音乐 -->
-						<a class="link-card" href="https://www.gequbao.com" target="_blank">
-							<div class="icon">🎵</div>
+						<a class="link-card" href="https://dxs.moe.gov.cn/zx/awards/index.shtml" target="_blank">
+							<div class="icon">🏆</div>
 							<div class="info">
-								<h3>歌曲宝</h3>
-								<p>MP3 音乐下载</p>
+								<h3>获奖名单</h3>
+								<p>竞赛获奖查询</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.9ku.com/zhuanji/83.htm" target="_blank">
-							<div class="icon">🎵</div>
+						<a class="link-card" href="https://colleges.chat" target="_blank">
+							<div class="icon">🏫</div>
 							<div class="info">
-								<h3>九酷音乐</h3>
-								<p>MP3 下载</p>
+								<h3>大学生活质量</h3>
+								<p>大学选择参考</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://echonext.moe/zh/" target="_blank">
-							<div class="icon">🎧</div>
+
+						<!-- 💰 助学就业 -->
+						<a class="link-card" href="https://www.csls.cdb.com.cn/#/index" target="_blank">
+							<div class="icon">💰</div>
 							<div class="info">
-								<h3>ECHO</h3>
-								<p>本地音乐播放器</p>
+								<h3>助学贷款</h3>
+								<p>国家开发银行</p>
 							</div>
 						</a>
-						<!-- 影视学习 -->
-						<a class="link-card" href="https://www.taicishe.com" target="_blank">
-							<div class="icon">🎬</div>
+						<a class="link-card" href="https://www.neea.edu.cn" target="_blank">
+							<div class="icon">📝</div>
 							<div class="info">
-								<h3>英语台词社</h3>
-								<p>电影美剧台词</p>
+								<h3>中国教育考试网</h3>
+								<p>各类考试报名</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.playphrase.me" target="_blank">
+						<a class="link-card" href="http://ncre.neea.edu.cn" target="_blank">
+							<div class="icon">💻</div>
+							<div class="info">
+								<h3>计算机等级考试</h3>
+								<p>NCRE 报名与成绩</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.dxsbb.com" target="_blank">
+							<div class="icon">📰</div>
+							<div class="info">
+								<h3>大学生必备网</h3>
+								<p>升学考证资讯</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://dxs.moe.gov.cn" target="_blank">
+							<div class="icon">🏫</div>
+							<div class="info">
+								<h3>中国大学生在线</h3>
+								<p>教育部服务平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://cet.neea.edu.cn" target="_blank">
+							<div class="icon">🔤</div>
+							<div class="info">
+								<h3>四六级官网</h3>
+								<p>CET 成绩查询</p>
+							</div>
+						</a>
+					</div>
+				</div>
+				<!-- 办公协作 -->
+				<div class="category" id="cat-office">
+					<h2 class="category-title"><span class="emoji">📋</span> 办公协作</h2>
+					<div class="links-grid">
+						<a class="link-card" href="https://docs.qq.com" target="_blank">
+							<div class="icon">📃</div>
+							<div class="info">
+								<h3>腾讯文档</h3>
+								<p>在线协作文档</p>
+							</div>
+						</a>
+						<!-- 在线文档 -->
+						<a class="link-card" href="https://shimo.im" target="_blank">
+							<div class="icon">📝</div>
+							<div class="info">
+								<h3>石墨文档</h3>
+								<p>在线协作文档</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.yuque.com" target="_blank">
+							<div class="icon">🐭</div>
+							<div class="info">
+								<h3>语雀</h3>
+								<p>知识管理工具</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.feishu.cn" target="_blank">
+							<div class="icon">✈️</div>
+							<div class="info">
+								<h3>飞书</h3>
+								<p>企业协作平台</p>
+							</div>
+						</a>
+						<!-- 笔记与思维导图 -->
+						<a class="link-card" href="https://mubu.com" target="_blank">
+							<div class="icon">📋</div>
+							<div class="info">
+								<h3>幕布</h3>
+								<p>思维导图笔记</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.notion.so" target="_blank">
+							<div class="icon">📑</div>
+							<div class="info">
+								<h3>Notion</h3>
+								<p>笔记与文档工具</p>
+							</div>
+						</a>
+						<!-- 邮件服务 -->
+						<a class="link-card" href="https://mail.qq.com/" target="_blank">
+							<div class="icon">📧</div>
+							<div class="info">
+								<h3>QQ 邮箱</h3>
+								<p>邮件服务</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.kdocs.cn" target="_blank">
+							<div class="icon">📄</div>
+							<div class="info">
+								<h3>金山文档</h3>
+								<p>WPS 在线协作</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.dingtalk.com" target="_blank">
+							<div class="icon">📌</div>
+							<div class="info">
+								<h3>钉钉</h3>
+								<p>企业协同办公</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://work.weixin.qq.com" target="_blank">
+							<div class="icon">💬</div>
+							<div class="info">
+								<h3>企业微信</h3>
+								<p>腾讯企业协作</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://meeting.tencent.com" target="_blank">
 							<div class="icon">🎥</div>
 							<div class="info">
-								<h3>PlayPhrase</h3>
-								<p>电影台词搜索</p>
+								<h3>腾讯会议</h3>
+								<p>在线视频会议</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.1jianji.com/charts/index" target="_blank">
-							<div class="icon">🎬</div>
+						<a class="link-card" href="https://www.wps.cn" target="_blank">
+							<div class="icon">📑</div>
 							<div class="info">
-								<h3>易剪辑</h3>
-								<p>剪映/PR 剪辑工具</p>
+								<h3>WPS Office</h3>
+								<p>国产办公套件</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://mail.163.com" target="_blank">
+							<div class="icon">✉️</div>
+							<div class="info">
+								<h3>网易邮箱</h3>
+								<p>163/126 邮箱</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://wj.qq.com" target="_blank">
+							<div class="icon">📋</div>
+							<div class="info">
+								<h3>腾讯问卷</h3>
+								<p>在线问卷表单</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://tower.im" target="_blank">
+							<div class="icon">🗂️</div>
+							<div class="info">
+								<h3>Tower</h3>
+								<p>团队项目管理</p>
 							</div>
 						</a>
 					</div>
 				</div>
-
-				<!-- 视频下载 -->
-				<div class="category" id="cat-download">
-					<h2 class="category-title"><span class="emoji">⬇️</span> 视频下载</h2>
-					<div class="links-grid">
-						<!-- 通用下载 -->
-						<a class="link-card" href="https://greenvideo.cc" target="_blank">
-							<div class="icon">⬇️</div>
-							<div class="info">
-								<h3>GreenVideo</h3>
-								<p>视频下载工具</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://www.bestvideow.com" target="_blank">
-							<div class="icon">🎬</div>
-							<div class="info">
-								<h3>Best Video</h3>
-								<p>视频解析下载</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://snapany.com/zh" target="_blank">
-							<div class="icon">🎬</div>
-							<div class="info">
-								<h3>SnapAny</h3>
-								<p>万能视频解析</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://www.datatool.vip" target="_blank">
-							<div class="icon">📥</div>
-							<div class="info">
-								<h3>DataTool</h3>
-								<p>视频下载工具</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://jx.xmflv.cc" target="_blank">
-							<div class="icon">🦐</div>
-							<div class="info">
-								<h3>虾米解析</h3>
-								<p>视频在线解析</p>
-							</div>
-						</a>
-						<!-- B站专用 -->
-						<a class="link-card" href="https://apps.microsoft.com/detail/xpdp0g2m2xbtrr?hl=zh-CN&gl=CN"
-							target="_blank">
-							<div class="icon">⬇️</div>
-							<div class="info">
-								<h3>唧唧下载</h3>
-								<p>B站视频下载</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://client.jijidown.com" target="_blank">
-							<div class="icon">⬇️</div>
-							<div class="info">
-								<h3>唧唧客户端</h3>
-								<p>B站视频下载客户端</p>
-							</div>
-						</a>
-					</div>
-				</div>
-
 				<!-- 效率工具 -->
 				<div class="category" id="cat-tools">
 					<h2 class="category-title"><span class="emoji">🔧</span> 效率工具</h2>
 					<div class="links-grid">
+						<a class="link-card" href="https://www.deepl.com/translator" target="_blank">
+							<div class="icon">🌐</div>
+							<div class="info">
+								<h3>DeepL</h3>
+								<p>AI 翻译工具</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.photopea.com" target="_blank">
+							<div class="icon">🖌️</div>
+							<div class="info">
+								<h3>Photopea</h3>
+								<p>在线 PS 修图</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://excalidraw.com" target="_blank">
+							<div class="icon">✏️</div>
+							<div class="info">
+								<h3>Excalidraw</h3>
+								<p>手绘风画板</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://localsend.org" target="_blank">
+							<div class="icon">📡</div>
+							<div class="info">
+								<h3>LocalSend</h3>
+								<p>局域网文件互传</p>
+							</div>
+						</a>
 						<!-- 🔤 翻译工具 -->
 						<a class="link-card" href="https://translate.google.com" target="_blank">
 							<div class="icon">🌐</div>
@@ -2161,9 +3012,120 @@
 								<p>免费资源导航</p>
 							</div>
 						</a>
+						<a class="link-card" href="https://tool.lu" target="_blank">
+							<div class="icon">🧰</div>
+							<div class="info">
+								<h3>在线工具</h3>
+								<p>程序员工具箱</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://tool.chinaz.com" target="_blank">
+							<div class="icon">📡</div>
+							<div class="info">
+								<h3>站长工具</h3>
+								<p>SEO 与域名查询</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://cli.im" target="_blank">
+							<div class="icon">🔳</div>
+							<div class="info">
+								<h3>草料二维码</h3>
+								<p>二维码生成美化</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.json.cn" target="_blank">
+							<div class="icon">🔣</div>
+							<div class="info">
+								<h3>JSON 在线</h3>
+								<p>格式化与校验</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://regex101.com" target="_blank">
+							<div class="icon">🔤</div>
+							<div class="info">
+								<h3>Regex101</h3>
+								<p>正则调试测试</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://app.diagrams.net" target="_blank">
+							<div class="icon">🔷</div>
+							<div class="info">
+								<h3>draw.io</h3>
+								<p>在线流程图</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.ilovepdf.com" target="_blank">
+							<div class="icon">📕</div>
+							<div class="info">
+								<h3>iLovePDF</h3>
+								<p>PDF 在线处理</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://smallpdf.com" target="_blank">
+							<div class="icon">📔</div>
+							<div class="info">
+								<h3>Smallpdf</h3>
+								<p>PDF 转换压缩</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://convertio.co" target="_blank">
+							<div class="icon">🔄</div>
+							<div class="info">
+								<h3>Convertio</h3>
+								<p>全格式文件转换</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.canva.cn" target="_blank">
+							<div class="icon">🎨</div>
+							<div class="info">
+								<h3>Canva 可画</h3>
+								<p>在线设计作图</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.chuangkit.com" target="_blank">
+							<div class="icon">🖼️</div>
+							<div class="info">
+								<h3>创客贴</h3>
+								<p>海报模板设计</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.iconfont.cn" target="_blank">
+							<div class="icon">🔣</div>
+							<div class="info">
+								<h3>iconfont</h3>
+								<p>阿里矢量图标库</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://temp-mail.org" target="_blank">
+							<div class="icon">📮</div>
+							<div class="info">
+								<h3>临时邮箱</h3>
+								<p>一次性收件箱</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://1password.com/password-generator" target="_blank">
+							<div class="icon">🔐</div>
+							<div class="info">
+								<h3>强密码生成</h3>
+								<p>随机密码生成器</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://ipinfo.io" target="_blank">
+							<div class="icon">🌐</div>
+							<div class="info">
+								<h3>IP 查询</h3>
+								<p>IP 归属地信息</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.pdf24.org" target="_blank">
+							<div class="icon">📗</div>
+							<div class="info">
+								<h3>PDF24</h3>
+								<p>免费 PDF 工具箱</p>
+							</div>
+						</a>
 					</div>
 				</div>
-
 				<!-- 系统软件 -->
 				<div class="category" id="cat-software">
 					<h2 class="category-title"><span class="emoji">💾</span> 系统软件</h2>
@@ -2187,13 +3149,6 @@
 						</a>
 
 						<!-- 📦 系统工具 -->
-						<a class="link-card" href="https://www.microsoft.com/zh-cn/Store" target="_blank">
-							<div class="icon">🪟</div>
-							<div class="info">
-								<h3>Microsoft Store</h3>
-								<p>应用商店</p>
-							</div>
-						</a>
 						<a class="link-card" href="https://www.winrar.com.cn/download.htm" target="_blank">
 							<div class="icon">📦</div>
 							<div class="info">
@@ -2208,18 +3163,11 @@
 								<p>软件下载站点</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://iknowledge.lenovo.com.cn/tool" target="_blank">
+						<a class="link-card" href="https://iknowledge.lenovo.com.cn" target="_blank">
 							<div class="icon">🔧</div>
 							<div class="info">
 								<h3>联想急救中心</h3>
 								<p>系统修复工具</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://www.cnblogs.com/cheng-/p/12325881.html" target="_blank">
-							<div class="icon">💡</div>
-							<div class="info">
-								<h3>Win10激活教程</h3>
-								<p>永久激活专业工作站版</p>
 							</div>
 						</a>
 
@@ -2240,140 +3188,85 @@
 								<p>命令大全</p>
 							</div>
 						</a>
-					</div>
-				</div>
-
-				<!-- 游戏相关 -->
-				<div class="category" id="cat-game">
-					<h2 class="category-title"><span class="emoji">🎮</span> 游戏相关</h2>
-					<div class="links-grid">
-						<!-- 🎮 游戏平台 -->
-						<a class="link-card" href="https://store.steampowered.com" target="_blank">
-							<div class="icon">🎮</div>
+						<a class="link-card" href="https://www.7-zip.org" target="_blank">
+							<div class="icon">🗜️</div>
 							<div class="info">
-								<h3>Steam</h3>
-								<p>游戏平台</p>
+								<h3>7-Zip</h3>
+								<p>开源压缩软件</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.kkyx.net" target="_blank">
-							<div class="icon">🎮</div>
-							<div class="info">
-								<h3>KK 游戏</h3>
-								<p>单机游戏</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://yx123789.com/" target="_blank">
-							<div class="icon">🎮</div>
-							<div class="info">
-								<h3>游戏仓库</h3>
-								<p>全球单机游戏</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://yxk111.com/" target="_blank">
-							<div class="icon">🎮</div>
-							<div class="info">
-								<h3>玩丫游戏仓库</h3>
-								<p>全球单机游戏</p>
-							</div>
-						</a>
-
-						<!-- 🔧 游戏工具 -->
-						<a class="link-card" href="https://steampp.net" target="_blank">
+						<a class="link-card" href="https://www.voidtools.com" target="_blank">
 							<div class="icon">⚡</div>
 							<div class="info">
-								<h3>瓦特工具箱</h3>
-								<p>Steam++ 加速</p>
+								<h3>Everything</h3>
+								<p>秒搜本地文件</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.xiaoxingjie.com" target="_blank">
+						<a class="link-card" href="https://obsproject.com" target="_blank">
+							<div class="icon">🎥</div>
+							<div class="info">
+								<h3>OBS Studio</h3>
+								<p>录屏直播神器</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.huorong.cn" target="_blank">
+							<div class="icon">🛡️</div>
+							<div class="info">
+								<h3>火绒安全</h3>
+								<p>轻量国产杀毒</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.snipaste.com" target="_blank">
+							<div class="icon">✂️</div>
+							<div class="info">
+								<h3>Snipaste</h3>
+								<p>截图贴图工具</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.todesk.com" target="_blank">
+							<div class="icon">🖥️</div>
+							<div class="info">
+								<h3>ToDesk</h3>
+								<p>远程控制软件</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.xunlei.com" target="_blank">
+							<div class="icon">⬇️</div>
+							<div class="info">
+								<h3>迅雷</h3>
+								<p>下载工具官网</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.cpuid.com" target="_blank">
 							<div class="icon">🔧</div>
 							<div class="info">
-								<h3>小幸修改器</h3>
-								<p>游戏修改器</p>
+								<h3>CPU-Z</h3>
+								<p>硬件信息检测</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.steamhm.com/Login/Login.html" target="_blank">
-							<div class="icon">🔧</div>
+						<a class="link-card" href="https://www.tbtool.cn" target="_blank">
+							<div class="icon">🧰</div>
 							<div class="info">
-								<h3>蒸汽帮</h3>
-								<p>游戏工具导航</p>
+								<h3>图吧工具箱</h3>
+								<p>硬件检测合集</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://bbs.3dmgame.com/thread-6045971-1-1.html" target="_blank">
-							<div class="icon">🔧</div>
+						<a class="link-card" href="https://www.geekuninstaller.com" target="_blank">
+							<div class="icon">🧹</div>
 							<div class="info">
-								<h3>风灵月影</h3>
-								<p>修改器工具</p>
+								<h3>Geek 卸载</h3>
+								<p>彻底卸载清理</p>
 							</div>
 						</a>
-
-						<!-- 📥 游戏下载 -->
-						<a class="link-card" href="https://www.520switch.com" target="_blank">
-							<div class="icon">🎮</div>
+						<a class="link-card" href="https://guanjia.qq.com" target="_blank">
+							<div class="icon">🐧</div>
 							<div class="info">
-								<h3>Switch520</h3>
-								<p>Switch 游戏下载</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://cmdw.com" target="_blank">
-							<div class="icon">🎮</div>
-							<div class="info">
-								<h3>CMDW</h3>
-								<p>游戏下载中心</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://koyso.com/" target="_blank">
-							<div class="icon">🎮</div>
-							<div class="info">
-								<h3>Koyso</h3>
-								<p>游戏资源搜索</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://www.kdocs.cn/l/cfQizT5byY8S" target="_blank">
-							<div class="icon">☢️</div>
-							<div class="info">
-								<h3>辐射避难所</h3>
-								<p>安卓版游戏下载</p>
-							</div>
-						</a>
-
-						<!-- 🎯 游戏辅助 -->
-						<a class="link-card" href="https://afdian.com/p/0164034c016c11ebafcb52540025c377"
-							target="_blank">
-							<div class="icon">🎵</div>
-							<div class="info">
-								<h3>PCL 启动器</h3>
-								<p>Minecraft 启动器下载</p>
-							</div>
-						</a>
-
-						<!-- 📖 游戏攻略 -->
-						<a class="link-card" href="https://cook.yunyoujun.cn/" target="_blank">
-							<div class="icon">🍳</div>
-							<div class="info">
-								<h3>食用手册</h3>
-								<p>游戏攻略指南</p>
-							</div>
-						</a>
-						<a class="link-card"
-							href="https://www.bombmanual.com/zh-CN/print/KeepTalkingAndNobodyExplodes-BombDefusalManual-v1-zh-CN.pdf"
-							target="_blank">
-							<div class="icon">💣</div>
-							<div class="info">
-								<h3>拆弹手册</h3>
-								<p>游戏攻略 PDF</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://orzice.com/v/gun_gqm" target="_blank">
-							<div class="icon">🎯</div>
-							<div class="info">
-								<h3>三角洲改枪码</h3>
-								<p>三角洲行动攻略</p>
+								<h3>腾讯电脑管家</h3>
+								<p>系统清理防护</p>
 							</div>
 						</a>
 					</div>
 				</div>
-
 				<!-- 模板素材 -->
 				<div class="category" id="cat-assets">
 					<h2 class="category-title"><span class="emoji">📑</span> 模板素材</h2>
@@ -2402,7 +3295,7 @@
 								<p>高清壁纸下载</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://bz.zzzmh.cn/index" target="_blank">
+						<a class="link-card" href="https://zzzmh.cn" target="_blank">
 							<div class="icon">🖼️</div>
 							<div class="info">
 								<h3>极简壁纸</h3>
@@ -2478,129 +3371,99 @@
 								<p>在线网名生成</p>
 							</div>
 						</a>
-					</div>
-				</div>
-
-				<!-- 校园生活 -->
-				<div class="category" id="cat-campus">
-					<h2 class="category-title"><span class="emoji">🎓</span> 校园生活</h2>
-					<div class="links-grid">
-						<!-- 📚 学习平台 -->
-						<a class="link-card" href="https://zlgcxy.fanya.chaoxing.com/portal" target="_blank">
-							<div class="icon">📖</div>
+						<a class="link-card" href="https://www.58pic.com" target="_blank">
+							<div class="icon">🖼️</div>
 							<div class="info">
-								<h3>超星学习通</h3>
-								<p>在线课程学习</p>
+								<h3>千图网</h3>
+								<p>设计素材模板</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://passport2.xuexitong.com/login" target="_blank">
-							<div class="icon">📖</div>
+						<a class="link-card" href="https://ibaotu.com" target="_blank">
+							<div class="icon">📐</div>
 							<div class="info">
-								<h3>学习通登录</h3>
-								<p>学习通官方登录</p>
+								<h3>包图网</h3>
+								<p>商用设计素材</p>
 							</div>
 						</a>
-						<!-- 📝 考试相关 -->
-						<a class="link-card" href="https://cet-bm.neea.edu.cn" target="_blank">
-							<div class="icon">📝</div>
+						<a class="link-card" href="https://www.51miz.com" target="_blank">
+							<div class="icon">📊</div>
 							<div class="info">
-								<h3>四六级报名</h3>
-								<p>英语等级考试</p>
+								<h3>觅知网</h3>
+								<p>PPT/Word 模板</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.heao.com.cn/path/index/" target="_blank">
-							<div class="icon">📋</div>
+						<a class="link-card" href="https://www.docer.com" target="_blank">
+							<div class="icon">📑</div>
 							<div class="info">
-								<h3>河南省教育考试院</h3>
-								<p>考试信息查询</p>
+								<h3>稻壳儿</h3>
+								<p>WPS 模板商店</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://dxs.moe.gov.cn/zx/awards/index.shtml" target="_blank">
-							<div class="icon">🏆</div>
+						<a class="link-card" href="https://www.officeplus.cn" target="_blank">
+							<div class="icon">🗂️</div>
 							<div class="info">
-								<h3>获奖名单</h3>
-								<p>竞赛获奖查询</p>
+								<h3>OfficePLUS</h3>
+								<p>微软官方模板</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://colleges.chat" target="_blank">
-							<div class="icon">🏫</div>
+						<a class="link-card" href="https://unsplash.com" target="_blank">
+							<div class="icon">📷</div>
 							<div class="info">
-								<h3>大学生活质量</h3>
-								<p>大学选择参考</p>
+								<h3>Unsplash</h3>
+								<p>免费高清图片</p>
 							</div>
 						</a>
-
-						<!-- 💰 助学就业 -->
-						<a class="link-card" href="https://www.csls.cdb.com.cn/#/index" target="_blank">
-							<div class="icon">💰</div>
+						<a class="link-card" href="https://www.pexels.com" target="_blank">
+							<div class="icon">🌄</div>
 							<div class="info">
-								<h3>助学贷款</h3>
-								<p>国家开发银行</p>
+								<h3>Pexels</h3>
+								<p>免费图库视频</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://chinavolunteer.mca.gov.cn/site/home" target="_blank">
-							<div class="icon">❤️</div>
+						<a class="link-card" href="https://pixabay.com" target="_blank">
+							<div class="icon">🎑</div>
 							<div class="info">
-								<h3>中国志愿服务网</h3>
-								<p>志愿者服务平台</p>
+								<h3>Pixabay</h3>
+								<p>免费图片素材</p>
 							</div>
 						</a>
-					</div>
-				</div>
-
-				<!-- 导航网站 -->
-				<div class="category" id="cat-nav">
-					<h2 class="category-title"><span class="emoji">🧭</span> 导航网站</h2>
-					<div class="links-grid">
-						<!-- 📚 学习导航 -->
-						<a class="link-card" href="https://www.xue8nav.com" target="_blank">
-							<div class="icon">📚</div>
+						<a class="link-card" href="https://www.zcool.com.cn" target="_blank">
+							<div class="icon">🎨</div>
 							<div class="info">
-								<h3>学吧导航</h3>
-								<p>学习导航网站</p>
+								<h3>站酷</h3>
+								<p>设计师作品社区</p>
 							</div>
 						</a>
-
-						<!-- 🔗 实用导航 -->
-						<a class="link-card" href="https://huamao.vip" target="_blank">
+						<a class="link-card" href="https://huaban.com" target="_blank">
 							<div class="icon">🌸</div>
 							<div class="info">
-								<h3>花猫导航</h3>
-								<p>实用网站导航</p>
+								<h3>花瓣网</h3>
+								<p>设计灵感采集</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://ilxdh.com" target="_blank">
-							<div class="icon">🐉</div>
+						<a class="link-card" href="https://www.flaticon.com" target="_blank">
+							<div class="icon">🔘</div>
 							<div class="info">
-								<h3>龙轩导航</h3>
-								<p>实用导航</p>
+								<h3>Flaticon</h3>
+								<p>海量矢量图标</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.xiaozhongjishu.com" target="_blank">
-							<div class="icon">🔧</div>
+						<a class="link-card" href="https://www.51yuansu.com" target="_blank">
+							<div class="icon">🎀</div>
 							<div class="info">
-								<h3>小众技术</h3>
-								<p>实用工具导航</p>
+								<h3>觅元素</h3>
+								<p>免抠 PNG 素材</p>
 							</div>
 						</a>
-						<!-- 🎁 资源导航 -->
-						<a class="link-card" href="https://www.iiice.cn" target="_blank">
-							<div class="icon">🎁</div>
+						<a class="link-card" href="https://www.uisdc.com" target="_blank">
+							<div class="icon">💡</div>
 							<div class="info">
-								<h3>下次一定</h3>
-								<p>白嫖资源导航</p>
-							</div>
-						</a>
-						<a class="link-card" href="https://m.bidianer.com/group/49" target="_blank">
-							<div class="icon">📱</div>
-							<div class="info">
-								<h3>笔点导航</h3>
-								<p>手机版网址导航</p>
+								<h3>优设网</h3>
+								<p>设计教程资讯</p>
 							</div>
 						</a>
 					</div>
 				</div>
-
 				<!-- 网盘资源 -->
 				<div class="category" id="cat-drive">
 					<h2 class="category-title"><span class="emoji">📦</span> 网盘资源</h2>
@@ -2683,9 +3546,826 @@
 								<p>夸克资源搜索站</p>
 							</div>
 						</a>
+						<a class="link-card" href="https://www.alipan.com" target="_blank">
+							<div class="icon">🌀</div>
+							<div class="info">
+								<h3>阿里云盘</h3>
+								<p>不限速云存储</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://pan.quark.cn" target="_blank">
+							<div class="icon">🔮</div>
+							<div class="info">
+								<h3>夸克网盘</h3>
+								<p>夸克云存储</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://pan.baidu.com" target="_blank">
+							<div class="icon">🐾</div>
+							<div class="info">
+								<h3>百度网盘</h3>
+								<p>国内主流网盘</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://cloud.189.cn" target="_blank">
+							<div class="icon">☁️</div>
+							<div class="info">
+								<h3>天翼云盘</h3>
+								<p>电信云存储</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://115.com" target="_blank">
+							<div class="icon">💠</div>
+							<div class="info">
+								<h3>115 网盘</h3>
+								<p>大容量存储</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.lanzoup.com" target="_blank">
+							<div class="icon">📎</div>
+							<div class="info">
+								<h3>蓝奏云</h3>
+								<p>免登录文件分享</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.wenshushu.cn" target="_blank">
+							<div class="icon">📨</div>
+							<div class="info">
+								<h3>文叔叔</h3>
+								<p>大文件传分享</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://cowtransfer.com" target="_blank">
+							<div class="icon">🐄</div>
+							<div class="info">
+								<h3>奶牛快传</h3>
+								<p>临时文件中转</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.123pan.com" target="_blank">
+							<div class="icon">🔢</div>
+							<div class="info">
+								<h3>123 云盘</h3>
+								<p>免费云存储</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://pan.xunlei.com" target="_blank">
+							<div class="icon">⚡</div>
+							<div class="info">
+								<h3>迅雷云盘</h3>
+								<p>迅雷在线存储</p>
+							</div>
+						</a>
 					</div>
 				</div>
+				<!-- 影音娱乐 -->
+				<div class="category" id="cat-media">
+					<h2 class="category-title"><span class="emoji">🎬</span> 影音娱乐</h2>
+					<div class="links-grid">
+						<a class="link-card" href="https://music.163.com" target="_blank">
+							<div class="icon">🎧</div>
+							<div class="info">
+								<h3>网易云音乐</h3>
+								<p>在线音乐</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://y.qq.com" target="_blank">
+							<div class="icon">🐧</div>
+							<div class="info">
+								<h3>QQ 音乐</h3>
+								<p>腾讯音乐平台</p>
+							</div>
+						</a>
+						<!-- 趣味科普 -->
+						<a class="link-card"
+							href="https://science.nasa.gov/mission/hubble/multimedia/what-did-hubble-see-on-your-birthday/"
+							target="_blank">
+							<div class="icon">🔭</div>
+							<div class="info">
+								<h3>Hubble Birthday</h3>
+								<p>你生日那天哈勃看到了什么</p>
+							</div>
+						</a>
+						<!-- 音效工具 -->
+						<a class="link-card" href="https://soundinstants.com/zh/" target="_blank">
+							<div class="icon">🔊</div>
+							<div class="info">
+								<h3>SoundInstants</h3>
+								<p>即时音效按钮</p>
+							</div>
+						</a>
+						<!-- 视频平台 -->
+						<a class="link-card" href="https://www.bilibili.com" target="_blank">
+							<div class="icon">📺</div>
+							<div class="info">
+								<h3>Bilibili</h3>
+								<p>视频弹幕网站</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.youtube.com" target="_blank">
+							<div class="icon">▶️</div>
+							<div class="info">
+								<h3>YouTube</h3>
+								<p>视频分享平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://v.qq.com" target="_blank">
+							<div class="icon">📺</div>
+							<div class="info">
+								<h3>腾讯视频</h3>
+								<p>在线视频平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.douyin.com" target="_blank">
+							<div class="icon">🎵</div>
+							<div class="info">
+								<h3>抖音</h3>
+								<p>短视频平台</p>
+							</div>
+						</a>
+						<!-- 动漫 -->
+						<a class="link-card" href="https://cn.yh-dm.cn/zh" target="_blank">
+							<div class="icon">🌸</div>
+							<div class="info">
+								<h3>樱花动漫</h3>
+								<p>动漫在线观看</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.yhdmtv.top/" target="_blank">
+							<div class="icon">🌸</div>
+							<div class="info">
+								<h3>樱花动漫(备用)</h3>
+								<p>动漫在线观看</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.biqumh.com" target="_blank">
+							<div class="icon">📖</div>
+							<div class="info">
+								<h3>笔趣阁漫画</h3>
+								<p>免费漫画在线看</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://cn.baozimhcn.com/" target="_blank">
+							<div class="icon">📚</div>
+							<div class="info">
+								<h3>包子漫画</h3>
+								<p>韩漫在线看</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://github.com/Predidit/Kazumi" target="_blank">
+							<div class="icon">🌸</div>
+							<div class="info">
+								<h3>Kazumi</h3>
+								<p>开源番剧采集 APP</p>
+							</div>
+						</a>
+						<!-- 小说 -->
+						<a class="link-card" href="https://write.qq.com/portal/dashboard/books" target="_blank">
+							<div class="icon">✍️</div>
+							<div class="info">
+								<h3>阅文作家专区</h3>
+								<p>小说创作平台</p>
+							</div>
+						</a>
+						<!-- 音乐 -->
+						<a class="link-card" href="https://www.gequbao.com" target="_blank">
+							<div class="icon">🎵</div>
+							<div class="info">
+								<h3>歌曲宝</h3>
+								<p>MP3 音乐下载</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://echonext.moe/zh/" target="_blank">
+							<div class="icon">🎧</div>
+							<div class="info">
+								<h3>ECHO</h3>
+								<p>本地音乐播放器</p>
+							</div>
+						</a>
+						<!-- 影视学习 -->
+						<a class="link-card" href="https://www.taicishe.com" target="_blank">
+							<div class="icon">🎬</div>
+							<div class="info">
+								<h3>英语台词社</h3>
+								<p>电影美剧台词</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.playphrase.me" target="_blank">
+							<div class="icon">🎥</div>
+							<div class="info">
+								<h3>PlayPhrase</h3>
+								<p>电影台词搜索</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.1jianji.com/charts/index" target="_blank">
+							<div class="icon">🎬</div>
+							<div class="info">
+								<h3>易剪辑</h3>
+								<p>剪映/PR 剪辑工具</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.iqiyi.com" target="_blank">
+							<div class="icon">🥝</div>
+							<div class="info">
+								<h3>爱奇艺</h3>
+								<p>影视综艺平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.youku.com" target="_blank">
+							<div class="icon">▶️</div>
+							<div class="info">
+								<h3>优酷</h3>
+								<p>视频平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.mgtv.com" target="_blank">
+							<div class="icon">🥭</div>
+							<div class="info">
+								<h3>芒果TV</h3>
+								<p>湖南卫视视频</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.douban.com" target="_blank">
+							<div class="icon">📚</div>
+							<div class="info">
+								<h3>豆瓣</h3>
+								<p>书影音评分社区</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.ximalaya.com" target="_blank">
+							<div class="icon">🎧</div>
+							<div class="info">
+								<h3>喜马拉雅</h3>
+								<p>有声书与播客</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.kugou.com" target="_blank">
+							<div class="icon">🎵</div>
+							<div class="info">
+								<h3>酷狗音乐</h3>
+								<p>在线音乐</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.kuwo.cn" target="_blank">
+							<div class="icon">🎶</div>
+							<div class="info">
+								<h3>酷我音乐</h3>
+								<p>在线音乐</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.douyu.com" target="_blank">
+							<div class="icon">🐟</div>
+							<div class="info">
+								<h3>斗鱼</h3>
+								<p>游戏直播</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.huya.com" target="_blank">
+							<div class="icon">🐯</div>
+							<div class="info">
+								<h3>虎牙</h3>
+								<p>游戏直播</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.kuaishou.com" target="_blank">
+							<div class="icon">📱</div>
+							<div class="info">
+								<h3>快手</h3>
+								<p>短视频社区</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.xiaohongshu.com" target="_blank">
+							<div class="icon">📕</div>
+							<div class="info">
+								<h3>小红书</h3>
+								<p>生活分享社区</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://weibo.com" target="_blank">
+							<div class="icon">🔥</div>
+							<div class="info">
+								<h3>微博</h3>
+								<p>热点资讯</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.qidian.com" target="_blank">
+							<div class="icon">📖</div>
+							<div class="info">
+								<h3>起点中文网</h3>
+								<p>网络文学</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.jjwxc.net" target="_blank">
+							<div class="icon">🌺</div>
+							<div class="info">
+								<h3>晋江文学城</h3>
+								<p>原创文学站</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://ac.qq.com" target="_blank">
+							<div class="icon">🦊</div>
+							<div class="info">
+								<h3>腾讯动漫</h3>
+								<p>正版漫画平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://manga.bilibili.com" target="_blank">
+							<div class="icon">📺</div>
+							<div class="info">
+								<h3>哔哩哔哩漫画</h3>
+								<p>正版漫画</p>
+							</div>
+						</a>
+					</div>
+				</div>
+				<!-- 视频下载 -->
+				<div class="category" id="cat-download">
+					<h2 class="category-title"><span class="emoji">⬇️</span> 视频下载</h2>
+					<div class="links-grid">
+						<!-- 通用下载 -->
+						<a class="link-card" href="https://greenvideo.cc" target="_blank">
+							<div class="icon">⬇️</div>
+							<div class="info">
+								<h3>GreenVideo</h3>
+								<p>视频下载工具</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.bestvideow.com" target="_blank">
+							<div class="icon">🎬</div>
+							<div class="info">
+								<h3>Best Video</h3>
+								<p>视频解析下载</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://snapany.com/zh" target="_blank">
+							<div class="icon">🎬</div>
+							<div class="info">
+								<h3>SnapAny</h3>
+								<p>万能视频解析</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.datatool.vip" target="_blank">
+							<div class="icon">📥</div>
+							<div class="info">
+								<h3>DataTool</h3>
+								<p>视频下载工具</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://jx.xmflv.cc" target="_blank">
+							<div class="icon">🦐</div>
+							<div class="info">
+								<h3>虾米解析</h3>
+								<p>视频在线解析</p>
+							</div>
+						</a>
+						<!-- B站专用 -->
+						<a class="link-card" href="https://apps.microsoft.com/detail/xpdp0g2m2xbtrr?hl=zh-CN&gl=CN"
+							target="_blank">
+							<div class="icon">⬇️</div>
+							<div class="info">
+								<h3>唧唧下载</h3>
+								<p>B站视频下载</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://client.jijidown.com" target="_blank">
+							<div class="icon">⬇️</div>
+							<div class="info">
+								<h3>唧唧客户端</h3>
+								<p>B站视频下载客户端</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://github.com/yt-dlp/yt-dlp" target="_blank">
+							<div class="icon">🐍</div>
+							<div class="info">
+								<h3>yt-dlp</h3>
+								<p>命令行视频下载</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://cobalt.tools" target="_blank">
+							<div class="icon">🔷</div>
+							<div class="info">
+								<h3>Cobalt</h3>
+								<p>无广告解析下载</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://github.com/soimort/you-get" target="_blank">
+							<div class="icon">📥</div>
+							<div class="info">
+								<h3>you-get</h3>
+								<p>Python 下载器</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://github.com/leiurayer/downkyi" target="_blank">
+							<div class="icon">📺</div>
+							<div class="info">
+								<h3>哔哩下载姬</h3>
+								<p>B 站视频下载</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://jdownloader.org" target="_blank">
+							<div class="icon">📦</div>
+							<div class="info">
+								<h3>JDownloader</h3>
+								<p>网盘批量下载</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.vidown.cn" target="_blank">
+							<div class="icon">🎬</div>
+							<div class="info">
+								<h3>维棠</h3>
+								<p>视频下载工具</p>
+							</div>
+						</a>
+					</div>
+				</div>
+				<!-- 小游戏 -->
+				<div class="category" id="cat-game-mini">
+					<h2 class="category-title"><span class="emoji">🎮</span> 小游戏</h2>
+					<div class="links-grid">
+						<a class="link-card" href="games/snake.html">
+							<div class="icon">🐍</div>
+							<div class="info">
+								<h3>贪吃蛇</h3>
+								<p>经典贪吃蛇游戏</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/2048.html">
+							<div class="icon">🔥</div>
+							<div class="info">
+								<h3>2048</h3>
+								<p>数字合并益智游戏</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/typing.html">
+							<div class="icon">⌨️</div>
+							<div class="info">
+								<h3>打字游戏</h3>
+								<p>练习打字速度</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/memory.html">
+							<div class="icon">🃏</div>
+							<div class="info">
+								<h3>记忆翻牌</h3>
+								<p>翻牌配对记忆</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/tictactoe.html">
+							<div class="icon">❌</div>
+							<div class="info">
+								<h3>井字棋</h3>
+								<p>双人对战/人机</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/breakout.html">
+							<div class="icon">🧱</div>
+							<div class="info">
+								<h3>弹球打砖块</h3>
+								<p>经典弹球消除</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/puzzle15.html">
+							<div class="icon">🔢</div>
+							<div class="info">
+								<h3>数字华容道</h3>
+								<p>15数字滑块拼图</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/guess.html">
+							<div class="icon">🎯</div>
+							<div class="info">
+								<h3>猜数字</h3>
+								<p>猜1~100的数字</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/tetris.html">
+							<div class="icon">🧱</div>
+							<div class="info">
+								<h3>俄罗斯方块</h3>
+								<p>经典消除方块</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/flappy.html">
+							<div class="icon">🐦</div>
+							<div class="info">
+								<h3>Flappy Bird</h3>
+								<p>像素鸟飞行闯关</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/whack.html">
+							<div class="icon">🔨</div>
+							<div class="info">
+								<h3>打地鼠</h3>
+								<p>限时30秒挑战</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/pong.html">
+							<div class="icon">🏓</div>
+							<div class="info">
+								<h3>乒乓球</h3>
+								<p>经典Pong对战</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/sokoban.html">
+							<div class="icon">📦</div>
+							<div class="info">
+								<h3>推箱子</h3>
+								<p>经典推箱子益智</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/pacman.html">
+							<div class="icon">👾</div>
+							<div class="info">
+								<h3>吃豆人</h3>
+								<p>经典吃豆人冒险</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/shooter.html">
+							<div class="icon">🚀</div>
+							<div class="info">
+								<h3>太空射击</h3>
+								<p>消灭外星飞船</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/gomoku.html">
+							<div class="icon">⚫</div>
+							<div class="info">
+								<h3>五子棋</h3>
+								<p>双人对战五子棋</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/catch.html">
+							<div class="icon">🍎</div>
+							<div class="info">
+								<h3>接水果</h3>
+								<p>篮子接水果避炸弹</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/othello.html">
+							<div class="icon">⚪</div>
+							<div class="info">
+								<h3>黑白棋</h3>
+								<p>经典翻转棋</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/minesweeper.html">
+							<div class="icon">💣</div>
+							<div class="info">
+								<h3>扫雷</h3>
+								<p>经典扫雷游戏</p>
+							</div>
+						</a>
+						<a class="link-card" href="games/reaction.html">
+							<div class="icon">⚡</div>
+							<div class="info">
+								<h3>反应速度</h3>
+								<p>测试反应时间</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.4399.com" target="_blank">
+							<div class="icon">🎲</div>
+							<div class="info">
+								<h3>4399 小游戏</h3>
+								<p>经典小游戏合集</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.7k7k.com" target="_blank">
+							<div class="icon">🕹️</div>
+							<div class="info">
+								<h3>7K7K 小游戏</h3>
+								<p>在线小游戏站</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://poki.com" target="_blank">
+							<div class="icon">🪄</div>
+							<div class="info">
+								<h3>Poki</h3>
+								<p>国际在线小游戏</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.crazygames.com" target="_blank">
+							<div class="icon">🤪</div>
+							<div class="info">
+								<h3>CrazyGames</h3>
+								<p>网页游戏平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://play2048.co" target="_blank">
+							<div class="icon">🔢</div>
+							<div class="info">
+								<h3>2048 原版</h3>
+								<p>经典合并数字</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.y8.com" target="_blank">
+							<div class="icon">👾</div>
+							<div class="info">
+								<h3>Y8 游戏</h3>
+								<p>海量网页小游戏</p>
+							</div>
+						</a>
+					</div>
+				</div>
+				<!-- 游戏相关 -->
+				<div class="category" id="cat-game">
+					<h2 class="category-title"><span class="emoji">🎮</span> 游戏相关</h2>
+					<div class="links-grid">
+						<!-- 🎮 游戏平台 -->
+						<a class="link-card" href="https://store.steampowered.com" target="_blank">
+							<div class="icon">🎮</div>
+							<div class="info">
+								<h3>Steam</h3>
+								<p>游戏平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.kkyx.net" target="_blank">
+							<div class="icon">🎮</div>
+							<div class="info">
+								<h3>KK 游戏</h3>
+								<p>单机游戏</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://yx123789.com/" target="_blank">
+							<div class="icon">🎮</div>
+							<div class="info">
+								<h3>游戏仓库</h3>
+								<p>全球单机游戏</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://yxk111.com/" target="_blank">
+							<div class="icon">🎮</div>
+							<div class="info">
+								<h3>玩丫游戏仓库</h3>
+								<p>全球单机游戏</p>
+							</div>
+						</a>
 
+						<!-- 🔧 游戏工具 -->
+						<a class="link-card" href="https://steampp.net" target="_blank">
+							<div class="icon">⚡</div>
+							<div class="info">
+								<h3>瓦特工具箱</h3>
+								<p>Steam++ 加速</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.xiaoxingjie.com" target="_blank">
+							<div class="icon">🔧</div>
+							<div class="info">
+								<h3>小幸修改器</h3>
+								<p>游戏修改器</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://bbs.3dmgame.com/thread-6045971-1-1.html" target="_blank">
+							<div class="icon">🔧</div>
+							<div class="info">
+								<h3>风灵月影</h3>
+								<p>修改器工具</p>
+							</div>
+						</a>
+
+						<!-- 📥 游戏下载 -->
+						<a class="link-card" href="https://www.520switch.com" target="_blank">
+							<div class="icon">🎮</div>
+							<div class="info">
+								<h3>Switch520</h3>
+								<p>Switch 游戏下载</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://koyso.com/" target="_blank">
+							<div class="icon">🎮</div>
+							<div class="info">
+								<h3>Koyso</h3>
+								<p>游戏资源搜索</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.kdocs.cn/l/cfQizT5byY8S" target="_blank">
+							<div class="icon">☢️</div>
+							<div class="info">
+								<h3>辐射避难所</h3>
+								<p>安卓版游戏下载</p>
+							</div>
+						</a>
+
+						<!-- 🎯 游戏辅助 -->
+						<a class="link-card" href="https://afdian.com/p/0164034c016c11ebafcb52540025c377"
+							target="_blank">
+							<div class="icon">🎵</div>
+							<div class="info">
+								<h3>PCL 启动器</h3>
+								<p>Minecraft 启动器下载</p>
+							</div>
+						</a>
+
+						<!-- 📖 游戏攻略 -->
+						<a class="link-card" href="https://cook.yunyoujun.cn/" target="_blank">
+							<div class="icon">🍳</div>
+							<div class="info">
+								<h3>食用手册</h3>
+								<p>游戏攻略指南</p>
+							</div>
+						</a>
+						<a class="link-card"
+							href="https://www.bombmanual.com/zh-CN/print/KeepTalkingAndNobodyExplodes-BombDefusalManual-v1-zh-CN.pdf"
+							target="_blank">
+							<div class="icon">💣</div>
+							<div class="info">
+								<h3>拆弹手册</h3>
+								<p>游戏攻略 PDF</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://orzice.com/v/gun_gqm" target="_blank">
+							<div class="icon">🎯</div>
+							<div class="info">
+								<h3>三角洲改枪码</h3>
+								<p>三角洲行动攻略</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://store.epicgames.com" target="_blank">
+							<div class="icon">🎁</div>
+							<div class="info">
+								<h3>Epic Games</h3>
+								<p>每周免费游戏</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.gamersky.com" target="_blank">
+							<div class="icon">🗞️</div>
+							<div class="info">
+								<h3>游民星空</h3>
+								<p>单机游戏资讯</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.3dmgame.com" target="_blank">
+							<div class="icon">🎮</div>
+							<div class="info">
+								<h3>3DM 游戏网</h3>
+								<p>游戏新闻攻略</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.ali213.net" target="_blank">
+							<div class="icon">🕹️</div>
+							<div class="info">
+								<h3>游侠网</h3>
+								<p>单机游戏门户</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.taptap.cn" target="_blank">
+							<div class="icon">📲</div>
+							<div class="info">
+								<h3>TapTap</h3>
+								<p>手游社区评分</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.xiaoheihe.cn" target="_blank">
+							<div class="icon">📦</div>
+							<div class="info">
+								<h3>小黑盒</h3>
+								<p>Steam 玩家社区</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://steamdb.info" target="_blank">
+							<div class="icon">📈</div>
+							<div class="info">
+								<h3>SteamDB</h3>
+								<p>史低价格查询</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.wegame.com.cn" target="_blank">
+							<div class="icon">🐧</div>
+							<div class="info">
+								<h3>WeGame</h3>
+								<p>腾讯游戏平台</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://bbs.nga.cn" target="_blank">
+							<div class="icon">💬</div>
+							<div class="info">
+								<h3>NGA 论坛</h3>
+								<p>硬核玩家社区</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.gcores.com" target="_blank">
+							<div class="icon">🎙️</div>
+							<div class="info">
+								<h3>机核</h3>
+								<p>游戏文化媒体</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.sonkwo.com" target="_blank">
+							<div class="icon">🍬</div>
+							<div class="info">
+								<h3>杉果游戏</h3>
+								<p>正版游戏折扣</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.miyoushe.com" target="_blank">
+							<div class="icon">🌙</div>
+							<div class="info">
+								<h3>米游社</h3>
+								<p>米哈游玩家社区</p>
+							</div>
+						</a>
+					</div>
+				</div>
 				<!-- 购物电商 -->
 				<div class="category" id="cat-shop">
 					<h2 class="category-title"><span class="emoji">🛒</span> 购物电商</h2>
@@ -2747,7 +4427,7 @@
 								<p>图书百货</p>
 							</div>
 						</a>
-						<a class="link-card" href="https://www.yanxuan.com" target="_blank">
+						<a class="link-card" href="https://you.163.com" target="_blank">
 							<div class="icon">✨</div>
 							<div class="info">
 								<h3>网易严选</h3>
@@ -2815,6 +4495,149 @@
 								<p>ROG 散热优化服务</p>
 							</div>
 						</a>
+						<a class="link-card" href="https://www.mi.com" target="_blank">
+							<div class="icon">📱</div>
+							<div class="info">
+								<h3>小米商城</h3>
+								<p>小米官方商城</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.vmall.com" target="_blank">
+							<div class="icon">📶</div>
+							<div class="info">
+								<h3>华为商城</h3>
+								<p>华为官方商城</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.apple.com/cn" target="_blank">
+							<div class="icon">🍎</div>
+							<div class="info">
+								<h3>Apple 中国</h3>
+								<p>苹果官方商店</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.manmanbuy.com" target="_blank">
+							<div class="icon">📉</div>
+							<div class="info">
+								<h3>慢慢买</h3>
+								<p>历史价格比价</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.hema.com" target="_blank">
+							<div class="icon">🦀</div>
+							<div class="info">
+								<h3>盒马</h3>
+								<p>生鲜即时零售</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.xiaomiyoupin.com" target="_blank">
+							<div class="icon">🛍️</div>
+							<div class="info">
+								<h3>小米有品</h3>
+								<p>精品生活电商</p>
+							</div>
+						</a>
+					</div>
+				</div>
+				<!-- 导航网站 -->
+				<div class="category" id="cat-nav">
+					<h2 class="category-title"><span class="emoji">🧭</span> 导航网站</h2>
+					<div class="links-grid">
+						<!-- 📚 学习导航 -->
+						<a class="link-card" href="https://www.xue8nav.com" target="_blank">
+							<div class="icon">📚</div>
+							<div class="info">
+								<h3>学吧导航</h3>
+								<p>学习导航网站</p>
+							</div>
+						</a>
+
+						<!-- 🔗 实用导航 -->
+						<a class="link-card" href="https://huamao.vip" target="_blank">
+							<div class="icon">🌸</div>
+							<div class="info">
+								<h3>花猫导航</h3>
+								<p>实用网站导航</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://ilxdh.com" target="_blank">
+							<div class="icon">🐉</div>
+							<div class="info">
+								<h3>龙轩导航</h3>
+								<p>实用导航</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.xiaozhongjishu.com" target="_blank">
+							<div class="icon">🔧</div>
+							<div class="info">
+								<h3>小众技术</h3>
+								<p>实用工具导航</p>
+							</div>
+						</a>
+						<!-- 🎁 资源导航 -->
+						<a class="link-card" href="https://www.iiice.cn" target="_blank">
+							<div class="icon">🎁</div>
+							<div class="info">
+								<h3>下次一定</h3>
+								<p>白嫖资源导航</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://m.bidianer.com/group/49" target="_blank">
+							<div class="icon">📱</div>
+							<div class="info">
+								<h3>笔点导航</h3>
+								<p>手机版网址导航</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.chongbuluo.com" target="_blank">
+							<div class="icon">🐛</div>
+							<div class="info">
+								<h3>虫部落</h3>
+								<p>搜索与资源导航</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.appinn.com" target="_blank">
+							<div class="icon">🧩</div>
+							<div class="info">
+								<h3>小众软件</h3>
+								<p>实用软件推荐</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.iplaysoft.com" target="_blank">
+							<div class="icon">🌈</div>
+							<div class="info">
+								<h3>异次元软件</h3>
+								<p>软件资讯评测</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://www.52pojie.cn" target="_blank">
+							<div class="icon">🔓</div>
+							<div class="info">
+								<h3>吾爱破解</h3>
+								<p>软件技术交流</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://hao.uisdc.com" target="_blank">
+							<div class="icon">🎨</div>
+							<div class="info">
+								<h3>优设导航</h3>
+								<p>设计师网址导航</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://chuangzaoshi.com" target="_blank">
+							<div class="icon">🦁</div>
+							<div class="info">
+								<h3>创造狮</h3>
+								<p>创意工具导航</p>
+							</div>
+						</a>
+						<a class="link-card" href="https://hao.shejidaren.com" target="_blank">
+							<div class="icon">✏️</div>
+							<div class="info">
+								<h3>设计达人导航</h3>
+								<p>设计资源聚合</p>
+							</div>
+						</a>
 					</div>
 				</div>
 
@@ -2845,6 +4668,25 @@
 				const noResults = document.getElementById('noResults');
 				const backToTop = document.getElementById('backToTop');
 				const navLinks = document.querySelectorAll('.category-nav a');
+
+				// 外链安全：新窗口打开时补 noopener，防止 window.opener 泄露
+				document.querySelectorAll('a[target="_blank"]').forEach(function(a) {
+					a.setAttribute('rel', 'noopener noreferrer');
+				});
+
+				// 分类入场动画（仅在 JS 可用时启用，无 JS 环境内容照常显示）
+				if ('IntersectionObserver' in window) {
+					document.body.classList.add('js-reveal');
+					const reveal = new IntersectionObserver(function(entries) {
+						entries.forEach(function(entry) {
+							if (entry.isIntersecting) {
+								entry.target.classList.add('in');
+								reveal.unobserve(entry.target);
+							}
+						});
+					}, { threshold: 0.06 });
+					categories.forEach(function(cat) { reveal.observe(cat); });
+				}
 
 				// 分类计数
 				categories.forEach(function(category) {
