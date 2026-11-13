@@ -4,18 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>俄罗斯方块</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#0a0a1a;color:#fff;font-family:system-ui,sans-serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;touch-action:manipulation}
-.hud{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;background:rgba(255,255,255,0.04);flex-shrink:0;gap:8px;flex-wrap:wrap}
+<style>*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%}
+body{background:radial-gradient(1200px 800px at 50% -10%,#1a1d45,#0a0a1a 68%);background-attachment:fixed;color:#fff;font-family:system-ui,sans-serif;height:100dvh;overflow:hidden;touch-action:manipulation}
+.hud{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:8px 14px;background:rgba(10,10,26,0.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);gap:8px;flex-wrap:wrap}
 .hud-item{font-size:0.85rem;color:rgba(255,255,255,0.8)}.hud-item span{font-weight:700;color:#818cf8}
-.hud-hint{font-size:0.68rem;color:rgba(255,255,255,0.3)}
+.hud-hint{font-size:0.68rem;color:rgba(255,255,255,0.35)}
 .btn{padding:5px 14px;border:none;border-radius:16px;color:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;background:linear-gradient(135deg,#8b5cf6,#6366f1);transition:.2s}
 .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(139,92,246,0.3)}
-.game-area{flex:1;display:flex;align-items:center;justify-content:center;gap:12px;overflow:hidden;padding:8px}
-canvas{border-radius:8px;box-shadow:0 0 30px rgba(139,92,246,0.08)}
-.side-panel{display:flex;flex-direction:column;gap:12px}
-.next-box{background:rgba(255,255,255,0.04);border-radius:8px;padding:10px;display:flex;align-items:center;justify-content:center}
+.btn.ghost{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.16)}
+.game-area{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;gap:12px;overflow:hidden;padding:52px 10px 16px}
+canvas#c{display:block;max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 0 60px rgba(139,92,246,0.15),0 0 0 1px rgba(255,255,255,0.05)}
+.side-panel{position:fixed;top:50%;transform:translateY(-50%);z-index:10}
+.next-box{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:10px;display:flex;align-items:center;justify-content:center}
 .mobile-ctrl{display:none;gap:4px;padding:4px}
 .mobile-ctrl .row{display:flex;gap:4px;justify-content:center}
 .mobile-ctrl button{width:44px;height:40px;border:none;border-radius:8px;background:rgba(255,255,255,0.08);color:#fff;font-size:1.1rem;cursor:pointer}
@@ -23,11 +24,11 @@ canvas{border-radius:8px;box-shadow:0 0 30px rgba(139,92,246,0.08)}
 .dpad{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr;gap:3px;width:130px}
 .dpad button{padding:8px 0}
 @media(hover:none){
-.mobile-ctrl{display:flex;flex-direction:column;align-items:center}
-.game-area{flex-direction:column}
+.mobile-ctrl{display:flex;flex-direction:column;align-items:center;position:fixed;left:0;right:0;bottom:0;z-index:20;gap:6px;padding:8px 4px;background:rgba(10,10,26,0.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .side-panel{display:none}
+.game-area{padding:52px 8px 120px}
 }
-@media(max-width:400px){.hud{font-size:0.7rem}}
+@media(max-width:400px){.hud{font-size:0.7rem;padding:6px 8px}.hud-hint{display:none}.game-area{padding-top:76px}}
 </style>
 </head>
 <body>
@@ -35,7 +36,8 @@ canvas{border-radius:8px;box-shadow:0 0 30px rgba(139,92,246,0.08)}
   <div class="hud-item">得分: <span id="sc">0</span></div>
   <div class="hud-item">等级: <span id="lv">1</span></div>
   <div class="hud-item">行数: <span id="ln">0</span></div>
-  <span class="hud-hint">←→移动 ↑旋转 ↓加速 空格硬降</span>
+  <span class="hud-hint">←→移动 ↑旋转 ↓加速 空格硬降 · F 全屏</span>
+  <button class="btn ghost" id="fsBtn">⛶ 全屏</button>
   <button class="btn" id="restart">重新开始</button>
 </div>
 <div class="game-area" id="gameArea">
@@ -54,10 +56,25 @@ canvas{border-radius:8px;box-shadow:0 0 30px rgba(139,92,246,0.08)}
 <script>
 const c=document.getElementById('c'),ctx=c.getContext('2d');
 const nc=document.getElementById('nc'),nctx=nc.getContext('2d');
-const COLS=10,ROWS=20,SZ=26;
+const COLS=10,ROWS=20;
+let SZ=26,GW=COLS*SZ,GH=ROWS*SZ;
 const SHAPES=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[1,1,0],[0,1,1]],[[0,1,1],[1,1,0]]];
 const CLR=['#06b6d4','#f59e0b','#8b5cf6','#ef4444','#22c55e','#3b82f6','#f97316'];
-function resize(){c.width=COLS*SZ;c.height=ROWS*SZ}
+function resize(){
+  const area=document.getElementById('gameArea'),cs=getComputedStyle(area);
+  const availW=area.clientWidth-parseFloat(cs.paddingLeft||0)-parseFloat(cs.paddingRight||0);
+  const availH=area.clientHeight-parseFloat(cs.paddingTop||0)-parseFloat(cs.paddingBottom||0);
+  SZ=Math.max(8,Math.floor(Math.min(availW/COLS,availH/ROWS)));
+  GW=COLS*SZ;GH=ROWS*SZ;
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  c.width=Math.round(GW*dpr);c.height=Math.round(GH*dpr);
+  c.style.width=GW+'px';c.style.height=GH+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  const nsz=Math.min(120,Math.max(64,SZ*4));
+  nc.style.width=nsz+'px';nc.style.height=nsz+'px';
+  const panel=document.querySelector('.side-panel');
+  if(panel)panel.style.left='calc(50% + '+(GW/2+16)+'px)';
+}
 let board,piece,px,py,pi,next,score,lines,level,timer,over,combo;
 function init(){board=Array(ROWS).fill(null).map(()=>Array(COLS).fill(0));score=0;lines=0;level=1;over=false;combo=0;newPiece();nextPiece();clearInterval(timer);timer=setInterval(tick,Math.max(80,700-level*55));resize();draw()}
 function newPiece(){if(next!==undefined){piece=SHAPES[next];pi=next}else{pi=Math.floor(Math.random()*SHAPES.length);piece=SHAPES[pi]}nextPiece();px=Math.floor((COLS-piece[0].length)/2);py=0;if(collides(px,py,piece)){over=true;clearInterval(timer)}}
@@ -68,8 +85,22 @@ function collides(cx,cy,p){for(let r=0;r<p.length;r++)for(let c=0;c<p[r].length;
 function merge(){for(let r=0;r<piece.length;r++)for(let c=0;c<piece[r].length;c++)if(piece[r][c]&&py+r>=0)board[py+r][px+c]=pi+1}
 function clearLines(){let cl=0;for(let r=ROWS-1;r>=0;r--){if(board[r].every(v=>v)){board.splice(r,1);board.unshift(Array(COLS).fill(0));cl++;r++}}if(cl){combo++;const pts={1:100,2:300,3:500,4:800};score+=(pts[cl]||cl*200)*level+combo*50;lines+=cl;level=Math.floor(lines/10)+1;clearInterval(timer);timer=setInterval(tick,Math.max(80,700-level*55))}else combo=0}
 function tick(){if(over)return;if(!collides(px,py+1,piece))py++;else{merge();clearLines();newPiece()}draw()}
-function draw(){ctx.fillStyle='#0d0d2b';ctx.fillRect(0,0,c.width,c.height);for(let r=0;r<ROWS;r++)for(let cl=0;cl<COLS;cl++){ctx.fillStyle=(r+cl)%2?'rgba(255,255,255,0.012)':'rgba(255,255,255,0.02)';ctx.fillRect(cl*SZ,r*SZ,SZ,SZ);if(board[r][cl]){ctx.fillStyle=CLR[board[r][cl]-1];ctx.fillRect(cl*SZ+1,r*SZ+1,SZ-2,SZ-2);ctx.fillStyle='rgba(255,255,255,0.15)';ctx.fillRect(cl*SZ+1,r*SZ+1,SZ-2,SZ/2-2)}}if(!over)for(let r=0;r<piece.length;r++)for(let cl=0;cl<piece[r].length;cl++)if(piece[r][cl]){ctx.fillStyle=CLR[pi];ctx.fillRect((px+cl)*SZ+1,(py+r)*SZ+1,SZ-2,SZ-2);ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect((px+cl)*SZ+1,(py+r)*SZ+1,SZ-2,SZ/2-2)}document.getElementById('sc').textContent=score;document.getElementById('lv').textContent=level;document.getElementById('ln').textContent=lines;if(over){ctx.fillStyle='rgba(0,0,0,0.65)';ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle='#fff';ctx.font='bold 20px system-ui';ctx.textAlign='center';ctx.fillText('游戏结束',c.width/2,c.height/2-10);ctx.font='13px system-ui';ctx.fillText('得分: '+score,c.width/2,c.height/2+15)}ctx.textAlign='start'}
-function hardDrop(){if(over)return;while(!collides(px,py+1,piece))py++;tick()}const up=document.getElementById('restart');up.addEventListener('click',init);document.addEventListener('keydown',e=>{if(over||!piece)return;const k=e.key;if(k==='ArrowLeft'&&!collides(px-1,py,piece))px--;if(k==='ArrowRight'&&!collides(px+1,py,piece))px++;if(k==='ArrowDown'&&!collides(px,py+1,piece))py++;if(k==='ArrowUp')rotate();if(k===' '){e.preventDefault();hardDrop()}draw()});document.getElementById('mleft').addEventListener('click',()=>{if(over||!piece)return;if(!collides(px-1,py,piece))px--;draw()});document.getElementById('mright').addEventListener('click',()=>{if(over||!piece)return;if(!collides(px+1,py,piece))px++;draw()});document.getElementById('mdown').addEventListener('click',()=>{if(over||!piece)return;if(!collides(px,py+1,piece))py++;draw()});document.getElementById('mup').addEventListener('click',()=>{if(over||!piece)return;rotate();draw()});document.getElementById('mdrop').addEventListener('click',hardDrop);document.getElementById('mrot').addEventListener('click',()=>{rotate();draw()});window.addEventListener('resize',resize);init();
+function draw(){ctx.fillStyle='#0d0d2b';ctx.fillRect(0,0,GW,GH);for(let r=0;r<ROWS;r++)for(let cl=0;cl<COLS;cl++){ctx.fillStyle=(r+cl)%2?'rgba(255,255,255,0.012)':'rgba(255,255,255,0.02)';ctx.fillRect(cl*SZ,r*SZ,SZ,SZ);if(board[r][cl]){ctx.fillStyle=CLR[board[r][cl]-1];ctx.fillRect(cl*SZ+1,r*SZ+1,SZ-2,SZ-2);ctx.fillStyle='rgba(255,255,255,0.15)';ctx.fillRect(cl*SZ+1,r*SZ+1,SZ-2,SZ/2-2)}}if(!over)for(let r=0;r<piece.length;r++)for(let cl=0;cl<piece[r].length;cl++)if(piece[r][cl]){ctx.fillStyle=CLR[pi];ctx.fillRect((px+cl)*SZ+1,(py+r)*SZ+1,SZ-2,SZ-2);ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect((px+cl)*SZ+1,(py+r)*SZ+1,SZ-2,SZ/2-2)}document.getElementById('sc').textContent=score;document.getElementById('lv').textContent=level;document.getElementById('ln').textContent=lines;if(over){ctx.fillStyle='rgba(0,0,0,0.65)';ctx.fillRect(0,0,GW,GH);ctx.fillStyle='#fff';ctx.font='bold '+Math.max(18,Math.floor(SZ*0.9))+'px system-ui';ctx.textAlign='center';ctx.fillText('游戏结束',GW/2,GH/2-10);ctx.font='13px system-ui';ctx.fillText('得分: '+score,GW/2,GH/2+15)}ctx.textAlign='start'}
+function hardDrop(){if(over)return;while(!collides(px,py+1,piece))py++;tick()}const up=document.getElementById('restart');up.addEventListener('click',init);document.addEventListener('keydown',e=>{if(over||!piece)return;const k=e.key;if(k==='ArrowLeft'&&!collides(px-1,py,piece))px--;if(k==='ArrowRight'&&!collides(px+1,py,piece))px++;if(k==='ArrowDown'&&!collides(px,py+1,piece))py++;if(k==='ArrowUp')rotate();if(k===' '){e.preventDefault();hardDrop()}draw()});document.getElementById('mleft').addEventListener('click',()=>{if(over||!piece)return;if(!collides(px-1,py,piece))px--;draw()});document.getElementById('mright').addEventListener('click',()=>{if(over||!piece)return;if(!collides(px+1,py,piece))px++;draw()});document.getElementById('mdown').addEventListener('click',()=>{if(over||!piece)return;if(!collides(px,py+1,piece))py++;draw()});document.getElementById('mup').addEventListener('click',()=>{if(over||!piece)return;rotate();draw()});document.getElementById('mdrop').addEventListener('click',hardDrop);document.getElementById('mrot').addEventListener('click',()=>{rotate();draw()});
+function toggleFullscreen(){
+  try{
+    const p=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+    if(p&&p.catch)p.catch(()=>{});
+  }catch(e){}
+}
+document.getElementById('fsBtn').addEventListener('click',toggleFullscreen);
+document.addEventListener('keydown',e=>{if(e.key==='f'||e.key==='F')toggleFullscreen()});
+document.addEventListener('fullscreenchange',()=>{
+  document.getElementById('fsBtn').textContent=document.fullscreenElement?'⛶ 退出全屏':'⛶ 全屏';
+  setTimeout(()=>{resize();draw()},80);
+});
+window.addEventListener('resize',()=>{resize();draw()});
+init();
 </script>
 </body>
 </html>
